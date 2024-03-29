@@ -3,6 +3,8 @@ import axios from "axios";
 import { MdOpenInNew } from "react-icons/md";
 import { IoMdClose } from "react-icons/io";
 import { useSelector } from "react-redux";
+import { baseURL } from "../utils";
+
 
 function Alert({ message }) {
   return (
@@ -22,7 +24,6 @@ function Notes() {
   const [prevNotes, setPrevNotes] = useState("");
 
   const [showModal, setShowModal] = useState(false);
-  const baseURL = import.meta.env.VITE_BASE_URL;
 
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");

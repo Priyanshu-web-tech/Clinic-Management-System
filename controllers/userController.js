@@ -1,4 +1,4 @@
-import User from "../models/User.js";
+import User from '../models/User.js'; // Import User model or adjust the import path accordingly
 
 export const createUser = async (req, res, next) => {
   const {
@@ -12,27 +12,35 @@ export const createUser = async (req, res, next) => {
     maritalStatus,
     hospitalName,
   } = req.body;
-  const newUser = new User({
-    name,
-    phone,
-    email,
-    address,
-    dob,
-    occupation,
-    gender,
-    maritalStatus,
-    hospitalName,
-  });
+
   try {
+    // Check if user already exists with the same hospital and phone
+    const existingUser = await User.findOne({ hospitalName, phone });
+    if (existingUser) {
+      return res.json({statusCode:400, success: false, message: 'Patient already exists' });
+    }
+
+    const newUser = new User({
+      name,
+      phone,
+      email,
+      address,
+      dob,
+      occupation,
+      gender,
+      maritalStatus,
+      hospitalName,
+    });
+
     await newUser.save();
 
-    res.status(201).json("User created");
-  } catch (e) {
-    console.log(e);
-
-    next(e);
+    res.status(201).json({ success: true, message: 'User created' });
+  } catch (error) {
+    console.log(error);
+    next(error);
   }
 };
+
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -97,6 +105,7 @@ export const resetQueueNumbers = async (req, res) => {
     const users = await User.find({ hospitalName: hospitalName });
     for (const user of users) {
       user.queueNumber = null; // Reset queue number
+      user.medStatus="FULLFILLED"
       await user.save();
     }
     res.status(200).json({ message: "Queue numbers reset successfully" });

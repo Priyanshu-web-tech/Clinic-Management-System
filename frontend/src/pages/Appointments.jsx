@@ -1,17 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import { baseURL } from "../utils";
-
-function Alert({ message }) {
-  return (
-    <div className="fixed bottom-8 left-0 w-full flex justify-center">
-      <div className="bg-white border border-gray-300 p-4 rounded-md shadow-md">
-        <p>{message}</p>
-      </div>
-    </div>
-  );
-}
+import { Alert, baseURL } from "../utils";
+import { FaChevronLeft, FaChevronRight, FaExternalLinkAlt } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const Appointments = () => {
   const [users, setUsers] = useState([]);
@@ -19,6 +11,10 @@ const Appointments = () => {
   const { currentHospital } = useSelector((state) => state.hospital);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(4);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
 
   const showAlertMessage = (message, duration = 3000) => {
     setAlertMessage(message);
@@ -39,7 +35,7 @@ const Appointments = () => {
         if (a.queueNumber === null && b.queueNumber === null) return 0;
         if (a.queueNumber === null) return 1;
         if (b.queueNumber === null) return -1;
-        if (a.queueNumber === 0) return 1; 
+        if (a.queueNumber === 0) return 1;
         if (b.queueNumber === 0) return -1;
         return a.queueNumber - b.queueNumber;
       });
@@ -62,51 +58,55 @@ const Appointments = () => {
     );
   });
 
-  const closeRequest = (userId) => {
-    axios
-      .patch(
-        `${baseURL}/api/users/updateUser/${userId}`,
-        { queueNumber: null, medStatus: "FULFILLED" },
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      )
-      .then((response) => {
-        if (response.data.acknowledged === true) {
-          console.log("STATUS Updated Successfully");
-          fetchUsers(); // Fetch users after updating
-        }
-      })
-      .catch((error) => {
-        console.error("Error updating STATUS:", error);
-      });
+  const totalPages = Math.ceil(users.length / itemsPerPage);
+
+  const nextPage = () => {
+    setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
+  };
+
+  const prevPage = () => {
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+  };
+
+  const handleClick = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+
+  const openDeleteConfirmation = (userId) => {
+    setUserToDelete(userId);
+    setShowDeleteConfirmation(true);
+  };
+
+  const closeDeleteConfirmation = () => {
+    setUserToDelete(null);
+    setShowDeleteConfirmation(false);
   };
 
   const deleteUser = (userId) => {
     axios
-      .delete(
-        `${baseURL}/api/users/deleteUser/${userId}`,
-
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      )
+      .delete(`${baseURL}/api/users/deleteUser/${userId}`, {
+        headers: { "Content-Type": "application/json" },
+      })
       .then((response) => {
         if (response.data.acknowledged === true) {
           console.log("Patient Deleted Successfully");
-          fetchUsers(); // Fetch users after updating
+          fetchUsers();
         }
       })
       .catch((error) => {
         console.error("Error Deleting User:", error);
+      })
+      .finally(() => {
+        closeDeleteConfirmation();
       });
   };
 
   const closeAllRequests = () => {
-    // Filter users with pending requests
     const pendingUsers = users.filter((user) => user.medStatus === "PENDING");
-
-    // Close requests for each pending user
     pendingUsers.forEach((user) => {
       closeRequest(user._id);
     });
@@ -126,30 +126,30 @@ const Appointments = () => {
     <div className="flex flex-col gap-4">
       {showAlert && <Alert message={alertMessage} />}
       <div className="bg-pale-white p-4 rounded-lg">
-      <div className="flex justify-between items-center">
-      <h1 className="text-3xl font-bold mb-4">All Patients</h1>
-      <button
-        type="button"
-        onClick={closeAllRequests}
-        className="bg-transparent mt-2 text-dark border hover:bg-dark hover:text-pale-white transition-all duration-300 font-bold px-4 py-2 rounded-full mb-4"
-      >
-        Close All Pending Requests
-      </button>
-      </div>
-      <hr />
-      <div className="container">
-  <input
-    type="text"
-    placeholder="Search by Name, Phone, or Email"
-    className="w-full px-4 py-3 mt-4 border rounded-full"
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-  />
-</div>
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold mb-4">All Patients</h1>
+          <button
+            type="button"
+            onClick={closeAllRequests}
+            className="bg-transparent mt-2 text-dark border hover:bg-dark hover:text-pale-white transition-all duration-300 font-bold px-4 py-2 rounded-full mb-4"
+          >
+            Close All Pending Requests
+          </button>
+        </div>
+        <hr />
+        <div className="container">
+          <input
+            type="text"
+            placeholder="Search by Name, Phone, or Email"
+            className="w-full px-4 py-3 mt-4 border rounded-full"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
       </div>
 
       <div className="block w-full overflow-x-auto">
-        {filteredUsers.length === 0 ? (
+        {currentItems.length === 0 ? (
           <p className="text-center">No users found.</p>
         ) : (
           <>
@@ -159,7 +159,6 @@ const Appointments = () => {
                   <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
                     Name
                   </th>
-
                   <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
                     Phone
                   </th>
@@ -172,19 +171,25 @@ const Appointments = () => {
                   <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
                     Action 2
                   </th>
-
                   <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
                     Action 3
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.map((user, index) => (
-                  <tr key={index}>
-                    <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left">
-                      {user.name}
-                    </td>
-                    
+                {currentItems.map((user, index) => (
+                  <tr key={index} className="hover:font-bold">
+                    <Link
+                      to={`/patient/${user._id}`}
+                      style={{ display: "contents" }}
+                      
+                    >
+                      <td className="border-t-0 flex px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left ">
+                        {user.name}
+                        <FaExternalLinkAlt className="ml-1 text-gray-500" />
+                      </td>
+                    </Link>
+
                     <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left">
                       {user.phone}
                     </td>
@@ -206,7 +211,7 @@ const Appointments = () => {
                     <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left">
                       <button
                         type="button"
-                        onClick={() => deleteUser(user._id)}
+                        onClick={() => openDeleteConfirmation(user._id)}
                         className="text-dark border hover:bg-red transition-all duration-300 hover:text-white py-2 px-6"
                       >
                         Delete
@@ -225,7 +230,6 @@ const Appointments = () => {
                         "Request Closed"
                       )}
                     </td>
-
                     <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left">
                       {user.queueNumber !== null ? (
                         user.queueNumber === 0 ? (
@@ -259,6 +263,64 @@ const Appointments = () => {
           </>
         )}
       </div>
+
+      <div className="flex justify-center items-center mt-4">
+        <div className="flex gap-4">
+          <button
+            onClick={prevPage}
+            disabled={currentPage === 1}
+            className="bg-transparent hover:bg-dark text-dark hover:text-pale-white border font-bold p-2 rounded-md"
+          >
+            <FaChevronLeft />
+          </button>
+          <div className="space-x-1">
+            {[...Array(totalPages).keys()].map((pageNumber) => (
+              <button
+                key={pageNumber}
+                onClick={() => handleClick(pageNumber + 1)}
+                className={`${
+                  currentPage === pageNumber + 1
+                    ? "bg-dark text-pale-white"
+                    : "bg-transparent hover:bg-dark text-dark hover:text-pale-white"
+                } border font-bold p-2 rounded-md`}
+              >
+                {pageNumber + 1}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={nextPage}
+            disabled={currentPage === totalPages}
+            className="bg-transparent hover:bg-dark text-dark hover:text-pale-white border font-bold p-2 rounded-md"
+          >
+            <FaChevronRight />
+          </button>
+        </div>
+      </div>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirmation && (
+        <div className="fixed top-0 left-0 w-full h-full bg-pale-white  bg-opacity-50 flex justify-center items-center">
+          <div className="bg-pale-white p-8 rounded-md border ">
+            <p className="text-lg font-semibold mb-4">Confirm Deletion</p>
+            <p>Are you sure you want to delete this user permanently?</p>
+            <div className="flex justify-center items-center mt-4 gap-2">
+              <button
+                onClick={() => deleteUser(userToDelete)}
+                className="text-dark border hover:bg-red transition-all duration-300 hover:text-white py-2 px-6"
+              >
+                Delete
+              </button>
+              <button
+                onClick={closeDeleteConfirmation}
+                className="text-dark border hover:bg-warn transition-all duration-300 hover:text-white py-2 px-6"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

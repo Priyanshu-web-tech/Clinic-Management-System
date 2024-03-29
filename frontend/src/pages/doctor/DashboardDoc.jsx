@@ -3,14 +3,16 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import { baseURL, calculateAge } from "../../utils";
 import { FaUserFriends, FaHeartbeat } from "react-icons/fa";
-import { Link } from "react-router-dom";
 import Notes from "../Notes";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 const DashboardDoc = ({ setActiveTab }) => {
   const [users, setUsers] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const { currentHospital } = useSelector((state) => state.hospital);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(4);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -52,6 +54,28 @@ const DashboardDoc = ({ setActiveTab }) => {
   const sortedUsers = filteredUsers.sort((a, b) =>
     a.name.localeCompare(b.name)
   );
+
+  const totalPages = Math.ceil(sortedUsers.length / itemsPerPage);
+
+  // Function to handle next page
+  const nextPage = () => {
+    setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
+  };
+
+  // Function to handle previous page
+  const prevPage = () => {
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+  };
+
+  // Function to handle pagination click
+  const handleClick = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // Slice the sortedUsers array based on current page and items per page
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = sortedUsers.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
     <div className="mx-auto rounded-md bg-pale-white ">
@@ -127,33 +151,32 @@ const DashboardDoc = ({ setActiveTab }) => {
                     ))}
                   </tbody>
                 </table>
-                <button
-                  className="bg-pale-white border text-xs lg:text-sm hover:bg-dark text-dark hover:text-pale-white px-6 py-2 ml-2 rounded-md my-4"
-                  onClick={handleShowAll}
-                >
-                  <p>Show All</p>
-                </button>
               </div>
             )}
           </div>
+          <button
+            className="bg-pale-white border text-xs lg:text-sm hover:bg-dark text-dark hover:text-pale-white px-6 py-2 ml-2 rounded-md my-4"
+            onClick={handleShowAll}
+          >
+            <p>Show All</p>
+          </button>
         </div>
       </div>
       <div className="flex flex-col gap-4 md:flex-row p-4 bg-white">
         <div className="md:w-3/5">
-        <h2 className="text-3xl mb-4 ml-2 font-bold flex items-center">
-              <FaUserFriends className="text-gray-500 text-xl mr-2" />
-              All Patients
-            </h2>
+          <h2 className="text-3xl mb-4 ml-2 font-bold flex items-center">
+            <FaUserFriends className="text-gray-500 text-xl mr-2" />
+            All Patients
+          </h2>
 
-            <input
-              type="text"
-              placeholder="Search by name or phone number"
-              className="w-full bg-transparent border border-gray-300 rounded-md py-2 px-4 mb-4"
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+          <input
+            type="text"
+            placeholder="Search by name or phone number"
+            className="w-full bg-transparent border border-gray-300 rounded-md py-2 px-4 mb-4"
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
           <div className="block w-full overflow-x-auto">
-            
-            {allUsers.length === 0 ? (
+            {currentItems.length === 0 ? (
               <p className="text-center text-gray-500">
                 No patients are currently waiting.
               </p>
@@ -172,15 +195,14 @@ const DashboardDoc = ({ setActiveTab }) => {
                       <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
                         Gender
                       </th>
-
                       <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
                         Phone
                       </th>
                     </tr>
                   </thead>
-                  {/* Table Two */}
+                  {/* Table Body */}
                   <tbody>
-                    {sortedUsers.map((user, index) => (
+                    {currentItems.map((user, index) => (
                       <tr key={index}>
                         <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left">
                           {user.name}
@@ -198,40 +220,54 @@ const DashboardDoc = ({ setActiveTab }) => {
                     ))}
                   </tbody>
                 </table>
-
-                <button
-                  className="bg-transparent hover:bg-dark text-dark hover:text-pale-white border font-bold  px-6 py-2 ml-2 rounded-md my-4"
-                  onClick={handleSetAppointment}
-                >
-                  Set Appointments
-                </button>
+                {/* Pagination */}
               </div>
             )}
           </div>
-        </div>
-        <div className="w-full  md:w-2/5 mt-4 md:mt-0">
-          <div className="rounded-lg ">
-            <h1 className="text-3xl font-bold mb-4">Navigating Made Easy!</h1>
-            <p className="text-gray-700 mb-4">
-              Visit to each section separately:
-            </p>
-
-            <div className="space-x-2">
-              <Link to="/receptionHome">
-                <button className="w-full flex items-center justify-center font-bold py-2 px-6 bg-transparent hover:bg-dark transition-all duration-300 text-dark border hover:text-pale-white rounded-md">
-                  <span>Reception</span>
+          <div className="flex justify-between items-center mt-4">
+            <button
+              onClick={prevPage}
+              disabled={currentPage === 1}
+              className="bg-transparent hover:bg-dark text-dark hover:text-pale-white border font-bold px-3 py-2 rounded-md"
+            >
+              <FaChevronLeft />
+            </button>
+            <div>
+              {[...Array(totalPages).keys()].map((pageNumber) => (
+                <button
+                  key={pageNumber}
+                  onClick={() => handleClick(pageNumber + 1)}
+                  className={`${
+                    currentPage === pageNumber + 1
+                      ? "bg-dark text-pale-white"
+                      : "bg-transparent hover:bg-dark text-dark hover:text-pale-white"
+                  } border font-bold px-3 py-2 rounded-md mr-2`}
+                >
+                  {pageNumber + 1}
                 </button>
-              </Link>
-
-              <Link to="/inventoryHome">
-              <button className="w-full flex transition-all duration-300 items-center justify-center font-bold py-2 px-6 bg-transparent hover:bg-dark text-dark border hover:text-pale-white rounded-md">
-                  <span>Inventory</span>
-                </button>
-              </Link>
+              ))}
             </div>
+            <button
+              onClick={nextPage}
+              disabled={currentPage === totalPages}
+              className="bg-transparent hover:bg-dark text-dark hover:text-pale-white border font-bold px-3 py-2 rounded-md"
+            >
+              <FaChevronRight />
+            </button>
+          </div>
+          <div className="text-center">
+            <button
+              className="bg-transparent hover:bg-dark text-dark hover:text-pale-white border font-bold px-6 py-2 rounded-md my-4"
+              onClick={handleSetAppointment}
+            >
+              See All Patients
+            </button>
           </div>
         </div>
-        <Notes />
+
+        <div className="w-full  md:w-2/5 mt-4 md:mt-0">
+          <Notes />
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
+import React, { useState, useEffect } from 'react';
 import Sidebar from "../../components/Sidebar";
-import {  useState } from "react";
 import { TbCheckupList } from "react-icons/tb";
 import Examine from "./Examine";
 import Appointments from "../Appointments";
@@ -11,7 +11,6 @@ import {
   MdOutlineAnalytics,
   MdOutlineCreate,
   MdAddchart,
-
 } from "react-icons/md";
 import Dashboard from "../inventory/Dashboard";
 import ProductsTab from "../inventory/ProductsTab";
@@ -21,10 +20,14 @@ import DashboardDoc from "./DashboardDoc";
 const DoctorHome = () => {
   const [activeTab, setActiveTab] = useState("Dashboard");
 
+  // Function to handle tab change
   const handleTabChange = (tab) => {
     setActiveTab(tab);
+    // Store active tab in local storage
+    localStorage.setItem('doctorActiveTab', tab);
   };
 
+  // Define sidebar items
   const sidebarItems = [
     { text: "Dashboard", icon: <FaChartBar size={25} /> },
     { text: "Examine", icon: <TbCheckupList size={25} /> },
@@ -35,8 +38,13 @@ const DoctorHome = () => {
     { text: "Analytics", icon: <MdOutlineAnalytics size={25} /> },
   ];
 
-
-
+  // Effect to retrieve active tab from local storage on component mount
+  useEffect(() => {
+    const storedTab = localStorage.getItem('doctorActiveTab');
+    if (storedTab) {
+      setActiveTab(storedTab);
+    }
+  }, []);
 
   return (
     <>

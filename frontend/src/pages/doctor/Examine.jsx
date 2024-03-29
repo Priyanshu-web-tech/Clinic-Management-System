@@ -2,27 +2,39 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { baseURL, calculateAge } from "../../utils";
+import { Alert, baseURL, calculateAge } from "../../utils";
 
 const Examine = () => {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const { currentHospital } = useSelector((state) => state.hospital);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+
+  const showAlertMessage = (message, duration = 3000) => {
+    setAlertMessage(message);
+    setShowAlert(true);
+
+    setTimeout(() => {
+      setShowAlert(false);
+    }, duration);
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get(
+        `${baseURL}/api/users/getUsers/${currentHospital.name}`
+      );
+      const sortedUsers = response.data.sort(
+        (a, b) => a.queueNumber - b.queueNumber
+      );
+      setUsers(sortedUsers);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get(
-          `${baseURL}/api/users/getUsers/${currentHospital.name}`
-        );
-        const sortedUsers = response.data.sort(
-          (a, b) => a.queueNumber - b.queueNumber
-        );
-        setUsers(sortedUsers);
-      } catch (error) {
-        console.log(error);
-      }
-    };
     fetchUsers();
   }, []);
 
@@ -36,10 +48,52 @@ const Examine = () => {
     );
   });
 
+  const resetQueue = async () => {
+    try {
+      await axios.put(
+        `${baseURL}/api/users/reset-queue/${currentHospital.name}`
+      );
+      showAlertMessage("Queue numbers reset Successfully!");
+      fetchUsers();
+    } catch (error) {
+      showAlertMessage("Error resetting queue numbers: " + error.message);
+    }
+  };
+
+  const removeFromQueue = (userId) => {
+    axios
+      .patch(
+        `${baseURL}/api/users/updateUser/${userId}`,
+        { queueNumber: null },
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      )
+      .then((response) => {
+        if (response.data.acknowledged === true) {
+          console.log("Status Updated Successfully");
+          fetchUsers();
+        }
+      })
+      .catch((error) => {
+        console.error("Error updating STATUS:", error);
+      });
+  };
   return (
     <div className="flex flex-col gap-4">
+      {showAlert && <Alert message={alertMessage} />}
+
       <div className="p-4 bg-pale-white rounded-lg">
-        <h1 className="text-3xl font-bold mb-4">Examine Patients</h1>
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold mb-4">Examine Patients</h1>
+          <button
+            type="button"
+            className="bg-transparent mt-2 text-dark border hover:bg-dark hover:text-pale-white transition-all duration-300 font-bold px-4 py-2 rounded-full mb-4"
+            onClick={resetQueue}
+          >
+            Reset Queue
+          </button>
+        </div>
         <hr />
         <div className="container">
           <input
@@ -74,7 +128,10 @@ const Examine = () => {
                   Queue Number
                 </th>
                 <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
-                  Action
+                  Action 1
+                </th>
+                <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
+                  Remove from Queue
                 </th>
               </tr>
             </thead>
@@ -96,7 +153,7 @@ const Examine = () => {
                   <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left">
                     {user.queueNumber}
                     {index === 0 && (
-                      <span className="px-2 py-1 bg-pale-white text-dark ml-6">
+                      <span className="px-2 py-1 bg-dark text-pale-white ml-6">
                         Ongoing
                       </span>
                     )}
@@ -107,11 +164,27 @@ const Examine = () => {
                     )}
                   </td>
                   <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left text-blue-500 underline">
-                    <Link to={`/patient/${user._id}`}>
-                      <button className="bg-dark hover:scale-110 transition-all duration-300 text-pale-white py-2 px-6 rounded-full">
+                    {index === 0 ? (
+                      <Link to={`/patient/${user._id}`}>
+                        <button className="bg-dark hover:scale-110 transition-all duration-300 text-pale-white py-2 px-6 rounded-full">
+                          Prescribe
+                        </button>
+                      </Link>
+                    ) : (
+                      <button
+                        disabled
+                        className="bg-gray hover:scale-110 transition-all duration-300 text-pale-white py-2 px-6 rounded-full cursor-not-allowed"
+                      >
                         Prescribe
                       </button>
-                    </Link>
+                    )}
+                  </td>
+                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left text-blue-500 underline">
+                    <button className="bg-dark hover:scale-110 transition-all duration-300 text-pale-white py-2 px-6 rounded-full"
+                      onClick={() => removeFromQueue(user._id)} 
+                    >
+                      Remove
+                    </button>
                   </td>
                 </tr>
               ))}

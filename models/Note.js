@@ -8,8 +8,8 @@ const noteSchema = new mongoose.Schema({
   phone: {
     type: String,
     required: true,
-  },
-});
+  }
+}, { timestamps: true });
 
 const Note = mongoose.model("Note", noteSchema);
 

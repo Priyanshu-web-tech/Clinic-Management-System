@@ -1,11 +1,15 @@
-import React, {  useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
-import { calculateAge,baseURL } from "./../../utils";
+import { calculateAge, baseURL } from "./../../utils";
 import { useNavigate, useLoaderData, useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { Alert } from "./../../utils";
 
 const Patient = () => {
   const { id } = useParams();
-   
+  const { currentUser } = useSelector((state) => state.user);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   const {
     name,
@@ -20,15 +24,23 @@ const Patient = () => {
     queueDates,
     medicalHistory: initialMedicalHistory,
   } = useLoaderData();
+
   const navigate = useNavigate();
-
   const [medicalHistory, setMedicalHistory] = useState(initialMedicalHistory);
-
   const [newMedicalEntry, setNewMedicalEntry] = useState({
     date: new Date().toISOString().slice(0, 10), // Get current date
     remarks: "",
     prescription: "",
   });
+
+  const showAlertMessage = (message, duration = 3000) => {
+    setAlertMessage(message);
+    setShowAlert(true);
+
+    setTimeout(() => {
+      setShowAlert(false);
+    }, duration);
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -39,6 +51,15 @@ const Patient = () => {
   };
 
   const addMedicalEntry = () => {
+    if (!newMedicalEntry.remarks) {
+      showAlertMessage("Please fill in Remarks!");
+      return; // Prevent submission if fields are empty
+    }
+
+    if (!newMedicalEntry.prescription) {
+      showAlertMessage("Please Fill in Prescription!");
+      return; // Prevent submission if fields are empty
+    }
     const updatedMedicalHistory = [...medicalHistory, newMedicalEntry];
     axios
       .patch(
@@ -51,7 +72,7 @@ const Patient = () => {
       .then((response) => {
         if (response.data.acknowledged === true) {
           console.log("Medical History Updated Successfully");
-          alert("Added Successfully");
+          showAlertMessage("Added Successfully!");
           setMedicalHistory(updatedMedicalHistory); // Update medical history state
         }
       })
@@ -109,6 +130,8 @@ const Patient = () => {
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
+      {showAlert && <Alert message={alertMessage} />}
+
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Patient Details</h1>
       <div className="grid grid-cols-2 gap-4">
         <div className="flex">
@@ -217,14 +240,20 @@ const Patient = () => {
         <button
           type="button"
           onClick={addMedicalEntry}
-          className="bg-pale-white border hover:bg-dark text-dark hover:text-pale-white font-bold px-6 py-2 ml-2 rounded-full my-4"
+          disabled={currentUser.userRole !== "Doctor"}
+          className={`bg-pale-white border hover:bg-dark text-dark hover:text-pale-white font-bold px-6 py-2 ml-2 rounded-full my-4 ${
+            currentUser.userRole !== "Doctor" ? "cursor-not-allowed" : ""
+          }`}
         >
           Add Medical Entry
         </button>
         <button
           type="button"
           onClick={closeAppointment}
-          className="bg-pale-white border hover:bg-dark text-dark hover:text-pale-white font-bold px-6 py-2 ml-2 rounded-full my-4"
+          disabled={currentUser.userRole !== "Doctor"}
+          className={`bg-pale-white border hover:bg-dark text-dark hover:text-pale-white font-bold px-6 py-2 ml-2 rounded-full my-4 ${
+            currentUser.userRole !== "Doctor" ? "cursor-not-allowed" : ""
+          }`}
         >
           Send for Medicine
         </button>
@@ -232,7 +261,10 @@ const Patient = () => {
         <button
           type="button"
           onClick={() => closeRequest(id)} // Pass the user ID here
-          className="bg-pale-white border hover:bg-dark text-dark hover:text-pale-white font-bold px-6 py-2 ml-2 rounded-full my-4"
+          disabled={currentUser.userRole !== "Doctor"}
+          className={`bg-pale-white border hover:bg-dark text-dark hover:text-pale-white font-bold px-6 py-2 ml-2 rounded-full my-4 ${
+            currentUser.userRole !== "Doctor" ? "cursor-not-allowed" : ""
+          }`}
         >
           Close Request
         </button>

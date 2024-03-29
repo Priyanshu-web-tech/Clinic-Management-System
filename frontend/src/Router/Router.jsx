@@ -41,6 +41,11 @@ const router = createBrowserRouter([
         element: <PageNotFound />,
       },
       {
+        path: "/patient/:id",
+        element: <Patient />,
+        loader: ({ params }) => fetch(`${baseURL}/api/users/getUser/${params.id}`),
+      },
+      {
         path: "/",
         element: <PrivateRoute />,
         children: [
@@ -74,11 +79,6 @@ const router = createBrowserRouter([
               {
                 path: "/DoctorHome",
                 element: <DoctorHome />,
-              },
-              {
-                path: "/patient/:id",
-                element: <Patient />,
-                loader: ({ params }) => fetch(`${baseURL}/api/users/getUser/${params.id}`),
               },
             ],
           },

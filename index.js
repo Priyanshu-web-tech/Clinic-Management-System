@@ -9,6 +9,8 @@ import authRouter from "./routes/authRoutes.js";
 import productsRoute from "./routes/products.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
 import ordersRoute from "./routes/orders.js";
+import noteRoutes from './routes/noteRoutes.js';
+
 
 dotenv.config();
 const PORT = process.env.PORT || 3001;
@@ -31,6 +33,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/products", productsRoute);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/orders", ordersRoute);
+app.use("/api/notes", noteRoutes);
 
 const __dirname = path.resolve();
 app.use(express.static(path.join(__dirname, "/frontend/dist")));

@@ -3,12 +3,31 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import { baseURL } from "../utils";
 
+function Alert({ message }) {
+  return (
+    <div className="fixed bottom-8 left-0 w-full flex justify-center">
+      <div className="bg-white border border-gray-300 p-4 rounded-md shadow-md">
+        <p>{message}</p>
+      </div>
+    </div>
+  );
+}
+
 const Appointments = () => {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-
   const { currentHospital } = useSelector((state) => state.hospital);
-   
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+
+  const showAlertMessage = (message, duration = 3000) => {
+    setAlertMessage(message);
+    setShowAlert(true);
+
+    setTimeout(() => {
+      setShowAlert(false);
+    }, duration);
+  };
 
   const fetchUsers = async () => {
     try {
@@ -96,7 +115,7 @@ const Appointments = () => {
   const addToQueue = async (userId) => {
     try {
       await axios.put(`${baseURL}/api/users/${userId}/queue`);
-      alert("Patient Added to Queue Successfully");
+      showAlertMessage("Patient Added to Queue Successfully!");
       fetchUsers();
     } catch (error) {
       console.log(error);
@@ -105,6 +124,7 @@ const Appointments = () => {
 
   return (
     <div className="flex flex-col gap-4">
+      {showAlert && <Alert message={alertMessage} />}
       <div className="bg-pale-white p-4 rounded-lg">
       <div className="flex justify-between items-center">
       <h1 className="text-3xl font-bold mb-4">All Patients</h1>

@@ -4,13 +4,13 @@ import axios from "axios";
 import { baseURL, calculateAge } from "../../utils";
 import { FaUserFriends, FaHeartbeat } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import Notes from "../Notes";
 
 const DashboardDoc = ({ setActiveTab }) => {
   const [users, setUsers] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const { currentHospital } = useSelector((state) => state.hospital);
-   
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -54,7 +54,7 @@ const DashboardDoc = ({ setActiveTab }) => {
   );
 
   return (
-    <div className="container mx-auto rounded-md bg-pale-white ">
+    <div className="mx-auto rounded-md bg-pale-white ">
       <div className="flex flex-col md:flex-row bg-pale-white rounded-md p-3">
         <div className="md:w-1/2 p-2 md:mr-4 md:mb-0 mb-4">
           <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight">
@@ -128,7 +128,7 @@ const DashboardDoc = ({ setActiveTab }) => {
                   </tbody>
                 </table>
                 <button
-                  className="bg-pale-white border text-xs lg:text-sm hover:bg-dark text-dark hover:text-pale-white px-6 py-2 ml-2 rounded-full my-4"
+                  className="bg-pale-white border text-xs lg:text-sm hover:bg-dark text-dark hover:text-pale-white px-6 py-2 ml-2 rounded-md my-4"
                   onClick={handleShowAll}
                 >
                   <p>Show All</p>
@@ -138,8 +138,8 @@ const DashboardDoc = ({ setActiveTab }) => {
           </div>
         </div>
       </div>
-      <div className="flex flex-col md:flex-row p-4 bg-white">
-        <div className="md:w-3/4">
+      <div className="flex flex-col gap-4 md:flex-row p-4 bg-white">
+        <div className="md:w-3/5">
         <h2 className="text-3xl mb-4 ml-2 font-bold flex items-center">
               <FaUserFriends className="text-gray-500 text-xl mr-2" />
               All Patients
@@ -148,7 +148,7 @@ const DashboardDoc = ({ setActiveTab }) => {
             <input
               type="text"
               placeholder="Search by name or phone number"
-              className="w-full bg-pale-white border border-gray-300 rounded-md py-2 px-4 mb-4"
+              className="w-full bg-transparent border border-gray-300 rounded-md py-2 px-4 mb-4"
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           <div className="block w-full overflow-x-auto">
@@ -200,7 +200,7 @@ const DashboardDoc = ({ setActiveTab }) => {
                 </table>
 
                 <button
-                  className="bg-pale-white hover:bg-dark text-dark hover:text-pale-white border font-bold  px-6 py-2 ml-2 rounded-full my-4"
+                  className="bg-transparent hover:bg-dark text-dark hover:text-pale-white border font-bold  px-6 py-2 ml-2 rounded-md my-4"
                   onClick={handleSetAppointment}
                 >
                   Set Appointments
@@ -209,52 +209,29 @@ const DashboardDoc = ({ setActiveTab }) => {
             )}
           </div>
         </div>
-        <div className="w-full  md:w-1/4 mt-4 md:mt-0">
-          <div className="rounded-lg p-1 md:p-6 ">
-            <h1 className="text-2xl font-bold mb-4">Navigating Made Easy!</h1>
+        <div className="w-full  md:w-2/5 mt-4 md:mt-0">
+          <div className="rounded-lg ">
+            <h1 className="text-3xl font-bold mb-4">Navigating Made Easy!</h1>
             <p className="text-gray-700 mb-4">
               Visit to each section separately:
             </p>
 
             <div className="space-x-2">
               <Link to="/receptionHome">
-                <button className="enter w-full  flex items-center justify-center font-bold py-2 px-6 bg-pale-white hover:bg-dark text-dark border hover:text-pale-white rounded-full">
-                  <svg
-                    height="24"
-                    width="24"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M0 0h24v24H0z" fill="none"></path>
-                    <path
-                      d="M5 13c0-5.088 2.903-9.436 7-11.182C16.097 3.564 19 7.912 19 13c0 .823-.076 1.626-.22 2.403l1.94 1.832a.5.5 0 0 1 .095.603l-2.495 4.575a.5.5 0 0 1-.793.114l-2.234-2.234a1 1 0 0 0-.707-.293H9.414a1 1 0 0 0-.707.293l-2.234 2.234a.5.5 0 0 1-.793-.114l-2.495-4.575a.5.5 0 0 1 .095-.603l1.94-1.832C5.077 14.626 5 13.823 5 13zm1.476 6.696l.817-.817A3 3 0 0 1 9.414 18h5.172a3 3 0 0 1 2.121.879l.817.817.982-1.8-1.1-1.04a2 2 0 0 1-.593-1.82c.124-.664.187-1.345.187-2.036 0-3.87-1.995-7.3-5-8.96C8.995 5.7 7 9.13 7 13c0 .691.063 1.372.187 2.037a2 2 0 0 1-.593 1.82l-1.1 1.039.982 1.8zM12 13a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"
-                      fill="currentColor"
-                    ></path>
-                  </svg>
+                <button className="w-full flex items-center justify-center font-bold py-2 px-6 bg-transparent hover:bg-dark transition-all duration-300 text-dark border hover:text-pale-white rounded-md">
                   <span>Reception</span>
                 </button>
               </Link>
 
               <Link to="/inventoryHome">
-              <button className="enter w-full   flex items-center justify-center font-bold py-2 px-6 bg-pale-white hover:bg-dark text-dark border hover:text-pale-white rounded-full">
-                  <svg
-                    height="24"
-                    width="24"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M0 0h24v24H0z" fill="none"></path>
-                    <path
-                      d="M5 13c0-5.088 2.903-9.436 7-11.182C16.097 3.564 19 7.912 19 13c0 .823-.076 1.626-.22 2.403l1.94 1.832a.5.5 0 0 1 .095.603l-2.495 4.575a.5.5 0 0 1-.793.114l-2.234-2.234a1 1 0 0 0-.707-.293H9.414a1 1 0 0 0-.707.293l-2.234 2.234a.5.5 0 0 1-.793-.114l-2.495-4.575a.5.5 0 0 1 .095-.603l1.94-1.832C5.077 14.626 5 13.823 5 13zm1.476 6.696l.817-.817A3 3 0 0 1 9.414 18h5.172a3 3 0 0 1 2.121.879l.817.817.982-1.8-1.1-1.04a2 2 0 0 1-.593-1.82c.124-.664.187-1.345.187-2.036 0-3.87-1.995-7.3-5-8.96C8.995 5.7 7 9.13 7 13c0 .691.063 1.372.187 2.037a2 2 0 0 1-.593 1.82l-1.1 1.039.982 1.8zM12 13a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"
-                      fill="currentColor"
-                    ></path>
-                  </svg>
+              <button className="w-full flex transition-all duration-300 items-center justify-center font-bold py-2 px-6 bg-transparent hover:bg-dark text-dark border hover:text-pale-white rounded-md">
                   <span>Inventory</span>
                 </button>
               </Link>
             </div>
           </div>
         </div>
+        <Notes />
       </div>
     </div>
   );

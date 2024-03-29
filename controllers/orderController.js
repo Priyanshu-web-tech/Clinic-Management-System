@@ -8,6 +8,7 @@ export const addOrder = async (req, res) => {
     const newOrder = new Order({
       productId,
       eventType,
+      orderValue,
       quantity,
       timestamp,
     });

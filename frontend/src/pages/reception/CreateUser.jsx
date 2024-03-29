@@ -195,7 +195,7 @@ const CreateUser = () => {
         </div>
         <div className="bg-pale-white border rounded-md hover:bg-dark hover:text-white flex items-center justify-center">
           <button
-            className=" w-full md:w-auto font-bold py-2 px-4 rounded-full"
+            className=" w-full md:w-auto font-bold p-4 transition-all duration-300 rounded-full"
             type="submit"
           >
             Create User

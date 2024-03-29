@@ -33,6 +33,8 @@ td,
 tbody,
 table,
 thead,
+select,
+option,
 label,
 span,
 ul,
@@ -52,6 +54,11 @@ li {
   list-style: none;
 }
 
+.blurred-body{
+  filter: blur(4px);
+}
+
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -69,22 +76,4 @@ li {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #828284;
-}
-
-.enter svg {
-  margin-right: 3px;
-  transform: rotate(30deg);
-  transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
-}
-
-.enter span {
-  transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
-}
-
-.enter:hover svg {
-  transform: translateX(5px) rotate(90deg);
-}
-
-.enter:hover span {
-  transform: translateX(7px);
 }

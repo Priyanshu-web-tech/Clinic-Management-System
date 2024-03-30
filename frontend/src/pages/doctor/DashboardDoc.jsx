@@ -175,7 +175,7 @@ const DashboardDoc = ({ setActiveTab }) => {
             className="w-full bg-transparent border border-gray-300 rounded-md py-2 px-4 mb-4"
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <div className="block w-full overflow-x-auto">
+          <div className="block w-full overflow-x-auto min-h-60">
             {currentItems.length === 0 ? (
               <p className="text-center text-gray-500">
                 No patients are currently waiting.
@@ -220,10 +220,10 @@ const DashboardDoc = ({ setActiveTab }) => {
                     ))}
                   </tbody>
                 </table>
-                {/* Pagination */}
               </div>
             )}
           </div>
+          {/* Pagination */}
           <div className="flex justify-between items-center mt-4">
             <button
               onClick={prevPage}

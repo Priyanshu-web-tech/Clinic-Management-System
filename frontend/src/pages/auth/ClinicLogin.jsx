@@ -4,6 +4,7 @@ import axios from "axios";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { useSelector, useDispatch } from "react-redux";
+import { baseURL } from "../../utils";
 
 import {
   signInStart,
@@ -16,15 +17,15 @@ import {
   signInHospitalFailure,
   signInHospitalSuccess,
 } from "../../redux/user/hospitalSlice";
-import { baseURL } from "../../utils";
 
 const ClinicLogin = () => {
-   
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({});
   const [hospitals, setHospitals] = useState([]);
-  const { loading, error } = useSelector((state) => state.hospital);
-  const navigate = useNavigate();
+  const { loading: hospitalLoading, error: hospitalError } = useSelector((state) => state.hospital);
+  const { loading: userLoading, error: userError } = useSelector((state) => state.user);
+  const loading = hospitalLoading || userLoading;
+  const error = hospitalError || userError;  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchHospitals = async () => {
@@ -40,6 +41,12 @@ const ClinicLogin = () => {
     fetchHospitals();
   }, []);
 
+  useEffect(() => {
+    // Clear errors when the component mounts
+    dispatch(signInHospitalFailure(null));
+    dispatch(signInFailure(null));
+  }, []);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -47,15 +54,13 @@ const ClinicLogin = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const hospitalLogin = async (formData, dispatch) => {
     try {
-      dispatch(signInHospitalStart());
       const formDataClinic = {
         name: formData.name,
         accessCode: formData.accessCode,
       };
-
+  
       const response = await axios.post(
         `${baseURL}/api/auth/loginHospital`,
         formDataClinic,
@@ -65,49 +70,68 @@ const ClinicLogin = () => {
           },
         }
       );
-
+  
       const data = response.data;
-
+  
       if (data.success === false) {
         dispatch(signInHospitalFailure(data.message));
-
-        return;
+        return null;
       }
+  
       dispatch(signInHospitalSuccess(data));
-
-      try {
-        dispatch(signInStart());
-        const formDataUser = {
-          hospitalName: formData.name,
-          phoneNumber: formData.phoneNumber,
-          password: formData.password,
-        };
-
-        const response = await axios.post(`${baseURL}/api/auth/login`, formDataUser, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        const data = response.data;
-
-        if (data.success === false) {
-          dispatch(signInFailure(data.message));
-          return;
-        }
-
-        dispatch(signInSuccess(data));
-        if (data.userRole === "Doctor") navigate("/doctorHome");
-        else if (data.userRole === "Reception") navigate("/receptionHome");
-        else if (data.userRole === "Inventory") navigate("/inventoryHome");
-        else navigate("/*");
-      } catch (error) {
-        dispatch(signInFailure(error.message));
-      }
+      return data.name; // Assuming name is returned upon successful login
     } catch (error) {
       dispatch(signInHospitalFailure(error.message));
+      return null;
     }
   };
+  
+  const userLogin = async (formData, dispatch, navigate) => {
+    try {
+      const formDataUser = {
+        hospitalName: formData.name,
+        phoneNumber: formData.phoneNumber,
+        password: formData.password,
+      };
+  
+      const response = await axios.post(`${baseURL}/api/auth/login`, formDataUser, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      const data = response.data;
+  
+      if (data.success === false) {
+        dispatch(signInFailure(data.message));
+        return;
+      }
+  
+      dispatch(signInSuccess(data));
+      if (data.userRole === "Doctor") navigate("/doctorHome");
+      else if (data.userRole === "Reception") navigate("/receptionHome");
+      else if (data.userRole === "Inventory") navigate("/inventoryHome");
+      else navigate("/*");
+    } catch (error) {
+      dispatch(signInFailure(error.message));
+    }
+  };
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      dispatch(signInHospitalStart());
+      const hospitalName = await hospitalLogin(formData, dispatch);
+  
+      if (hospitalName) {
+        dispatch(signInStart());
+        await userLogin(formData, dispatch, navigate);
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+    }
+  };
+  
 
   return (
     <>
@@ -213,7 +237,7 @@ const ClinicLogin = () => {
           >
             Don't have an account? Register now.
           </Link>
-          {error && <p className="text-red-500 mt-5 text-center">{error}</p>}
+          {error && <p className="text-red mt-5 text-center">{error}</p>}
         </div>
       </div>
       <Footer />

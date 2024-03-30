@@ -17,7 +17,7 @@ export const createUser = async (req, res, next) => {
     // Check if user already exists with the same hospital and phone
     const existingUser = await User.findOne({ hospitalName, phone });
     if (existingUser) {
-      return res.json({statusCode:400, success: false, message: 'Patient already exists' });
+      return res.json({statusCode:400, success: false, message: 'Patient with same Phone Number already exists' });
     }
 
     const newUser = new User({
@@ -119,7 +119,7 @@ export const updateUser = async (req, res, next) => {
   const userData = req.body;
 
   if (!user) {
-    return next(errorHandler(404, "User not found!"));
+    return res.json({statusCode:404, success: false, message: 'User Not Found' });
   }
 
   try {
@@ -141,7 +141,7 @@ export const deleteUser=async(req,res,next)=>{
   const user = await User.findById(req.params.id);
 
   if (!user) {
-    return next(errorHandler(404, "User not found!"));
+    return res.json({statusCode:404, success: false, message: 'User Not Found' });
   }
 
   try {

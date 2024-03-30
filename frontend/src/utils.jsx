@@ -9,10 +9,10 @@ export const calculateAge = (dob) => {
   return age;
 };
 
-export const Alert = ({message}) => {
+export const Alert = ({ message }) => {
   return (
-    <div className="fixed bottom-8 left-0 w-full flex justify-center">
-      <div className="bg-white border border-gray-300 p-4 rounded-md shadow-md">
+    <div className="fixed bottom-8 right-8 flex justify-end animate-slide-in">
+      <div className="bg-pale-white border border-gray-300 p-4 rounded-md shadow-md">
         <p>{message}</p>
       </div>
     </div>

@@ -1,15 +1,18 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { calculateAge, baseURL } from "./../../utils";
-import { useNavigate, useLoaderData, useParams } from "react-router-dom";
+import { useNavigate, useLoaderData, useParams, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Alert } from "./../../utils";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 const Patient = () => {
   const { id } = useParams();
   const { currentUser } = useSelector((state) => state.user);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
 
   const {
     name,
@@ -128,12 +131,48 @@ const Patient = () => {
       });
   };
 
-  return (
-    <div className="p-6 bg-white rounded-lg shadow-md">
-      {showAlert && <Alert message={alertMessage} />}
+  const totalPages = Math.ceil(medicalHistory.length / itemsPerPage);
 
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Patient Details</h1>
-      <div className="grid grid-cols-2 gap-4">
+  // Function to handle next page
+  const nextPage = () => {
+    setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
+  };
+
+  // Function to handle previous page
+  const prevPage = () => {
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+  };
+
+  // Function to handle pagination click
+  const handleClick = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // Slice the medicalHistory array based on current page and items per page
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const reversedMedicalHistory = [...medicalHistory].reverse();
+
+  const currentItems = reversedMedicalHistory.slice(indexOfFirstItem, indexOfLastItem);
+
+  return (
+    <div className="m-2">
+      {showAlert && <Alert message={alertMessage} />}
+      <div className="p-3 bg-pale-white rounded-lg flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Patient Details</h1>
+        <Link to={`/doctorHome`}>
+          <button
+            type="button"
+            className="bg-transparent mt-2  text-dark border hover:bg-dark hover:text-pale-white transition-all duration-300 font-bold px-4 py-2 rounded-full "
+          >
+            Go back
+          </button>{" "}
+        </Link>
+      </div>
+      <hr />
+
+      {/* Basic Details */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4">
         <div className="flex">
           <span className="font-semibold mr-2">Name:</span>
           <span>{name}</span>
@@ -175,38 +214,39 @@ const Patient = () => {
           <span>{queueNumber}</span>
         </div>
       </div>
-      <div>
-        <h2 className="text-2xl font-semibold mb-2 mt-4">Medical History</h2>
 
-        <div className="block w-full overflow-x-auto">
-          {medicalHistory.length === 0 ? (
+      {/* Medical History */}
+      <div className="p-4">
+        <h2 className="text-2xl font-semibold mb-2">Medical History</h2>
+
+        <div className="block w-full overflow-x-auto min-h-60" >
+          {currentItems.length === 0 ? (
             <p>No Medical History Found</p>
           ) : (
             <table className="items-center bg-transparent w-full border-collapse">
               <thead>
                 <tr>
-                  <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
+                  <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-2 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
                     Date
                   </th>
-                  <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
+                  <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-2 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
                     Remarks
                   </th>
-                  <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
+                  <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-2 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
                     Prescription
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {medicalHistory.map((item, index) => (
-                  <tr key={index}>
-                    <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left">
+                {currentItems.map((item, index) => (
+                  <tr key={index} className="hover:font-bold">
+                    <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-3 text-left">
                       {new Date(item.date).toLocaleDateString("en-GB")}{" "}
                     </td>
-
-                    <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left">
+                    <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-3 text-left">
                       {item.remarks}
                     </td>
-                    <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left">
+                    <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-3 text-left">
                       {item.prescription}
                     </td>
                   </tr>
@@ -215,59 +255,95 @@ const Patient = () => {
             </table>
           )}
         </div>
+        {/* Pagination */}
+        <div className="flex justify-center items-center gap-4 mt-3">
+            <button
+              onClick={prevPage}
+              disabled={currentPage === 1}
+              className="bg-transparent hover:bg-dark text-dark hover:text-pale-white border font-bold
+              px-3 py-2 rounded-md"
+            >
+              <FaChevronLeft />
+            </button>
+            <div className="space-x-1">
+              {[...Array(totalPages).keys()].map((pageNumber) => (
+                <button
+                  key={pageNumber}
+                  onClick={() => handleClick(pageNumber + 1)}
+                  className={`${
+                    currentPage === pageNumber + 1
+                      ? "bg-dark text-pale-white"
+                      : "bg-transparent hover:bg-dark text-dark hover:text-pale-white"
+                  } border font-bold p-2 rounded-md`}
+                >
+                  {pageNumber + 1}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={nextPage}
+              disabled={currentPage === totalPages}
+              className="bg-transparent hover:bg-dark text-dark hover:text-pale-white border font-bold px-3 py-2 rounded-md"
+            >
+              <FaChevronRight />
+            </button>
+        </div>
       </div>
 
-      <div className="mt-8 space-x-3 space-y-3">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-          Add New Medical Entry
-        </h2>
-        <input
-          type="text"
-          name="remarks"
-          value={newMedicalEntry.remarks}
-          onChange={handleInputChange}
-          placeholder="Remarks"
-          className="border border-gray-300 rounded-full p-3 mr-4 focus:outline-none focus:border-blue-500"
-        />
-        <input
-          type="text"
-          name="prescription"
-          value={newMedicalEntry.prescription}
-          onChange={handleInputChange}
-          placeholder="Prescription"
-          className="border border-gray-300 rounded-full p-3 focus:outline-none focus:border-blue-500"
-        />
-        <button
-          type="button"
-          onClick={addMedicalEntry}
-          disabled={currentUser.userRole !== "Doctor"}
-          className={`bg-pale-white border hover:bg-dark text-dark hover:text-pale-white font-bold px-6 py-2 ml-2 rounded-full my-4 ${
-            currentUser.userRole !== "Doctor" ? "cursor-not-allowed" : ""
-          }`}
-        >
-          Add Medical Entry
-        </button>
-        <button
-          type="button"
-          onClick={closeAppointment}
-          disabled={currentUser.userRole !== "Doctor"}
-          className={`bg-pale-white border hover:bg-dark text-dark hover:text-pale-white font-bold px-6 py-2 ml-2 rounded-full my-4 ${
-            currentUser.userRole !== "Doctor" ? "cursor-not-allowed" : ""
-          }`}
-        >
-          Send for Medicine
-        </button>
+      {/* Actions */}
+      <div className="p-4">
+        <h2 className="text-2xl font-semibold ">Add New Medical Entry</h2>
+        {/* inputs and buttons */}
+        <div className="lg:flex-row lg:gap-3 flex flex-col ">
+          <input
+            type="text"
+            name="remarks"
+            value={newMedicalEntry.remarks}
+            onChange={handleInputChange}
+            placeholder="Remarks"
+            className="border  rounded-full px-2 py-2 lg:my-4  my-2"
+          />
+          <input
+            type="text"
+            name="prescription"
+            value={newMedicalEntry.prescription}
+            onChange={handleInputChange}
+            placeholder="Prescription"
+            className="border  rounded-full px-2 py-2  lg:my-4  my-2 "
+          />
+          <button
+            type="button"
+            onClick={addMedicalEntry}
+            disabled={currentUser.userRole !== "Doctor"}
+            className={`bg-pale-white border hover:bg-dark text-dark hover:text-pale-white font-bold px-6 
+            py-2 rounded-full lg:my-4  my-2 ${
+              currentUser.userRole !== "Doctor" ? "cursor-not-allowed" : ""
+            }`}
+          >
+            Add Medical Entry
+          </button>
+          <button
+            type="button"
+            onClick={closeAppointment}
+            disabled={currentUser.userRole !== "Doctor"}
+            className={`bg-pale-white border hover:bg-dark text-dark hover:text-pale-white font-bold px-6 py-2  rounded-full lg:my-4  my-2 ${
+              currentUser.userRole !== "Doctor" ? "cursor-not-allowed" : ""
+            }`}
+          >
+            Send for Medicine
+          </button>
 
-        <button
-          type="button"
-          onClick={() => closeRequest(id)} // Pass the user ID here
-          disabled={currentUser.userRole !== "Doctor"}
-          className={`bg-pale-white border hover:bg-dark text-dark hover:text-pale-white font-bold px-6 py-2 ml-2 rounded-full my-4 ${
-            currentUser.userRole !== "Doctor" ? "cursor-not-allowed" : ""
-          }`}
-        >
-          Close Request
-        </button>
+          <button
+            type="button"
+            onClick={() => closeRequest(id)} // Pass the user ID here
+            disabled={currentUser.userRole !== "Doctor"}
+            className={`bg-pale-white border hover:bg-dark text-dark hover:text-pale-white font-bold px-6 py-2  rounded-full lg:my-4  my-2 ${
+              currentUser.userRole !== "Doctor" ? "cursor-not-allowed" : ""
+            }`}
+          >
+            Close Request
+          </button>
+        </div>
       </div>
     </div>
   );

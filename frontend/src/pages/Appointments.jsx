@@ -2,7 +2,11 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { Alert, baseURL } from "../utils";
-import { FaChevronLeft, FaChevronRight, FaExternalLinkAlt } from "react-icons/fa";
+import {
+  FaChevronLeft,
+  FaChevronRight,
+  FaExternalLinkAlt,
+} from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const Appointments = () => {
@@ -12,7 +16,7 @@ const Appointments = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(4);
+  const [itemsPerPage] = useState(6);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
 
@@ -105,6 +109,24 @@ const Appointments = () => {
       });
   };
 
+  const closeRequest = (userId) => {
+    axios
+      .patch(
+        `${baseURL}/api/users/updateUser/${userId}`,
+        { queueNumber: null, medStatus: "FULLFILLED" },
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      )
+      .then((response) => {
+        if (response.data.acknowledged === true) {
+          fetchUsers(); // Fetch users after updating
+        }
+      })
+      .catch((error) => {
+        console.error("Error updating STATUS:", error);
+      });
+  };
   const closeAllRequests = () => {
     const pendingUsers = users.filter((user) => user.medStatus === "PENDING");
     pendingUsers.forEach((user) => {
@@ -148,7 +170,7 @@ const Appointments = () => {
         </div>
       </div>
 
-      <div className="block w-full overflow-x-auto">
+      <div className="block w-full overflow-x-auto " style={{ minHeight: "27rem" }}>
         {currentItems.length === 0 ? (
           <p className="text-center">No users found.</p>
         ) : (
@@ -179,16 +201,15 @@ const Appointments = () => {
               <tbody>
                 {currentItems.map((user, index) => (
                   <tr key={index} className="hover:font-bold">
-                    <Link
-                      to={`/patient/${user._id}`}
-                      style={{ display: "contents" }}
-                      
-                    >
-                      <td className="border-t-0 flex px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left ">
+                    <td className="border-t-0 flex px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left ">
+                      <Link
+                        to={`/patient/${user._id}`}
+                        style={{ display: "contents" }}
+                      >
                         {user.name}
                         <FaExternalLinkAlt className="ml-1 text-gray-500" />
-                      </td>
-                    </Link>
+                      </Link>
+                    </td>
 
                     <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left">
                       {user.phone}

@@ -82,7 +82,6 @@ const Examine = () => {
   return (
     <div className="flex flex-col gap-4">
       {showAlert && <Alert message={alertMessage} />}
-
       <div className="p-4 bg-pale-white rounded-lg">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold mb-4">Examine Patients</h1>

@@ -19,14 +19,48 @@ import Footer from "../../components/Footer";
 import { baseURL } from "../../utils";
 
 const Signup = () => {
-   
-
   const [formData, setFormData] = useState({});
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [hospitals, setHospitals] = useState([]);
+  const [errors, setErrors] = useState({});
+
+  const { loading: hospitalLoading, error: hospitalError } = useSelector(
+    (state) => state.hospital
+  );
+  const { loading: userLoading, error: userError } = useSelector(
+    (state) => state.user
+  );
+  const loading = hospitalLoading || userLoading;
+  const error = hospitalError || userError;
+
+  const validateInput = (name, value) => {
+    switch (name) {
+      case "name":
+        return /^[A-Za-z\s]+$/.test(value)
+          ? ""
+          : "Name must contain only alphabets";
+      case "phoneNumber":
+        return /^\d{0,10}$/.test(value) ? "" : "Phone number must contain only numbers & should be 10 digits ";
+      default:
+        return "";
+    }
+  };
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    const errorMessage = validateInput(id, value);
+    setErrors({
+      ...errors,
+      [id]: errorMessage,
+    });
+    if (!errorMessage) {
+      setFormData({
+        ...formData,
+        [id]: value,
+      });
+    }
+  };
 
   useEffect(() => {
     const fetchHospitals = async () => {
@@ -42,25 +76,12 @@ const Signup = () => {
     fetchHospitals();
   }, []);
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.id]: e.target.value,
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const hospitalAuthenticateAndLogin = async (formData, dispatch, baseURL) => {
     try {
-      setLoading(true);
-
       const formDataClinic = {
         name: formData.hospitalName,
         accessCode: formData.accessCode,
       };
-
-      // Authenticate Hospital & Sign in
       const response = await axios.post(
         `${baseURL}/api/auth/loginHospital`,
         formDataClinic,
@@ -74,9 +95,20 @@ const Signup = () => {
       const data = response.data;
 
       if (data.success === false) {
-        return;
+        dispatch(signInHospitalFailure(data.message));
+        return null;
       }
 
+      dispatch(signInHospitalSuccess(data));
+      return data;
+    } catch (error) {
+      dispatch(signInHospitalFailure(error.message));
+      return null;
+    }
+  };
+
+  const userSignUp = async (formData, dispatch, baseURL) => {
+    try {
       const formDataUser = {
         name: formData.name,
         password: formData.password,
@@ -97,75 +129,73 @@ const Signup = () => {
       const registerData = registerResponse.data;
 
       if (registerData.success === false) {
-        setLoading(false);
-        setError(registerData.message);
+        return null;
+      }
+
+      return registerData;
+    } catch (error) {
+      console.log("Error in Sign up", error);
+      return null;
+    }
+  };
+
+  const userSignIn = async (formData, dispatch, navigate, baseURL) => {
+    try {
+      dispatch(signInStart());
+      const formDataUserSignIn = {
+        hospitalName: formData.hospitalName,
+        phoneNumber: formData.phoneNumber,
+        password: formData.password,
+      };
+
+      const response = await axios.post(
+        `${baseURL}/api/auth/login`,
+        formDataUserSignIn,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = response.data;
+
+      if (data.success === false) {
+        dispatch(signInFailure(data.message));
         return;
       }
-      setLoading(false);
-      setError(null);
 
-      // NOW SIGN IN:
-
-      try {
-        dispatch(signInHospitalStart());
-     
-        const response = await axios.post(
-          `${baseURL}/api/auth/loginHospital`,
-          formDataClinic,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-  
-        const data = response.data;
-  
-        if (data.success === false) {
-          dispatch(signInHospitalFailure(data.message));
-  
-          return;
-        }
-        dispatch(signInHospitalSuccess(data));
-  
-        try {
-          dispatch(signInStart());
-          const formDataUserSignIn = {
-            hospitalName: formData.hospitalName,
-            phoneNumber: formData.phoneNumber,
-            password: formData.password,
-          };
-  
-          const response = await axios.post(`${baseURL}/api/auth/login`, formDataUserSignIn, {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-  
-          const data = response.data;
-          console.log(data);
-  
-          if (data.success === false) {
-            dispatch(signInFailure(data.message));
-            return;
-          }
-  
-          dispatch(signInSuccess(data));
-          if (data.userRole === "Doctor") navigate("/doctorHome");
-          else if (data.userRole === "Reception") navigate("/receptionHome");
-          else if (data.userRole === "Inventory") navigate("/inventoryHome");
-          else navigate("/*");
-        } catch (error) {
-          dispatch(signInFailure(error.message));
-        }
-      } catch (error) {
-        dispatch(signInHospitalFailure(error.message));
-      }
-
-
+      dispatch(signInSuccess(data));
+      if (data.userRole === "Doctor") navigate("/doctorHome");
+      else if (data.userRole === "Reception") navigate("/receptionHome");
+      else if (data.userRole === "Inventory") navigate("/inventoryHome");
+      else navigate("/*");
     } catch (error) {
-      setLoading(false);
-      setError(error.message);
+      dispatch(signInFailure(error.message));
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (Object.values(errors).some((error) => error !== "")) {
+      return; // Stop form submission if there are errors
+    }
+   
+    try {
+      const hospitalData = await hospitalAuthenticateAndLogin(
+        formData,
+        dispatch,
+        baseURL
+      );
+      if (!hospitalData) return;
+
+      const signUpData = await userSignUp(formData, dispatch, baseURL);
+      if (!signUpData) return;
+
+      await userSignIn(formData, dispatch, navigate, baseURL);
+    } catch (error) {
+      console.error("Error during Sign up:", error);
     }
   };
 
@@ -233,8 +263,14 @@ const Signup = () => {
                 onChange={handleChange}
                 autoComplete="name"
                 required
-                className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-md border border-gray-300 rounded-md py-2 px-4"
+                className={`appearance-none block w-full   border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white ${
+                  errors.name ? "border-red" : ""
+                }`}
               />
+
+              {errors.name && (
+                <p className="text-red-500 text-xs italic">{errors.name}</p>
+              )}
             </div>
             <div>
               <label
@@ -249,10 +285,15 @@ const Signup = () => {
                 name="phoneNumber"
                 onChange={handleChange}
                 autoComplete="phoneNumber"
-                pattern="[1-9]{1}[0-9]{9}"
                 required
-                className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-md border border-gray-300 rounded-md py-2 px-4"
+                className={`appearance-none block w-full   border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white ${
+                  errors.phoneNumber ? "border-red" : ""
+                }`}
               />
+
+              {errors.phoneNumber && (
+                <p className="text-red-500 text-xs italic">{errors.phoneNumber}</p>
+              )}
             </div>
             <div>
               <label
@@ -307,7 +348,7 @@ const Signup = () => {
           >
             Already have an account? Login now.
           </Link>
-          {error && <p className="text-red-500 mt-5">{error}</p>}
+          {error && <p className="text-red mt-5">{error}</p>}
         </div>
       </div>
       <Footer />

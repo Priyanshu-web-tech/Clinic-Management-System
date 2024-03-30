@@ -1,7 +1,6 @@
 import ReceptionModel from "../models/Reception.js";
 import HospitalModel from "../models/Hospitals.js";
 import bcryptjs from "bcryptjs";                    
-import { errorHandler } from "../utils/error.js";
 import jwt from "jsonwebtoken";
 
 export const signup = async (req, res, next) => {
@@ -24,18 +23,18 @@ export const signin = async (req, res, next) => {
     const validUser = await ReceptionModel.findOne({ phoneNumber });
 
     if (!validUser) {
-      return next(errorHandler(401, "User not found"));
+      return res.json({statusCode:401, success: false, message: 'User Not Found' });
     }
 
     const validPassword = bcryptjs.compareSync(password, validUser.password);
 
     if (!validPassword) {
-      return next(errorHandler(401, "Wrong Creds!"));
+      return res.json({statusCode:401, success: false, message: 'Wrong Password' });
     }
 
     // Check if hospitalName matches
     if (validUser.hospitalName !== hospitalName) {
-      return next(errorHandler(401, "Hospital name does not match"));
+      return res.json({statusCode:401, success: false, message: 'You are not linked with this hospital' });
     }
 
     const token = jwt.sign({ id: validUser._id }, "mern");
@@ -65,16 +64,10 @@ export const signinHospital = async (req, res, next) => {
 
   try {
     const validHospital = await HospitalModel.findOne({ name });
-    
-
-    if (!validHospital) {
-      return next(errorHandler(401, "Hospital not Listed"));
-    }
-
     const validPassword = validHospital.accessCode ===accessCode;
 
     if (!validPassword) {
-      return next(errorHandler(401, "Wrong Creds!"));
+      return res.json({statusCode:401, success: false, message: 'Wrong Access Code' });
     }
 
     const token = jwt.sign({ id: validHospital._id }, "mern");
@@ -94,7 +87,7 @@ export const getHospitals = async (req, res,next) => {
   try {
     const users = await HospitalModel.find();
     if (!users) {
-      return next(errorHandler(404, "Users not found!"));
+      return res.json({statusCode:404, success: false, message: 'Hospitals Not Found' });
     }
     res.status(200).json(users);
   } catch (error) {

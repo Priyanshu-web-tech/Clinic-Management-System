@@ -27,7 +27,7 @@ const CreateUser = () => {
           ? ""
           : "Name must contain only alphabets";
       case "phone":
-        return /^\d{0,10}$/.test(value) ? "" : "Phone number must be 10 digits";
+        return /^\d{0,10}$/.test(value) ? "" : "Phone number must contain only numbers & should be 10 digits ";
       // Add more validations for other fields as necessary
       case "email":
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
@@ -56,13 +56,10 @@ const CreateUser = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const formValid = Object.keys(formData).every(
-      (key) => validateInput(key, formData[key]) === ""
-    );
-
-    if (!formValid) {
-      return;
+    if (Object.values(errors).some((error) => error !== "")) {
+      return; // Stop form submission if there are errors
     }
+   
 
     formData.hospitalName = currentHospital.name;
     try {
@@ -91,7 +88,6 @@ const CreateUser = () => {
       setFormData({}); // Clear form fields
       formRef.current.reset(); // Reset form
     } catch (error) {
-      console.log("hi");
       console.log(error);
     }
   };

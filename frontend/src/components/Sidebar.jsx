@@ -2,7 +2,6 @@ import { LuChevronFirst, LuChevronLast } from "react-icons/lu";
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { IoLogOutOutline } from "react-icons/io5";
-import {baseURL} from "../utils";
 
 import {
   signOutUserStart,
@@ -29,7 +28,7 @@ export default function Sidebar({
   const handleSignOut = async () => {
     try {
       dispatch(signOutUserStart());
-      const res = await fetch(`${baseURL}/api/auth/signout`);
+      const res = await fetch(`/api/auth/signout`);
       const data = await res.json();
       if (data.success === false) {
         dispatch(signOutUserFailure(data.message));
@@ -44,7 +43,7 @@ export default function Sidebar({
   const handleClinicSignOut = async () => {
     try {
       dispatch(signOutHospitalStart());
-      const res = await fetch(`${baseURL}/api/auth/signoutHospital`);
+      const res = await fetch(`/api/auth/signoutHospital`);
       const data = await res.json();
       if (data.success === false) {
         dispatch(signOutHospitalFailure(data.message));

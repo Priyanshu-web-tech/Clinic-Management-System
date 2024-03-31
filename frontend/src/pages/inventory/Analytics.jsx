@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { baseURL } from "../../utils";
+
 
 const Analytics = () => {
    
@@ -20,13 +20,13 @@ const Analytics = () => {
   }, []);
 
   const fetchAnalyticsData = () => {
-    axios.get(`${baseURL}/api/analytics/events`).then((response) => {
+    axios.get(`/api/analytics/events`).then((response) => {
       setAnalyticsData(response.data);
     });
   };
 
   const fetchStatistics = () => {
-    axios.get(`${baseURL}/api/analytics`).then((response) => {
+    axios.get(`/api/analytics`).then((response) => {
       setStatistics({
         inventoryCount: response.data.inventoryCount,
         netSales: response.data.orderedProductsAmount, // Renamed to Net Sales
@@ -38,7 +38,7 @@ const Analytics = () => {
 
   const calculateTotalInvestment = (inventoryCount) => {
     // Fetch all products and calculate average price
-    axios.get(`${baseURL}/api/products`).then((response) => {
+    axios.get(`/api/products`).then((response) => {
       const products = response.data;
       const totalPrices = products.reduce(
         (acc, product) => acc + product.price,
@@ -55,7 +55,7 @@ const Analytics = () => {
 
   const calculateNetRevenue = (netSales) => {
     // Fetch all orders and calculate average order value
-    axios.get(`${baseURL}/api/orders`).then((response) => {
+    axios.get(`/api/orders`).then((response) => {
       const orders = response.data;
       const totalOrderValues = orders.reduce(
         (acc, order) => acc + order.totalPrice,

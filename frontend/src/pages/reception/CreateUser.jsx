@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import { Alert, baseURL } from "../../utils";
+import { Alert } from "../../utils";
 
 const CreateUser = () => {
   const [formData, setFormData] = useState({});
@@ -27,7 +27,9 @@ const CreateUser = () => {
           ? ""
           : "Name must contain only alphabets";
       case "phone":
-        return /^\d{0,10}$/.test(value) ? "" : "Phone number must contain only numbers & should be 10 digits ";
+        return /^\d{0,10}$/.test(value)
+          ? ""
+          : "Phone number must contain only numbers & should be 10 digits ";
       // Add more validations for other fields as necessary
       case "email":
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
@@ -45,7 +47,11 @@ const CreateUser = () => {
       ...errors,
       [id]: errorMessage,
     });
-    if (!errorMessage) {
+    if (!errorMessage || value === "") {
+      setErrors({
+        ...errors,
+        [id]: "", // Reset error message when input becomes valid
+      });
       setFormData({
         ...formData,
         [id]: value,
@@ -59,12 +65,11 @@ const CreateUser = () => {
     if (Object.values(errors).some((error) => error !== "")) {
       return; // Stop form submission if there are errors
     }
-   
 
     formData.hospitalName = currentHospital.name;
     try {
       const registerResponse = await axios.post(
-        `${baseURL}/api/users/createUser`,
+        `/api/users/createUser`,
         formData,
         {
           headers: {
@@ -138,6 +143,7 @@ const CreateUser = () => {
             <input
               name="phone"
               onChange={handleChange}
+              pattern="[1-9]{1}[0-9]{9}"
               className={`appearance-none block w-full    border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white ${
                 errors.phone ? "border-red" : ""
               }`}

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
-import { baseURL, calculateAge } from "../../utils";
+import {  calculateAge } from "../../utils";
 import { FaUserFriends, FaHeartbeat } from "react-icons/fa";
-import Notes from "../Notes";
+import Notes from "./Notes";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 const DashboardDoc = ({ setActiveTab }) => {
@@ -18,7 +18,7 @@ const DashboardDoc = ({ setActiveTab }) => {
     const fetchUsers = async () => {
       try {
         const response = await axios.get(
-          `${baseURL}/api/users/getUsers/${currentHospital.name}`
+          `/api/users/getUsers/${currentHospital.name}`
         );
         const users = response.data.filter(
           (user) => user.queueNumber !== 0 && user.queueNumber !== null
@@ -79,7 +79,7 @@ const DashboardDoc = ({ setActiveTab }) => {
 
   return (
     <div className="mx-auto rounded-md bg-pale-white ">
-      <div className="flex flex-col md:flex-row bg-pale-white rounded-md p-3">
+      <div className="flex flex-col md:flex-row bg-pale-white rounded-md p-2">
         <div className="md:w-1/2 p-2 md:mr-4 md:mb-0 mb-4">
           <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight">
             Empowering Care One Click at a Time.
@@ -124,7 +124,10 @@ const DashboardDoc = ({ setActiveTab }) => {
                   </thead>
                   <tbody>
                     {users.slice(0, 2).map((user, index) => (
-                      <tr key={index}>
+                      <tr
+                        key={index}
+                        className="transition-all duration-300 hover:font-bold hover:bg-pale-white "
+                      >
                         <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left">
                           {user.name}
                         </td>
@@ -164,11 +167,21 @@ const DashboardDoc = ({ setActiveTab }) => {
       </div>
       <div className="flex flex-col gap-4 md:flex-row p-4 bg-white">
         <div className="md:w-3/5">
-          <h2 className="text-3xl mb-4 ml-2 font-bold flex items-center">
-            <FaUserFriends className="text-gray-500 text-xl mr-2" />
-            All Patients
-          </h2>
 
+          <div className="flex justify-between items-center my-4">
+            <h1 className="text-xl md:text-3xl  ml-2 font-bold flex items-center">
+              <FaUserFriends className=" text-3xl mr-2" />
+              Registered Patients
+            </h1>
+
+            <button
+              className="bg-transparent hover:bg-dark text-dark hover:text-pale-white border font-bold 
+              px-2 py-2 rounded-md"
+              onClick={handleSetAppointment}
+            >
+              See All Patients
+            </button>
+          </div>
           <input
             type="text"
             placeholder="Search by name or phone number"
@@ -203,7 +216,10 @@ const DashboardDoc = ({ setActiveTab }) => {
                   {/* Table Body */}
                   <tbody>
                     {currentItems.map((user, index) => (
-                      <tr key={index}>
+                      <tr
+                        key={index}
+                        className="transition-all duration-300 hover:font-bold hover:bg-pale-white "
+                      >
                         <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left">
                           {user.name}
                         </td>
@@ -224,7 +240,7 @@ const DashboardDoc = ({ setActiveTab }) => {
             )}
           </div>
           {/* Pagination */}
-          <div className="flex justify-between items-center mt-4">
+          <div className="flex justify-center items-center gap-4">
             <button
               onClick={prevPage}
               disabled={currentPage === 1}
@@ -232,7 +248,7 @@ const DashboardDoc = ({ setActiveTab }) => {
             >
               <FaChevronLeft />
             </button>
-            <div>
+            <div className="space-x-1">
               {[...Array(totalPages).keys()].map((pageNumber) => (
                 <button
                   key={pageNumber}
@@ -241,7 +257,7 @@ const DashboardDoc = ({ setActiveTab }) => {
                     currentPage === pageNumber + 1
                       ? "bg-dark text-pale-white"
                       : "bg-transparent hover:bg-dark text-dark hover:text-pale-white"
-                  } border font-bold px-3 py-2 rounded-md mr-2`}
+                  } border font-bold px-2 py-1 rounded-md`}
                 >
                   {pageNumber + 1}
                 </button>
@@ -253,14 +269,6 @@ const DashboardDoc = ({ setActiveTab }) => {
               className="bg-transparent hover:bg-dark text-dark hover:text-pale-white border font-bold px-3 py-2 rounded-md"
             >
               <FaChevronRight />
-            </button>
-          </div>
-          <div className="text-center">
-            <button
-              className="bg-transparent hover:bg-dark text-dark hover:text-pale-white border font-bold px-6 py-2 rounded-md my-4"
-              onClick={handleSetAppointment}
-            >
-              See All Patients
             </button>
           </div>
         </div>

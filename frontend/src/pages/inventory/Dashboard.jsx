@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { baseURL } from "../../utils";
+
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
@@ -16,7 +16,7 @@ const Dashboard = () => {
   }, []);
 
   const fetchProducts = () => {
-    axios.get(`${baseURL}/api/products`).then((response) => {
+    axios.get(`/api/products`).then((response) => {
       setProducts(response.data);
     });
   };
@@ -26,7 +26,7 @@ const Dashboard = () => {
   };
 
   const handleAddProduct = () => {
-    axios.post(`${baseURL}/api/products`, newProduct).then((response) => {
+    axios.post(`/api/products`, newProduct).then((response) => {
       setProducts([...products, response.data]);
       setNewProduct({
         name: "",

@@ -15,7 +15,7 @@ import {
   signOutHospitalSuccess,
   signOutHospitalFailure,
 } from "../redux/user/hospitalSlice";
-import { baseURL } from "../utils";
+
 
 const Navbar = () => {
   const dispatch = useDispatch();
@@ -40,7 +40,7 @@ const Navbar = () => {
   const handleSignOut = async () => {
     try {
       dispatch(signOutUserStart());
-      const res = await fetch(`${baseURL}/api/auth/signout`);
+      const res = await fetch(`/api/auth/signout`);
       const data = await res.json();
       if (data.success === false) {
         dispatch(signOutUserFailure(data.message));
@@ -55,7 +55,7 @@ const Navbar = () => {
   const handleClinicSignOut = async () => {
     try {
       dispatch(signOutHospitalStart());
-      const res = await fetch(`${baseURL}/api/auth/signoutHospital`);
+      const res = await fetch(`/api/auth/signoutHospital`);
       const data = await res.json();
       if (data.success === false) {
         dispatch(signOutHospitalFailure(data.message));

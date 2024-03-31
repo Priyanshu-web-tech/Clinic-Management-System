@@ -1,12 +1,18 @@
 import ReceptionModel from "../models/Reception.js";
 import HospitalModel from "../models/Hospitals.js";
-import bcryptjs from "bcryptjs";                    
+import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export const signup = async (req, res, next) => {
-  const { name, phoneNumber, password,userRole,hospitalName } = req.body;
+  const { name, phoneNumber, password, userRole, hospitalName } = req.body;
   const hashedPass = bcryptjs.hashSync(password, 10);
-  const newUser = new ReceptionModel({ name, phoneNumber, password: hashedPass,userRole,hospitalName });
+  const newUser = new ReceptionModel({
+    name,
+    phoneNumber,
+    password: hashedPass,
+    userRole,
+    hospitalName,
+  });
 
   try {
     await newUser.save();
@@ -23,32 +29,50 @@ export const signin = async (req, res, next) => {
     const validUser = await ReceptionModel.findOne({ phoneNumber });
 
     if (!validUser) {
-      return res.json({statusCode:401, success: false, message: 'User Not Found' });
+      return res.json({
+        statusCode: 401,
+        success: false,
+        message: "User Not Found",
+      });
     }
 
     const validPassword = bcryptjs.compareSync(password, validUser.password);
 
     if (!validPassword) {
-      return res.json({statusCode:401, success: false, message: 'Wrong Password' });
+      return res.json({
+        statusCode: 401,
+        success: false,
+        message: "Wrong Password",
+      });
     }
 
     // Check if hospitalName matches
     if (validUser.hospitalName !== hospitalName) {
-      return res.json({statusCode:401, success: false, message: 'You are not linked with this hospital' });
+      return res.json({
+        statusCode: 401,
+        success: false,
+        message: "You are not linked with this hospital",
+      });
     }
 
-    const token = jwt.sign({ id: validUser._id }, "mern");
+    const token = jwt.sign({ id: validUser._id }, process.env.JWT_KEY);
 
     const { password: pass, ...rest } = validUser._doc;
+
+    // expiration time for the cookie to 20min from now
+    const expirationDate = new Date(Date.now() + 2* 24 *60 *  60 * 1000);
+
     res
-      .cookie("access_token", token, { httpOnly: true })
+      .cookie("access_token", token, {
+        expires: expirationDate, // Set expiration time
+        httpOnly: true,
+      })
       .status(200)
       .json(rest);
   } catch (e) {
     next(e);
   }
 };
-
 
 export const signOut = async (req, res, next) => {
   try {
@@ -64,17 +88,27 @@ export const signinHospital = async (req, res, next) => {
 
   try {
     const validHospital = await HospitalModel.findOne({ name });
-    const validPassword = validHospital.accessCode ===accessCode;
+    const validPassword = validHospital.accessCode === accessCode;
 
     if (!validPassword) {
-      return res.json({statusCode:401, success: false, message: 'Wrong Access Code' });
+      return res.json({
+        statusCode: 401,
+        success: false,
+        message: "Wrong Access Code",
+      });
     }
 
-    const token = jwt.sign({ id: validHospital._id }, "mern");
+    const token = jwt.sign({ id: validHospital._id }, process.env.JWT_KEY);
 
     const { accessCode: pass, ...rest } = validHospital._doc;
+
+    const expirationDate = new Date(Date.now() + 10 * 60 * 1000);
+
     res
-      .cookie("access_token_hospital", token, { httpOnly: true })
+      .cookie("access_token_hospital", token, {
+        expires: expirationDate, // Set expiration time
+        httpOnly: true,
+      })
       .status(200)
       .json(rest);
   } catch (e) {
@@ -82,12 +116,15 @@ export const signinHospital = async (req, res, next) => {
   }
 };
 
-export const getHospitals = async (req, res,next) => {
-  
+export const getHospitals = async (req, res, next) => {
   try {
     const users = await HospitalModel.find();
     if (!users) {
-      return res.json({statusCode:404, success: false, message: 'Hospitals Not Found' });
+      return res.json({
+        statusCode: 404,
+        success: false,
+        message: "Hospitals Not Found",
+      });
     }
     res.status(200).json(users);
   } catch (error) {

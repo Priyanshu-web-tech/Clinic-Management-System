@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import { Alert, baseURL } from "../utils";
+import { Alert } from "../utils";
 import {
   FaChevronLeft,
   FaChevronRight,
@@ -32,7 +32,7 @@ const Appointments = () => {
   const fetchUsers = async () => {
     try {
       const response = await axios.get(
-        `${baseURL}/api/users/getUsers/${currentHospital.name}`
+        `/api/users/getUsers/${currentHospital.name}`
       );
 
       const sortedUsers = response.data.sort((a, b) => {
@@ -92,7 +92,7 @@ const Appointments = () => {
 
   const deleteUser = (userId) => {
     axios
-      .delete(`${baseURL}/api/users/deleteUser/${userId}`, {
+      .delete(`/api/users/deleteUser/${userId}`, {
         headers: { "Content-Type": "application/json" },
       })
       .then((response) => {
@@ -112,7 +112,7 @@ const Appointments = () => {
   const closeRequest = (userId) => {
     axios
       .patch(
-        `${baseURL}/api/users/updateUser/${userId}`,
+        `/api/users/updateUser/${userId}`,
         { queueNumber: null, medStatus: "FULLFILLED" },
         {
           headers: { "Content-Type": "application/json" },
@@ -132,11 +132,12 @@ const Appointments = () => {
     pendingUsers.forEach((user) => {
       closeRequest(user._id);
     });
+    showAlertMessage("All Requests closed Successfully")
   };
 
   const addToQueue = async (userId) => {
     try {
-      await axios.put(`${baseURL}/api/users/${userId}/queue`);
+      await axios.put(`/api/users/${userId}/queue`);
       showAlertMessage("Patient Added to Queue Successfully!");
       fetchUsers();
     } catch (error) {
@@ -170,7 +171,10 @@ const Appointments = () => {
         </div>
       </div>
 
-      <div className="block w-full overflow-x-auto " style={{ minHeight: "27rem" }}>
+      <div
+        className="block w-full overflow-x-auto "
+        style={{ minHeight: "27rem" }}
+      >
         {currentItems.length === 0 ? (
           <p className="text-center">No users found.</p>
         ) : (
@@ -200,8 +204,11 @@ const Appointments = () => {
               </thead>
               <tbody>
                 {currentItems.map((user, index) => (
-                  <tr key={index} className="hover:font-bold">
-                    <td className="border-t-0 flex px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left ">
+                  <tr
+                    key={index}
+                    className="transition-all duration-300 hover:font-bold hover:bg-pale-white "
+                  >
+                    <td className="border-t-0  flex px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left ">
                       <Link
                         to={`/patient/${user._id}`}
                         style={{ display: "contents" }}
@@ -284,6 +291,8 @@ const Appointments = () => {
           </>
         )}
       </div>
+
+      {/* Pagination */}
 
       <div className="flex justify-center items-center mt-4">
         <div className="flex gap-4">

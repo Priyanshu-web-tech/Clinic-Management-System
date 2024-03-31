@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { Alert, baseURL, calculateAge } from "../../utils";
+import { Alert, calculateAge } from "../../utils";
 
 const Examine = () => {
   const [users, setUsers] = useState([]);
@@ -23,7 +23,7 @@ const Examine = () => {
   const fetchUsers = async () => {
     try {
       const response = await axios.get(
-        `${baseURL}/api/users/getUsers/${currentHospital.name}`
+        `/api/users/getUsers/${currentHospital.name}`
       );
       const sortedUsers = response.data.sort(
         (a, b) => a.queueNumber - b.queueNumber
@@ -51,7 +51,7 @@ const Examine = () => {
   const resetQueue = async () => {
     try {
       await axios.put(
-        `${baseURL}/api/users/reset-queue/${currentHospital.name}`
+        `/api/users/reset-queue/${currentHospital.name}`
       );
       showAlertMessage("Queue numbers reset Successfully!");
       fetchUsers();
@@ -63,7 +63,7 @@ const Examine = () => {
   const removeFromQueue = (userId) => {
     axios
       .patch(
-        `${baseURL}/api/users/updateUser/${userId}`,
+        `/api/users/updateUser/${userId}`,
         { queueNumber: null },
         {
           headers: { "Content-Type": "application/json" },
@@ -136,7 +136,7 @@ const Examine = () => {
             </thead>
             <tbody>
               {filteredUsers.map((user, index) => (
-                <tr key={index}>
+                  <tr key={index} className="transition-all duration-300 hover:font-bold hover:bg-pale-white ">
                   <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left">
                     {user.name}
                   </td>

@@ -4,7 +4,7 @@ import axios from "axios";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { useSelector, useDispatch } from "react-redux";
-import { baseURL } from "../../utils";
+import { RiEyeFill, RiEyeOffFill } from "react-icons/ri"; // Import icons from React Icons
 
 import {
   signInStart,
@@ -22,15 +22,25 @@ const ClinicLogin = () => {
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({});
   const [hospitals, setHospitals] = useState([]);
-  const { loading: hospitalLoading, error: hospitalError } = useSelector((state) => state.hospital);
-  const { loading: userLoading, error: userError } = useSelector((state) => state.user);
+  const { loading: hospitalLoading, error: hospitalError } = useSelector(
+    (state) => state.hospital
+  );
+  const { loading: userLoading, error: userError } = useSelector(
+    (state) => state.user
+  );
   const loading = hospitalLoading || userLoading;
-  const error = hospitalError || userError;  const navigate = useNavigate();
+  const error = hospitalError || userError;
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   useEffect(() => {
     const fetchHospitals = async () => {
       try {
-        const response = await axios.get(`${baseURL}/api/auth/getHospitals`);
+        const response = await axios.get(`/api/auth/getHospitals`);
         const hospitalsData = response.data;
         setHospitals(hospitalsData);
       } catch (error) {
@@ -60,9 +70,9 @@ const ClinicLogin = () => {
         name: formData.name,
         accessCode: formData.accessCode,
       };
-  
+
       const response = await axios.post(
-        `${baseURL}/api/auth/loginHospital`,
+        `/api/auth/loginHospital`,
         formDataClinic,
         {
           headers: {
@@ -70,14 +80,14 @@ const ClinicLogin = () => {
           },
         }
       );
-  
+
       const data = response.data;
-  
+
       if (data.success === false) {
         dispatch(signInHospitalFailure(data.message));
         return null;
       }
-  
+
       dispatch(signInHospitalSuccess(data));
       return data.name; // Assuming name is returned upon successful login
     } catch (error) {
@@ -85,7 +95,7 @@ const ClinicLogin = () => {
       return null;
     }
   };
-  
+
   const userLogin = async (formData, dispatch, navigate) => {
     try {
       const formDataUser = {
@@ -93,20 +103,24 @@ const ClinicLogin = () => {
         phoneNumber: formData.phoneNumber,
         password: formData.password,
       };
-  
-      const response = await axios.post(`${baseURL}/api/auth/login`, formDataUser, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-  
+
+      const response = await axios.post(
+        `/api/auth/login`,
+        formDataUser,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
       const data = response.data;
-  
+
       if (data.success === false) {
         dispatch(signInFailure(data.message));
         return;
       }
-  
+
       dispatch(signInSuccess(data));
       if (data.userRole === "Doctor") navigate("/doctorHome");
       else if (data.userRole === "Reception") navigate("/receptionHome");
@@ -116,13 +130,13 @@ const ClinicLogin = () => {
       dispatch(signInFailure(error.message));
     }
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       dispatch(signInHospitalStart());
       const hospitalName = await hospitalLogin(formData, dispatch);
-  
+
       if (hospitalName) {
         dispatch(signInStart());
         await userLogin(formData, dispatch, navigate);
@@ -131,7 +145,6 @@ const ClinicLogin = () => {
       console.error("Error during login:", error);
     }
   };
-  
 
   return (
     <>
@@ -180,7 +193,7 @@ const ClinicLogin = () => {
                 name="accessCode"
                 onChange={handleChange}
                 required
-                className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-md border border-gray-300 rounded-md py-2 px-4"
+                className="mt-1  block w-full shadow-md border border-gray-300 rounded-md py-2 px-4"
               />
             </div>
             {/* Phone number */}
@@ -199,11 +212,11 @@ const ClinicLogin = () => {
                 autoComplete="phoneNumber"
                 pattern="[1-9]{1}[0-9]{9}"
                 required
-                className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-md border border-gray-300 rounded-md py-2 px-4"
+                className="mt-1  block w-full shadow-md border border-gray-300 rounded-md py-2 px-4"
               />
             </div>
             {/* User Password */}
-            <div>
+            <div className="relative">
               <label
                 htmlFor="password"
                 className="block text-lg font-medium text-gray-800 mb-1"
@@ -211,20 +224,31 @@ const ClinicLogin = () => {
                 Password
               </label>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 id="password"
                 name="password"
                 onChange={handleChange}
                 required
-                className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-md border border-gray-300 rounded-md py-2 px-4"
+                className="mt-1  block w-full shadow-md border border-gray-300 rounded-md py-2 px-4"
               />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute  inset-y-8 right-0 px-3 py-2 text-teal-800 focus:outline-none"
+              >
+                {showPassword ? (
+                  <RiEyeOffFill size={24} />
+                ) : (
+                  <RiEyeFill size={24} />
+                )}
+              </button>
             </div>
             {/* Submit button */}
             <div>
               <button
                 disabled={loading}
                 type="submit"
-                className="w-full flex justify-center py-3 px-6 border border-transparent rounded-md shadow-sm text-lg font-medium bg-dark text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="w-full flex justify-center py-3 px-6 border border-transparent rounded-md shadow-sm text-lg font-medium bg-dark text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 "
               >
                 {loading ? "Loading..." : "Log In"}
               </button>

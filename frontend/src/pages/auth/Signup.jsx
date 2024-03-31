@@ -16,7 +16,8 @@ import {
 
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import { baseURL } from "../../utils";
+
+import { RiEyeFill, RiEyeOffFill } from "react-icons/ri";
 
 const Signup = () => {
   const [formData, setFormData] = useState({});
@@ -24,6 +25,16 @@ const Signup = () => {
   const dispatch = useDispatch();
   const [hospitals, setHospitals] = useState([]);
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
 
   const { loading: hospitalLoading, error: hospitalError } = useSelector(
     (state) => state.hospital
@@ -41,7 +52,22 @@ const Signup = () => {
           ? ""
           : "Name must contain only alphabets";
       case "phoneNumber":
-        return /^\d{0,10}$/.test(value) ? "" : "Phone number must contain only numbers & should be 10 digits ";
+        return /^\d{0,10}$/.test(value)
+          ? ""
+          : "Phone number must contain only numbers & should be 10 digits ";
+      case "password":
+        // Password strength check
+        if (value.length < 8) {
+          return "Password must be at least 8 characters long";
+        } else if (!/[a-z]/.test(value)) {
+          return "Password must contain at least one lowercase letter";
+        } else if (!/[A-Z]/.test(value)) {
+          return "Password must contain at least one uppercase letter";
+        } else if (!/\d/.test(value)) {
+          return "Password must contain at least one digit";
+        } else {
+          return "";
+        }
       default:
         return "";
     }
@@ -54,7 +80,11 @@ const Signup = () => {
       ...errors,
       [id]: errorMessage,
     });
-    if (!errorMessage) {
+    if (!errorMessage || value === "") {
+      setErrors({
+        ...errors,
+        [id]: "", // Reset error message when input becomes valid
+      });
       setFormData({
         ...formData,
         [id]: value,
@@ -65,7 +95,7 @@ const Signup = () => {
   useEffect(() => {
     const fetchHospitals = async () => {
       try {
-        const response = await axios.get(`${baseURL}/api/auth/getHospitals`);
+        const response = await axios.get(`/api/auth/getHospitals`);
         const hospitalsData = response.data;
         setHospitals(hospitalsData);
       } catch (error) {
@@ -76,14 +106,14 @@ const Signup = () => {
     fetchHospitals();
   }, []);
 
-  const hospitalAuthenticateAndLogin = async (formData, dispatch, baseURL) => {
+  const hospitalAuthenticateAndLogin = async (formData, dispatch) => {
     try {
       const formDataClinic = {
         name: formData.hospitalName,
         accessCode: formData.accessCode,
       };
       const response = await axios.post(
-        `${baseURL}/api/auth/loginHospital`,
+        `/api/auth/loginHospital`,
         formDataClinic,
         {
           headers: {
@@ -107,7 +137,7 @@ const Signup = () => {
     }
   };
 
-  const userSignUp = async (formData, dispatch, baseURL) => {
+  const userSignUp = async (formData, dispatch) => {
     try {
       const formDataUser = {
         name: formData.name,
@@ -118,7 +148,7 @@ const Signup = () => {
       };
 
       const registerResponse = await axios.post(
-        `${baseURL}/api/auth/register`,
+        `/api/auth/register`,
         formDataUser,
         {
           headers: {
@@ -139,7 +169,7 @@ const Signup = () => {
     }
   };
 
-  const userSignIn = async (formData, dispatch, navigate, baseURL) => {
+  const userSignIn = async (formData, dispatch, navigate) => {
     try {
       dispatch(signInStart());
       const formDataUserSignIn = {
@@ -149,7 +179,7 @@ const Signup = () => {
       };
 
       const response = await axios.post(
-        `${baseURL}/api/auth/login`,
+        `/api/auth/login`,
         formDataUserSignIn,
         {
           headers: {
@@ -181,19 +211,26 @@ const Signup = () => {
     if (Object.values(errors).some((error) => error !== "")) {
       return; // Stop form submission if there are errors
     }
-   
+
+    if (formData.password !== formData.confirmPassword) {
+      setErrors({
+        ...errors,
+        confirmPassword: "Passwords do not match",
+      });
+      return;
+    }
+
     try {
       const hospitalData = await hospitalAuthenticateAndLogin(
         formData,
         dispatch,
-        baseURL
       );
       if (!hospitalData) return;
 
-      const signUpData = await userSignUp(formData, dispatch, baseURL);
+      const signUpData = await userSignUp(formData, dispatch);
       if (!signUpData) return;
 
-      await userSignIn(formData, dispatch, navigate, baseURL);
+      await userSignIn(formData, dispatch, navigate);
     } catch (error) {
       console.error("Error during Sign up:", error);
     }
@@ -218,7 +255,7 @@ const Signup = () => {
               </label>
 
               <select
-                className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-md border border-gray-300 rounded-md py-2 px-4"
+                className="mt-1  block w-full shadow-md border border-gray-300 rounded-md py-2 px-4"
                 required
                 onChange={handleChange}
                 id="hospitalName"
@@ -246,7 +283,7 @@ const Signup = () => {
                 name="accessCode"
                 onChange={handleChange}
                 required
-                className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-md border border-gray-300 rounded-md py-2 px-4"
+                className="mt-1  block w-full shadow-md border border-gray-300 rounded-md py-2 px-4"
               />
             </div>
             <div>
@@ -285,6 +322,7 @@ const Signup = () => {
                 name="phoneNumber"
                 onChange={handleChange}
                 autoComplete="phoneNumber"
+                pattern="[1-9]{1}[0-9]{9}"
                 required
                 className={`appearance-none block w-full   border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white ${
                   errors.phoneNumber ? "border-red" : ""
@@ -292,7 +330,9 @@ const Signup = () => {
               />
 
               {errors.phoneNumber && (
-                <p className="text-red-500 text-xs italic">{errors.phoneNumber}</p>
+                <p className="text-red-500 text-xs italic">
+                  {errors.phoneNumber}
+                </p>
               )}
             </div>
             <div>
@@ -304,7 +344,7 @@ const Signup = () => {
               </label>
 
               <select
-                className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-md border border-gray-300 rounded-md py-2 px-4"
+                className="mt-1  block w-full shadow-md border border-gray-300 rounded-md py-2 px-4"
                 required
                 onChange={handleChange}
                 id="userRole"
@@ -316,7 +356,8 @@ const Signup = () => {
                 <option value="Inventory">Inventory</option>
               </select>
             </div>
-            <div>
+
+            <div className="relative">
               <label
                 htmlFor="password"
                 className="block text-lg font-medium text-gray-800 mb-1"
@@ -324,14 +365,68 @@ const Signup = () => {
                 Password
               </label>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 id="password"
                 name="password"
                 onChange={handleChange}
                 required
-                className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-md border border-gray-300 rounded-md py-2 px-4"
+                className={`appearance-none block w-full   border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white ${
+                  errors.password ? "border-red" : ""
+                }`}
               />
+              {errors.password && (
+                <p className="text-red-500 text-xs italic">{errors.password}</p>
+              )}
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute  inset-y-8 right-0 px-3 py-2 text-teal-800 focus:outline-none"
+              >
+                {showPassword ? (
+                  <RiEyeOffFill size={24} />
+                ) : (
+                  <RiEyeFill size={24} />
+                )}
+              </button>
             </div>
+
+            <div className="relative">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-lg font-medium text-gray-800 mb-1"
+              >
+                Confirm Password
+              </label>
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                id="confirmPassword"
+                name="confirmPassword"
+                onChange={handleChange}
+                required
+                className={`appearance-none block w-full   border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white ${
+                  errors.confirmPassword ? "border-red" : ""
+                }`}
+              />
+
+              {errors.confirmPassword && (
+                <p className="text-red-500 text-xs italic">
+                  {errors.confirmPassword}
+                </p>
+              )}
+
+              <button
+                type="button"
+                onClick={toggleConfirmPasswordVisibility}
+                className="absolute  inset-y-8 right-0 px-3 py-2 text-teal-800 focus:outline-none"
+              >
+                {showConfirmPassword ? (
+                  <RiEyeOffFill size={24} />
+                ) : (
+                  <RiEyeFill size={24} />
+                )}
+              </button>
+            </div>
+
             <div>
               <button
                 disabled={loading}

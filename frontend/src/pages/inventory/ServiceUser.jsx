@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import { baseURL } from "../../utils";
+
 
 const ServiceUser = () => {
   const [users, setUsers] = useState([]);
@@ -11,7 +11,7 @@ const ServiceUser = () => {
   const fetchUsers = async () => {
     try {
       const response = await axios.get(
-        `${baseURL}/api/users/getUsers/${currentHospital.name}`
+        `/api/users/getUsers/${currentHospital.name}`
       );
 
       setUsers(response.data);
@@ -37,7 +37,7 @@ const ServiceUser = () => {
   const closeRequest = (userId) => {
     axios
       .patch(
-        `${baseURL}/api/users/updateUser/${userId}`,
+        `/api/users/updateUser/${userId}`,
         { queueNumber: null, medStatus: "FULLFILLED" },
         {
           headers: { "Content-Type": "application/json" },
@@ -90,7 +90,7 @@ const ServiceUser = () => {
             </thead>
             <tbody>
               {filteredUsers.map((user, index) => (
-                <tr key={index}>
+                  <tr key={index} className="transition-all duration-300 hover:font-bold hover:bg-pale-white ">
                   <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left">
                     {user.name}
                   </td>
@@ -107,8 +107,8 @@ const ServiceUser = () => {
                     <button
                       type="button"
                       onClick={() => closeRequest(user._id)} // Pass the user ID here
-                      className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full"
-                    >
+                      className="text-dark border transition-all duration-300 hover:bg-warn hover:border-warn py-2 px-6"
+                      >
                       Close Request
                     </button>
                   </td>

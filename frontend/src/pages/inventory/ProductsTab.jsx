@@ -1,7 +1,7 @@
 // src/pages/ProductTab.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { baseURL } from "../../utils";
+
 
 const ProductTab = () => {
   const [products, setProducts] = useState([]);
@@ -15,20 +15,20 @@ const ProductTab = () => {
   }, []);
 
   const fetchProducts = () => {
-    axios.get(`${baseURL}/api/products`).then((response) => {
+    axios.get(`/api/products`).then((response) => {
       setProducts(response.data);
     });
   };
 
   const fetchAnalyticsData = () => {
-    axios.get(`${baseURL}/api/analytics`).then((response) => {
+    axios.get(`/api/analytics`).then((response) => {
       setAnalyticsData(response.data);
     });
   };
 
   const handleOrderProduct = (productId, orderQuantity) => {
     axios
-      .post(`${baseURL}/api/orders`, {
+      .post(`/api/orders`, {
         productId,
         eventType: "order",
         quantity: orderQuantity,
@@ -44,7 +44,7 @@ const ProductTab = () => {
 
   const handleRestockProduct = (productId, restockQuantity) => {
     axios
-      .post(`${baseURL}/api/restocks`, {
+      .post(`/api/restocks`, {
         productId,
         eventType: "restock",
         quantity: restockQuantity,
@@ -68,7 +68,7 @@ const ProductTab = () => {
 
     // Send the new event to the server for logging
     axios
-      .post(`${baseURL}/api/analytics/log`, newEvent)
+      .post(`/api/analytics/log`, newEvent)
       .then(() => {
         // After successful logging, fetch updated analytics data
         fetchAnalyticsData();

@@ -18,8 +18,3 @@ export const Alert = ({ message }) => {
     </div>
   );
 };
-
-// export const baseURL = import.meta.env.VITE_BASE_URL;
-
-// For Hosting:
-export const baseURL = window.location.origin;

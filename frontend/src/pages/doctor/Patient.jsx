@@ -1,34 +1,44 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { calculateAge, baseURL } from "./../../utils";
+import { calculateAge } from "./../../utils";
 import { useNavigate, useLoaderData, useParams, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Alert } from "./../../utils";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import EditPatientModal from "../../components/EditPatientModal";
 
 const Patient = () => {
+  const navigate = useNavigate();
   const { id } = useParams();
   const { currentUser } = useSelector((state) => state.user);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const {
-    name,
-    occupation,
-    phone,
-    email,
-    address,
+    _id,
+    name: initialName,
+    occupation: initialOccupation,
+    phone: initialPhone,
+    email: initialEmail,
+    address: initialAddress,
     dob,
-    gender,
-    maritalStatus,
+    gender: initialGender,
+    maritalStatus: initialMaritalStatus,
     queueNumber,
     queueDates,
     medicalHistory: initialMedicalHistory,
   } = useLoaderData();
 
-  const navigate = useNavigate();
+  const [name, setName] = useState(initialName);
+  const [phone, setPhone] = useState(initialPhone);
+  const [email, setEmail] = useState(initialEmail);
+  const [address, setAddress] = useState(initialAddress);
+  const [gender, setGender] = useState(initialGender);
+  const [maritalStatus, setMaritalStatus] = useState(initialMaritalStatus);
+  const [occupation, setOccupation] = useState(initialOccupation);
   const [medicalHistory, setMedicalHistory] = useState(initialMedicalHistory);
   const [newMedicalEntry, setNewMedicalEntry] = useState({
     date: new Date().toISOString().slice(0, 10), // Get current date
@@ -43,6 +53,17 @@ const Patient = () => {
     setTimeout(() => {
       setShowAlert(false);
     }, duration);
+  };
+
+  const updatePatientDetails = (updatedDetails) => {
+    // Update the state with the updated details
+    setName(updatedDetails.name);
+    setOccupation(updatedDetails.occupation);
+    setPhone(updatedDetails.phone);
+    setEmail(updatedDetails.email);
+    setAddress(updatedDetails.address);
+    setGender(updatedDetails.gender);
+    setMaritalStatus(updatedDetails.maritalStatus);
   };
 
   const handleInputChange = (e) => {
@@ -66,7 +87,7 @@ const Patient = () => {
     const updatedMedicalHistory = [...medicalHistory, newMedicalEntry];
     axios
       .patch(
-        `${baseURL}/api/users/updateUser/${id}`,
+        `/api/users/updateUser/${id}`,
         { medicalHistory: updatedMedicalHistory },
         {
           headers: { "Content-Type": "application/json" },
@@ -92,7 +113,7 @@ const Patient = () => {
   const closeAppointment = () => {
     axios
       .patch(
-        `${baseURL}/api/users/updateUser/${id}`,
+        `/api/users/updateUser/${id}`,
         { queueNumber: 0, medStatus: "PENDING" },
 
         {
@@ -113,7 +134,7 @@ const Patient = () => {
   const closeRequest = (userId) => {
     axios
       .patch(
-        `${baseURL}/api/users/updateUser/${userId}`,
+        `/api/users/updateUser/${userId}`,
         { queueNumber: null, medStatus: "FULLFILLED" },
         {
           headers: { "Content-Type": "application/json" },
@@ -153,21 +174,51 @@ const Patient = () => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const reversedMedicalHistory = [...medicalHistory].reverse();
 
-  const currentItems = reversedMedicalHistory.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = reversedMedicalHistory.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
 
   return (
     <div className="m-2">
       {showAlert && <Alert message={alertMessage} />}
+      {showEditModal && (
+        <EditPatientModal
+          patientDetails={{
+            _id,
+            name,
+            occupation,
+            phone,
+            email,
+            address,
+            gender,
+            maritalStatus,
+          }}
+          showAlertMessage={showAlertMessage}
+          onUpdatePatient={updatePatientDetails}
+          onClose={() => setShowEditModal(false)}
+        />
+      )}
       <div className="p-3 bg-pale-white rounded-lg flex justify-between items-center">
         <h1 className="text-3xl font-bold">Patient Details</h1>
-        <Link to={`/doctorHome`}>
+
+        <div>
+          <Link to={`/doctorHome`}>
+            <button
+              type="button"
+              className="bg-transparent mt-2  text-dark border hover:bg-dark hover:text-pale-white transition-all duration-300 font-bold px-4 py-2 rounded-full "
+            >
+              Go back
+            </button>{" "}
+          </Link>
           <button
             type="button"
             className="bg-transparent mt-2  text-dark border hover:bg-dark hover:text-pale-white transition-all duration-300 font-bold px-4 py-2 rounded-full "
+            onClick={() => setShowEditModal(true)}
           >
-            Go back
-          </button>{" "}
-        </Link>
+            Edit Details
+          </button>
+        </div>
       </div>
       <hr />
 
@@ -194,9 +245,10 @@ const Patient = () => {
           <span>{new Date(dob).toLocaleDateString("en-GB")}</span>
         </div>
         <div className="flex">
-          <span className="font-semibold mr-2">Age:</span>
-          <span>{calculateAge(dob)}</span>
+          <span className="font-semibold mr-2">Marital Status:</span>
+          <span>{maritalStatus}</span>
         </div>
+
         <div className="flex">
           <span className="font-semibold mr-2">Occupation:</span>
           <span>{occupation}</span>
@@ -205,10 +257,12 @@ const Patient = () => {
           <span className="font-semibold mr-2">Gender:</span>
           <span>{gender}</span>
         </div>
+
         <div className="flex">
-          <span className="font-semibold mr-2">Marital Status:</span>
-          <span>{maritalStatus}</span>
+          <span className="font-semibold mr-2">Age:</span>
+          <span>{calculateAge(dob)}</span>
         </div>
+
         <div className="flex">
           <span className="font-semibold mr-2">Queue Number:</span>
           <span>{queueNumber}</span>
@@ -219,7 +273,7 @@ const Patient = () => {
       <div className="p-4">
         <h2 className="text-2xl font-semibold mb-2">Medical History</h2>
 
-        <div className="block w-full overflow-x-auto min-h-60" >
+        <div className="block w-full overflow-x-auto min-h-60">
           {currentItems.length === 0 ? (
             <p>No Medical History Found</p>
           ) : (
@@ -239,7 +293,10 @@ const Patient = () => {
               </thead>
               <tbody>
                 {currentItems.map((item, index) => (
-                  <tr key={index} className="hover:font-bold">
+                  <tr
+                    key={index}
+                    className="transition-all duration-300 hover:font-bold hover:bg-pale-white "
+                  >
                     <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-3 text-left">
                       {new Date(item.date).toLocaleDateString("en-GB")}{" "}
                     </td>
@@ -257,36 +314,36 @@ const Patient = () => {
         </div>
         {/* Pagination */}
         <div className="flex justify-center items-center gap-4 mt-3">
-            <button
-              onClick={prevPage}
-              disabled={currentPage === 1}
-              className="bg-transparent hover:bg-dark text-dark hover:text-pale-white border font-bold
+          <button
+            onClick={prevPage}
+            disabled={currentPage === 1}
+            className="bg-transparent hover:bg-dark text-dark hover:text-pale-white border font-bold
               px-3 py-2 rounded-md"
-            >
-              <FaChevronLeft />
-            </button>
-            <div className="space-x-1">
-              {[...Array(totalPages).keys()].map((pageNumber) => (
-                <button
-                  key={pageNumber}
-                  onClick={() => handleClick(pageNumber + 1)}
-                  className={`${
-                    currentPage === pageNumber + 1
-                      ? "bg-dark text-pale-white"
-                      : "bg-transparent hover:bg-dark text-dark hover:text-pale-white"
-                  } border font-bold p-2 rounded-md`}
-                >
-                  {pageNumber + 1}
-                </button>
-              ))}
-            </div>
-            <button
-              onClick={nextPage}
-              disabled={currentPage === totalPages}
-              className="bg-transparent hover:bg-dark text-dark hover:text-pale-white border font-bold px-3 py-2 rounded-md"
-            >
-              <FaChevronRight />
-            </button>
+          >
+            <FaChevronLeft />
+          </button>
+          <div className="space-x-1">
+            {[...Array(totalPages).keys()].map((pageNumber) => (
+              <button
+                key={pageNumber}
+                onClick={() => handleClick(pageNumber + 1)}
+                className={`${
+                  currentPage === pageNumber + 1
+                    ? "bg-dark text-pale-white"
+                    : "bg-transparent hover:bg-dark text-dark hover:text-pale-white"
+                } border font-bold p-2 rounded-md`}
+              >
+                {pageNumber + 1}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={nextPage}
+            disabled={currentPage === totalPages}
+            className="bg-transparent hover:bg-dark text-dark hover:text-pale-white border font-bold px-3 py-2 rounded-md"
+          >
+            <FaChevronRight />
+          </button>
         </div>
       </div>
 

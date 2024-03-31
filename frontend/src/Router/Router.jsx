@@ -14,7 +14,7 @@ import {
   ReceptionRoute,
 } from "./RouteGuards";
 import PageNotFound from "../pages/PageNotFound";
-import { baseURL } from "../utils";
+
 
  
 
@@ -43,7 +43,7 @@ const router = createBrowserRouter([
       {
         path: "/patient/:id",
         element: <Patient />,
-        loader: ({ params }) => fetch(`${baseURL}/api/users/getUser/${params.id}`),
+        loader: ({ params }) => fetch(`/api/users/getUser/${params.id}`),
       },
       {
         path: "/",

@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import Sidebar from "../../components/Sidebar";
 import { TbCheckupList } from "react-icons/tb";
 import Examine from "./Examine";
 import Appointments from "../Appointments";
 import CreateUser from "../reception/CreateUser";
 import { FaChartBar } from "react-icons/fa6";
+import { FaUserEdit } from "react-icons/fa";
+
 import { CiBoxList } from "react-icons/ci";
 import {
   MdCalendarMonth,
@@ -16,6 +18,7 @@ import Dashboard from "../inventory/Dashboard";
 import ProductsTab from "../inventory/ProductsTab";
 import Analytics from "../inventory/Analytics";
 import DashboardDoc from "./DashboardDoc";
+import Profile from "../Profile";
 
 const DoctorHome = () => {
   const [activeTab, setActiveTab] = useState("Dashboard");
@@ -24,7 +27,7 @@ const DoctorHome = () => {
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     // Store active tab in local storage
-    localStorage.setItem('doctorActiveTab', tab);
+    localStorage.setItem("doctorActiveTab", tab);
   };
 
   // Define sidebar items
@@ -33,6 +36,7 @@ const DoctorHome = () => {
     { text: "Examine", icon: <TbCheckupList size={25} /> },
     { text: "Appointments", icon: <MdCalendarMonth size={25} /> },
     { text: "CreateUser", icon: <MdOutlineCreate size={25} /> },
+    { text: "EditProfile", icon: <FaUserEdit size={25} /> },
     { text: "Add-Products", icon: <MdAddchart size={25} /> },
     { text: "Products", icon: <CiBoxList size={25} /> },
     { text: "Analytics", icon: <MdOutlineAnalytics size={25} /> },
@@ -40,7 +44,7 @@ const DoctorHome = () => {
 
   // Effect to retrieve active tab from local storage on component mount
   useEffect(() => {
-    const storedTab = localStorage.getItem('doctorActiveTab');
+    const storedTab = localStorage.getItem("doctorActiveTab");
     if (storedTab) {
       setActiveTab(storedTab);
     }
@@ -56,9 +60,13 @@ const DoctorHome = () => {
           category="Doctor"
         />
         <div className="flex-1 ml-2 overflow-y-scroll">
-          {activeTab === "Dashboard" && <DashboardDoc setActiveTab={setActiveTab} />}
+          {activeTab === "Dashboard" && (
+            <DashboardDoc setActiveTab={setActiveTab} />
+          )}
           {activeTab === "Examine" && <Examine />}
           {activeTab === "CreateUser" && <CreateUser />}
+          {activeTab === "EditProfile" && <Profile />}
+
           {activeTab === "Appointments" && <Appointments />}
           {activeTab === "Analytics" && <Analytics />}
           {activeTab === "Add-Products" && <Dashboard />}

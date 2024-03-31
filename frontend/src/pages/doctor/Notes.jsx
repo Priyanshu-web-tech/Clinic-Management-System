@@ -3,7 +3,7 @@ import axios from "axios";
 import { MdOpenInNew } from "react-icons/md";
 import { IoMdClose } from "react-icons/io";
 import { useSelector } from "react-redux";
-import { Alert, baseURL } from "../utils";
+import { Alert } from "../../utils";
 import { RiDeleteBinLine } from 'react-icons/ri';
 
 
@@ -33,7 +33,7 @@ function Notes() {
 
   const fetchNote = async () => {
     try {
-      const response = await axios.get(`${baseURL}/api/notes`);
+      const response = await axios.get(`/api/notes`);
       const filteredNotes = response.data.filter((note) => {
         return note.phone === currentUser.phoneNumber;
       });
@@ -45,7 +45,7 @@ function Notes() {
 
   const saveNote = async () => {
     try {
-      await axios.post(`${baseURL}/api/notes`, {
+      await axios.post(`/api/notes`, {
         content: note,
         phone: currentUser.phoneNumber,
       });
@@ -69,7 +69,7 @@ function Notes() {
 
   const deleteNote = (noteId) => {
     axios
-      .delete(`${baseURL}/api/notes/${noteId}`, {
+      .delete(`/api/notes/${noteId}`, {
         headers: { "Content-Type": "application/json" },
       })
       .then((response) => {

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
-import {  calculateAge } from "../../utils";
+import { calculateAge } from "../../utils";
 import { FaUserFriends, FaHeartbeat } from "react-icons/fa";
-import Notes from "./Notes";
+import Notes from "../../components/Notes";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 const DashboardDoc = ({ setActiveTab }) => {
@@ -167,7 +167,6 @@ const DashboardDoc = ({ setActiveTab }) => {
       </div>
       <div className="flex flex-col gap-4 md:flex-row p-4 bg-white">
         <div className="md:w-3/5">
-
           <div className="flex justify-between items-center my-4">
             <h1 className="text-xl md:text-3xl  ml-2 font-bold flex items-center">
               <FaUserFriends className=" text-3xl mr-2" />

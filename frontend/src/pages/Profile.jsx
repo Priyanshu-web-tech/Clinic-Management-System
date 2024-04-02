@@ -20,6 +20,35 @@ const Profile = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [errors, setErrors] = useState({});
+
+  const validateInput = (name, value) => {
+    switch (name) {
+      case "name":
+        return /^[A-Za-z\s]+$/.test(value)
+          ? ""
+          : "Name must contain only alphabets";
+      case "phoneNumber":
+        return /^\d{0,10}$/.test(value)
+          ? ""
+          : "Phone number must contain only numbers & should be 10 digits ";
+      case "password":
+        // Password strength check
+        if (value.length < 8) {
+          return "Password must be at least 8 characters long";
+        } else if (!/[a-z]/.test(value)) {
+          return "Password must contain at least one lowercase letter";
+        } else if (!/[A-Z]/.test(value)) {
+          return "Password must contain at least one uppercase letter";
+        } else if (!/\d/.test(value)) {
+          return "Password must contain at least one digit";
+        } else {
+          return "";
+        }
+      default:
+        return "";
+    }
+  };
 
   const showAlertMessage = (message, duration = 3000) => {
     setAlertMessage(message);
@@ -35,11 +64,36 @@ const Profile = () => {
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+    const { id, value } = e.target;
+    const errorMessage = validateInput(id, value);
+    setErrors({
+      ...errors,
+      [id]: errorMessage,
+    });
+
+    if (!errorMessage || value === "") {
+      setErrors({
+        ...errors,
+        [id]: "", // Reset error message when input becomes valid
+      });
+      setFormData({ ...formData, [e.target.id]: e.target.value });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Check if there are any errors in the form
+    if (Object.values(errors).some((error) => error !== "")) {
+      return; // Stop form submission if there are errors
+    }
+
+    // Remove password field from formData if it is empty
+    const updatedFormData = { ...formData };
+    if (formData.password === "") {
+      delete updatedFormData.password;
+    }
+
     try {
       dispatch(updateUserStart());
       const res = await fetch(`/api/reception/update/${currentUser._id}`, {
@@ -47,7 +101,7 @@ const Profile = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(updatedFormData), // Send updatedFormData to the backend
       });
       const data = await res.json();
       if (data.success === false) {
@@ -110,11 +164,18 @@ const Profile = () => {
               <input
                 type="text"
                 placeholder="name"
+                required
                 defaultValue={currentUser.name}
                 id="name"
-                className="border p-3  text-black rounded-lg w-full"
+                className={`appearance-none block w-full   border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white ${
+                  errors.name ? "border-red" : ""
+                }`}
                 onChange={handleChange}
               />
+
+              {errors.name && (
+                <p className="text-red-500 text-xs italic">{errors.name}</p>
+              )}
             </div>
 
             <div>
@@ -124,11 +185,20 @@ const Profile = () => {
               <input
                 type="text"
                 placeholder="phoneNumber"
+                required
                 defaultValue={currentUser.phoneNumber}
                 id="phoneNumber"
-                className="border p-3 text-black rounded-lg w-full"
+                className={`appearance-none block w-full   border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white ${
+                  errors.phoneNumber ? "border-red" : ""
+                }`}
                 onChange={handleChange}
               />
+
+              {errors.phoneNumber && (
+                <p className="text-red-500 text-xs italic">
+                  {errors.phoneNumber}
+                </p>
+              )}
             </div>
 
             <div className="relative">
@@ -140,8 +210,14 @@ const Profile = () => {
                 placeholder="password"
                 onChange={handleChange}
                 id="password"
-                className="border p-3  text-black  rounded-lg w-full"
+                className={`appearance-none block w-full   border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white ${
+                  errors.password ? "border-red" : ""
+                }`}
               />
+
+              {errors.password && (
+                <p className="text-red-500 text-xs italic">{errors.password}</p>
+              )}
 
               <button
                 type="button"
@@ -178,5 +254,4 @@ const Profile = () => {
     </div>
   );
 };
-
 export default Profile;

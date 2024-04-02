@@ -5,6 +5,20 @@ import jwt from "jsonwebtoken";
 
 export const signup = async (req, res, next) => {
   const { name, phoneNumber, password, userRole, hospitalName } = req.body;
+
+  const existingUser = await ReceptionModel.findOne({
+    phoneNumber,
+    hospitalName,
+  });
+
+  if (existingUser) {
+    return res.json({
+      statusCode: 400,
+      success: false,
+      message: "User with same Phone number already exists",
+    });
+  }
+
   const hashedPass = bcryptjs.hashSync(password, 10);
   const newUser = new ReceptionModel({
     name,
@@ -59,8 +73,8 @@ export const signin = async (req, res, next) => {
 
     const { password: pass, ...rest } = validUser._doc;
 
-    // expiration time for the cookie to 20min from now
-    const expirationDate = new Date(Date.now() + 2* 24 *60 *  60 * 1000);
+    // expiration time for the cookie to 2 days from now
+    const expirationDate = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
 
     res
       .cookie("access_token", token, {
@@ -102,7 +116,7 @@ export const signinHospital = async (req, res, next) => {
 
     const { accessCode: pass, ...rest } = validHospital._doc;
 
-    const expirationDate = new Date(Date.now() + 10 * 60 * 1000);
+    const expirationDate = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
 
     res
       .cookie("access_token_hospital", token, {

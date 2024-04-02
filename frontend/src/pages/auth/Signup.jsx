@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
+import { Alert } from "../../utils";
 import {
   signInStart,
   signInFailure,
@@ -9,7 +10,6 @@ import {
 } from "../../redux/user/userSlice";
 
 import {
-  signInHospitalStart,
   signInHospitalFailure,
   signInHospitalSuccess,
 } from "../../redux/user/hospitalSlice";
@@ -27,6 +27,8 @@ const Signup = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -44,6 +46,15 @@ const Signup = () => {
   );
   const loading = hospitalLoading || userLoading;
   const error = hospitalError || userError;
+
+  const showAlertMessage = (message, duration = 3000) => {
+    setAlertMessage(message);
+    setShowAlert(true);
+
+    setTimeout(() => {
+      setShowAlert(false);
+    }, duration);
+  };
 
   const validateInput = (name, value) => {
     switch (name) {
@@ -159,6 +170,7 @@ const Signup = () => {
       const registerData = registerResponse.data;
 
       if (registerData.success === false) {
+        showAlertMessage(`${registerData.message}`);
         return null;
       }
 
@@ -240,6 +252,8 @@ const Signup = () => {
     <>
       <Navbar />
       <div className="min-h-screen bg-gray-900 flex justify-center items-center">
+      {showAlert && <Alert message={alertMessage} />}
+
         <div className="bg-white p-8 rounded-lg shadow-md w-full sm:w-96">
           <h2 className="text-4xl font-semibold text-center text-indigo-600 mb-6">
             Create an Account

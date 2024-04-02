@@ -27,12 +27,45 @@ const EditPatientModal = ({
     maritalStatus,
   });
 
+  const [errors, setErrors] = useState({});
+
+  const validateInput = (name, value) => {
+    switch (name) {
+      case "name":
+        return /^[A-Za-z\s]+$/.test(value)
+          ? ""
+          : "Name must contain only alphabets";
+      case "phone":
+        return /^\d{0,10}$/.test(value)
+          ? ""
+          : "Phone number must contain only numbers & should be 10 digits ";
+      default:
+        return "";
+    }
+  };
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+    const { id, value } = e.target;
+    const errorMessage = validateInput(id, value);
+    setErrors({
+      ...errors,
+      [id]: errorMessage,
+    });
+    if (!errorMessage || value === "") {
+      setErrors({
+        ...errors,
+        [id]: "", // Reset error message when input becomes valid
+      });
+      setFormData({ ...formData, [id]: value });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (Object.values(errors).some((error) => error !== "")) {
+      return; // Stop form submission if there are errors
+    }
     try {
       const response = await axios.patch(
         `/api/users/updateUser/${_id}`,
@@ -56,9 +89,12 @@ const EditPatientModal = ({
         <h2 className="text-3xl font-bold mb-4 text-center">
           Edit Patient Details
         </h2>
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div className="flex flex-col">
-            <label htmlFor="name" className="text-sm font-medium text-dark">
+        <form className="space-y-1" onSubmit={handleSubmit}>
+          <div>
+            <label
+              htmlFor="name"
+              className="block uppercase tracking-wide  text-xs font-bold mb-1"
+            >
               Name
             </label>
             <input
@@ -67,43 +103,65 @@ const EditPatientModal = ({
               id="name"
               name="name"
               value={formData.name}
+              required
               placeholder="Name"
-              className="border border-gray rounded-md px-3 py-2"
+              className={`appearance-none block w-full   border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white ${
+                errors.name ? "border-red" : ""
+              }`}
             />
+
+            {errors.name && (
+              <p className="text-red-500 text-xs italic">{errors.name}</p>
+            )}
           </div>
-          <div className="flex flex-col">
+          <div>
             <label
               htmlFor="occupation"
-              className="text-sm font-medium text-dark"
+              className="block uppercase tracking-wide  text-xs font-bold mb-1"
             >
               Occupation
             </label>
             <input
               onChange={handleChange}
+              required
               type="text"
               id="occupation"
               name="occupation"
               value={formData.occupation}
               placeholder="Occupation"
-              className="border border-gray rounded-md px-3 py-2"
+              className="appearance-none block w-full   border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white"
             />
           </div>
-          <div className="flex flex-col">
-            <label htmlFor="phone" className="text-sm font-medium text-dark">
+          <div>
+            <label
+              htmlFor="phone"
+              className="block uppercase tracking-wide  text-xs font-bold mb-1"
+            >
               Phone
             </label>
             <input
               onChange={handleChange}
+              pattern="[1-9]{1}[0-9]{9}"
+              required
               type="tel"
               id="phone"
               name="phone"
               value={formData.phone}
               placeholder="Phone"
-              className="border border-gray rounded-md px-3 py-2"
+              className={`appearance-none block w-full    border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white ${
+                errors.phone ? "border-red" : ""
+              }`}
             />
+
+            {errors.phone && (
+              <p className="text-red-500 text-xs italic">{errors.phone}</p>
+            )}
           </div>
-          <div className="flex flex-col">
-            <label htmlFor="email" className="text-sm font-medium text-dark">
+          <div>
+            <label
+              htmlFor="email"
+              className="block uppercase tracking-wide  text-xs font-bold mb-1"
+            >
               Email
             </label>
             <input
@@ -113,44 +171,52 @@ const EditPatientModal = ({
               name="email"
               value={formData.email}
               placeholder="Email"
-              className="border border-gray rounded-md px-3 py-2"
+              className={`appearance-none block w-full    border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white `}
             />
           </div>
-          <div className="flex flex-col">
-            <label htmlFor="address" className="text-sm font-medium text-dark">
+          <div>
+            <label
+              htmlFor="address"
+              className="block uppercase tracking-wide  text-xs font-bold mb-1"
+            >
               Address
             </label>
             <input
               onChange={handleChange}
+              required
               type="text"
               id="address"
               name="address"
               value={formData.address}
               placeholder="Address"
-              className="border border-gray rounded-md px-3 py-2"
+              className="appearance-none block w-full   border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white"
             />
           </div>
 
-          <div className="flex flex-col">
-            <label htmlFor="gender" className="text-sm font-medium text-dark">
+          <div>
+            <label
+              htmlFor="gender"
+              className="block uppercase tracking-wide  text-xs font-bold mb-1"
+            >
               Gender
             </label>
             <select
               id="gender"
               name="gender"
               value={formData.gender}
+              required
               onChange={handleChange}
-              className="border border-gray rounded-md px-3 py-2"
+              className="appearance-none block w-full   border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white"
             >
               <option value="Male">Male</option>
               <option value="Female">Female</option>
               <option value="Others">Others</option>
             </select>
           </div>
-          <div className="flex flex-col">
+          <div>
             <label
               htmlFor="maritalStatus"
-              className="text-sm font-medium text-dark"
+              className="block uppercase tracking-wide  text-xs font-bold mb-1"
             >
               Marital Status
             </label>
@@ -158,17 +224,19 @@ const EditPatientModal = ({
               id="maritalStatus"
               name="maritalStatus"
               value={formData.maritalStatus}
+              required
               onChange={handleChange}
-              className="border border-gray rounded-md px-3 py-2"
+              className="appearance-none block w-full   border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white"
             >
               <option value="married">Married</option>
               <option value="unmarried">Unmarried</option>
               <option value="divorced">Divorced</option>
             </select>
           </div>
+          <br />
           <button
             type="submit"
-            className="bg-dark w-full text-white py-2 px-4 rounded-md transition duration-300"
+            className="bg-dark w-full text-white px-1 py-3  rounded-md "
           >
             Save Changes
           </button>

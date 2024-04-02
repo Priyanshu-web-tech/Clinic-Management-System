@@ -278,7 +278,7 @@ const CreateUser = () => {
             className=" w-full md:w-auto font-bold p-4 transition-all duration-300 rounded-full"
             type="submit"
           >
-            Create User
+            Create Patient
           </button>
         </div>
       </form>

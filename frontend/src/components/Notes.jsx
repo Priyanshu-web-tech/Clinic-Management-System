@@ -3,8 +3,8 @@ import axios from "axios";
 import { MdOpenInNew } from "react-icons/md";
 import { IoMdClose } from "react-icons/io";
 import { useSelector } from "react-redux";
-import { Alert } from "../../utils";
 import { RiDeleteBinLine } from 'react-icons/ri';
+import { Alert } from "../utils";
 
 
 function Notes() {

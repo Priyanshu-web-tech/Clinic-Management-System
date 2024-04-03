@@ -89,13 +89,13 @@ function Notes() {
       });
   };
   return (
-    <div className="max-w-lg mx-auto">
+    <div  className="">
       {showAlert && <Alert message={alertMessage} />}
-      <h1 className="text-3xl font-semibold mb-4">Note</h1>
+      <h1 className="text-3xl font-bold mb-4">Note</h1>
       <div className="mb-4">
         <textarea
           className="w-full border rounded-md py-2 px-3"
-          placeholder="Write your note..."
+          placeholder="Write your notes..."
           rows={8}
           value={note}
           onChange={(e) => setNote(e.target.value)}

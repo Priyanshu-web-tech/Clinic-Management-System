@@ -78,7 +78,7 @@ export default function Sidebar({
 
   return (
     <>
-      <aside className="">
+      <aside>
         <nav className="h-full p-2 flex flex-col justify-between bg-pale-white rounded-lg shadow-sm">
           <div>
           <div className="pb-2 flex justify-center items-center">

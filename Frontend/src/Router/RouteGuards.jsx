@@ -24,7 +24,7 @@ export const DoctorRoute = () => {
   const { currentUser } = useSelector((state) => state.user);
   const isDoctor = currentUser.userRole === "Doctor";
   return (
-    <div className="m-3">
+    <div className="m-2">
       {isDoctor ? <Outlet /> : <AccessDenied />}
     </div>
   );
@@ -35,7 +35,7 @@ export const InventoryRoute = () => {
   const isInventory =
     currentUser.userRole === "Inventory" || currentUser.userRole === "Doctor";
   return (
-    <div className="m-3">
+    <div className="m-2">
       {isInventory ? <Outlet /> : <AccessDenied />}
     </div>
   );
@@ -46,7 +46,7 @@ export const ReceptionRoute = () => {
   const isReceptionist =
     currentUser.userRole === "Reception" || currentUser.userRole === "Doctor";
   return (
-    <div className="m-3">
+    <div className="m-2">
       {isReceptionist ? <Outlet /> : <AccessDenied />}
     </div>
   );

@@ -6,6 +6,8 @@ import Analytics from "./Analytics";
 import ServiceUser from "./ServiceUser";
 import { CiBoxList } from "react-icons/ci";
 import { MdAddchart, MdMedicalServices, MdOutlineAnalytics } from "react-icons/md";
+import { FaUserEdit } from 'react-icons/fa';
+import Profile from '../Profile';
 
 const InventoryHome = () => {
   const [activeTab, setActiveTab] = useState("ServiceUser");
@@ -21,6 +23,8 @@ const InventoryHome = () => {
   const sidebarItems = [
     { text: "ServiceUser", icon: <MdMedicalServices size={25} /> },
     { text: "Add-Products", icon: <MdAddchart size={25} /> },
+    { text: "EditProfile", icon: <FaUserEdit size={25} /> },
+
     { text: "Products", icon: <CiBoxList size={25} /> },
     { text: "Analytics", icon: <MdOutlineAnalytics size={25} /> },
   ];
@@ -45,6 +49,8 @@ const InventoryHome = () => {
         <div className="flex-1 ml-2 overflow-y-hidden">
           {activeTab === "ServiceUser" && <ServiceUser />}
           {activeTab === "Analytics" && <Analytics />}
+          {activeTab === "EditProfile" && <Profile />}
+
           {activeTab === "Add-Products" && <Dashboard />}
           {activeTab === "Products" && <ProductsTab />}
         </div>

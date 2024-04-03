@@ -3,6 +3,8 @@ import Sidebar from "../../components/Sidebar";
 import { MdOutlineCreate, MdCalendarMonth } from "react-icons/md";
 import CreateUser from "./CreateUser";
 import Appointments from "../Appointments";
+import Profile from "../Profile";
+import { FaUserEdit } from 'react-icons/fa';
 
 const ReceptionHome = () => {
   const [activeTab, setActiveTab] = useState("CreateUser");
@@ -18,6 +20,8 @@ const ReceptionHome = () => {
   const sidebarItems = [
     { text: "CreateUser", icon: <MdOutlineCreate size={25} /> },
     { text: "Appointments", icon: <MdCalendarMonth size={25} /> },
+    { text: "EditProfile", icon: <FaUserEdit size={25} /> },
+
   ];
 
   // Effect to retrieve active tab from local storage on component mount
@@ -39,6 +43,7 @@ const ReceptionHome = () => {
         />
         <div className="flex-1 ml-2 overflow-y-hidden">
           {activeTab === "CreateUser" && <CreateUser />}
+          {activeTab === "EditProfile" && <Profile />}
           {activeTab === "Appointments" && <Appointments />}
         </div>
       </div>

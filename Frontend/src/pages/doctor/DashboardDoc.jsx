@@ -18,15 +18,18 @@ const DashboardDoc = ({ setActiveTab }) => {
     const fetchUsers = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_BASE_URL}/api/users/getUsers/${currentHospital.name}`, {
-            withCredentials: true, // This ensures cookies are sent
+          `${import.meta.env.VITE_BASE_URL}/api/users/getUsers/${
+            currentHospital.name
+          }`,
+          {
+            withCredentials: true,
           }
         );
         const users = response.data.filter(
           (user) => user.queueNumber !== 0 && user.queueNumber !== null
         );
         const sortedUsers = users.sort((a, b) => a.queueNumber - b.queueNumber);
-        setUsers(sortedUsers); // Limiting to first 5 users
+        setUsers(sortedUsers);
 
         const allUsers = response.data;
         setAllUsers(allUsers);
@@ -80,25 +83,36 @@ const DashboardDoc = ({ setActiveTab }) => {
   const currentItems = sortedUsers.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
-    <div className="mx-auto rounded-md bg-pale-white ">
-      <div className="flex flex-col md:flex-row bg-pale-white rounded-md p-2">
-        <div className="md:w-1/2 p-2 md:mr-4 md:mb-0 mb-4">
+    <div>
+      {/* Section 1 */}
+      <section className="flex flex-col md:flex-row bg-pale-white rounded-md p-2">
+        {/* Left Part */}
+        <div className="md:w-1/2 p-2 md:mb-0 mb-2">
           <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight">
             Empowering Care One Click at a Time.
           </h1>
-          <div className="flex items-center mt-4">
-            <FaHeartbeat className="text-dark text-sm mr-2" />
+          <div className="flex items-center mt-3">
+            <FaHeartbeat className="text-dark text-md mr-2" />
             <p className="text-sm lg:text-lg">
               Currently serving {users.length} patients.
             </p>
           </div>
         </div>
+        {/* RIGHT PART */}
+        <div className="md:w-1/2 md:pl-2  md:mb-0 mb-2">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl md:text-3xl mb-4  font-bold flex items-center ">
+              <FaUserFriends className=" text-2xl mr-2" />
+              Upcoming Patients
+            </h2>
 
-        <div className="md:w-1/2 md:pl-4 md:mb-0 mb-4">
-          <h2 className="text-2xl md:text-3xl mb-4 ml-2 font-bold flex items-center">
-            <FaUserFriends className="text-gray-500 text-xl mr-2" />
-            Upcoming Patients
-          </h2>
+            <button
+              className="bg-pale-white border text-xs lg:text-sm hover:bg-dark text-dark hover:text-pale-white px-3 py-2  rounded-md my-4"
+              onClick={handleShowAll}
+            >
+              <p>Show All</p>
+            </button>
+          </div>
 
           <div className="block w-full overflow-x-auto">
             {users.length === 0 ? (
@@ -159,25 +173,20 @@ const DashboardDoc = ({ setActiveTab }) => {
               </div>
             )}
           </div>
-          <button
-            className="bg-pale-white border text-xs lg:text-sm hover:bg-dark text-dark hover:text-pale-white px-6 py-2 ml-2 rounded-md my-4"
-            onClick={handleShowAll}
-          >
-            <p>Show All</p>
-          </button>
         </div>
-      </div>
-      <div className="flex flex-col gap-4 md:flex-row p-4 bg-white">
-        <div className="md:w-3/5">
-          <div className="flex justify-between items-center my-4">
-            <h1 className="text-xl md:text-3xl  ml-2 font-bold flex items-center">
-              <FaUserFriends className=" text-3xl mr-2" />
+      </section>
+      {/* Section 2 */}
+      <section className="flex flex-col gap-4 md:flex-row p-2 bg-white">
+        {/* LEFT PART */}
+        <div className="md:w-3/5 p-2">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl md:text-3xl mb-4  font-bold flex items-center ">
+              <FaUserFriends className=" text-2xl mr-2" />
               Registered Patients
-            </h1>
+            </h2>
 
             <button
-              className="bg-transparent hover:bg-dark text-dark hover:text-pale-white border font-bold 
-              px-2 py-2 rounded-md"
+              className="bg-pale-white border text-xs lg:text-sm hover:bg-dark text-dark hover:text-pale-white px-3 py-2  rounded-md my-4"
               onClick={handleSetAppointment}
             >
               See All Patients
@@ -241,7 +250,7 @@ const DashboardDoc = ({ setActiveTab }) => {
             )}
           </div>
           {/* Pagination */}
-          <div className="flex justify-center items-center gap-4">
+          <div className="flex justify-center items-center gap-4 mt-2">
             <button
               onClick={prevPage}
               disabled={currentPage === 1}
@@ -273,11 +282,11 @@ const DashboardDoc = ({ setActiveTab }) => {
             </button>
           </div>
         </div>
-
-        <div className="w-full  md:w-2/5 mt-4 md:mt-0">
+        {/* RIGHT PART */}
+        <div className="md:w-2/5 mt-4 md:mt-0 p-3">
           <Notes />
         </div>
-      </div>
+      </section>
     </div>
   );
 };

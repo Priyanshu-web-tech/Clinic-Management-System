@@ -80,7 +80,6 @@ export const signin = async (req, res, next) => {
       .cookie("access_token", token, {
         sameSite: "none",
         secure: true,
-
         expires: expirationDate, // Set expiration time
         httpOnly: true,
       })

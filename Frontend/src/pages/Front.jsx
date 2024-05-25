@@ -22,10 +22,10 @@ const HomePage = () => {
       <section className="bg-pale-white text-dark py-20 px-6">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold mb-8">
-            Revolutionize Your Clinic with Our Hospital Management System
+            Revolutionize Your Clinic with Our Clinic Management System
           </h1>
           <p className="text-lg leading-relaxed">
-            Transform your clinic's operations with our cutting-edge Hospital
+            Transform your clinic's operations with our cutting-edge Clinic
             Management System. Our intuitive platform simplifies patient record
             management, appointment scheduling, inventory tracking, and more.
             Boost efficiency, enhance patient care, and streamline workflows
@@ -125,7 +125,7 @@ const HomePage = () => {
                 <h3 className="text-xl font-semibold mb-2">Registration</h3>
                 <ul className="list-disc text-gray-800 pl-6">
                   <li>
-                    Sign up for our Hospital Management System by providing
+                    Sign up for our Clinic Management System by providing
                     basic information about your clinic, such as name, location,
                     and contact details.
                   </li>
@@ -177,7 +177,7 @@ const HomePage = () => {
                 <h3 className="text-xl font-semibold mb-2">Integration</h3>
                 <ul className="list-disc text-gray-800 pl-6">
                   <li>
-                    Seamlessly integrate our Hospital Management System with
+                    Seamlessly integrate our Clinic Management System with
                     existing software solutions your clinic uses, such as
                     electronic health records (EHR) systems and accounting
                     software.

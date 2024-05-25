@@ -22,11 +22,10 @@ const InventoryHome = () => {
   // Define sidebar items
   const sidebarItems = [
     { text: "ServiceUser", icon: <MdMedicalServices size={25} /> },
-    { text: "Add-Products", icon: <MdAddchart size={25} /> },
     { text: "EditProfile", icon: <FaUserEdit size={25} /> },
-
-    { text: "Products", icon: <CiBoxList size={25} /> },
-    { text: "Analytics", icon: <MdOutlineAnalytics size={25} /> },
+    // { text: "Add-Products", icon: <MdAddchart size={25} /> },
+    // { text: "Products", icon: <CiBoxList size={25} /> },
+    // { text: "Analytics", icon: <MdOutlineAnalytics size={25} /> },
   ];
 
   // Effect to retrieve active tab from local storage on component mount
@@ -48,11 +47,10 @@ const InventoryHome = () => {
         />
         <div className="flex-1 ml-2 overflow-y-hidden">
           {activeTab === "ServiceUser" && <ServiceUser />}
-          {activeTab === "Analytics" && <Analytics />}
           {activeTab === "EditProfile" && <Profile />}
-
+          {/* {activeTab === "Analytics" && <Analytics />}
           {activeTab === "Add-Products" && <Dashboard />}
-          {activeTab === "Products" && <ProductsTab />}
+          {activeTab === "Products" && <ProductsTab />} */}
         </div>
       </div>
     </>

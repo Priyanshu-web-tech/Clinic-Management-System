@@ -78,7 +78,7 @@ const CreateUser = () => {
           },
         }
       );
-      
+
       const registerData = registerResponse.data;
       console.log(registerData);
 

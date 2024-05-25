@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {  useState } from "react";
 import axios from "axios";
 import { calculateAge } from "./../../utils";
 import { useNavigate, useLoaderData, useParams, Link } from "react-router-dom";

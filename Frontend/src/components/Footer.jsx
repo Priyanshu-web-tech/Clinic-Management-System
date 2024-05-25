@@ -11,7 +11,10 @@ const Footer = () => {
           <div className="flex flex-col justify-center">
             <h3 className="text-2xl font-semibold mb-4">Useful Pages</h3>
             <div className="flex items-center space-x-4">
-              <Link to="/cliniclogin" className="text-slate-400 hover:text-blue-400">
+              <Link
+                to="/cliniclogin"
+                className="text-slate-400 hover:text-blue-400"
+              >
                 Login
               </Link>
 
@@ -23,26 +26,27 @@ const Footer = () => {
               </Link>
             </div>
           </div>
-          {/* Connect with Elanine */}
           <div className="flex flex-col justify-center md:text-end">
-            <h3 className="text-2xl font-semibold mb-4">
-              Connect with Elanine
-            </h3>
+            <h3 className="text-2xl font-semibold mb-4">Connect to get started</h3>
             <div className="md:flex md:items-center md:justify-end md:space-x-4">
               <a
-                href="https://www.elanine.com"
+                target="_blank"
+                href="https://priyanshu-sharma-portfolio.netlify.app"
                 className="flex md:flex-row-reverse gap-2 text-slate-400 hover:text-blue-400"
               >
                 Website <FaGlobe className="h-6 w-6" />
               </a>
               <a
-                href="https://www.instagram.com/elanine__/"
+                target="_blank"
+                href="https://www.instagram.com/__priyanshu.sharma"
                 className="flex md:flex-row-reverse gap-2 text-slate-400 hover:text-blue-400"
               >
                 Instagram <FaInstagram className="h-6 w-6" />
               </a>
               <a
-                href="https://www.linkedin.com/company/elanine-creatives"
+                target="_blank"
+                
+                href="https://www.linkedin.com/in/priyanshu-sharma-025737216"
                 className="flex md:flex-row-reverse gap-2 text-slate-400 hover:text-blue-400"
               >
                 Linkedin <FaLinkedin className="h-6 w-6" />

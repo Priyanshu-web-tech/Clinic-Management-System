@@ -98,7 +98,9 @@ const Profile = () => {
     try {
       dispatch(updateUserStart());
       const res = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/api/reception/update/${currentUser._id}`,
+        `${import.meta.env.VITE_BASE_URL}/api/reception/update/${
+          currentUser._id
+        }`,
         updatedFormData,
         {
           withCredentials: true,
@@ -126,7 +128,9 @@ const Profile = () => {
     try {
       dispatch(deleteUserStart());
       const res = await axios.delete(
-        `${import.meta.env.VITE_BASE_URL}/api/reception/delete/${currentUser._id}`,
+        `${import.meta.env.VITE_BASE_URL}/api/reception/delete/${
+          currentUser._id
+        }`,
         {
           withCredentials: true,
         }

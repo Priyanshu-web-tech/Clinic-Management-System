@@ -37,9 +37,9 @@ const DoctorHome = () => {
     { text: "Appointments", icon: <MdCalendarMonth size={25} /> },
     { text: "CreateUser", icon: <MdOutlineCreate size={25} /> },
     { text: "EditProfile", icon: <FaUserEdit size={25} /> },
-    { text: "Add-Products", icon: <MdAddchart size={25} /> },
-    { text: "Products", icon: <CiBoxList size={25} /> },
-    { text: "Analytics", icon: <MdOutlineAnalytics size={25} /> },
+    // { text: "Add-Products", icon: <MdAddchart size={25} /> },
+    // { text: "Products", icon: <CiBoxList size={25} /> },
+    // { text: "Analytics", icon: <MdOutlineAnalytics size={25} /> },
   ];
 
   // Effect to retrieve active tab from local storage on component mount
@@ -68,9 +68,9 @@ const DoctorHome = () => {
           {activeTab === "EditProfile" && <Profile />}
 
           {activeTab === "Appointments" && <Appointments />}
-          {activeTab === "Analytics" && <Analytics />}
+          {/* {activeTab === "Analytics" && <Analytics />}
           {activeTab === "Add-Products" && <Dashboard />}
-          {activeTab === "Products" && <ProductsTab />}
+          {activeTab === "Products" && <ProductsTab />} */}
         </div>
       </div>
     </>

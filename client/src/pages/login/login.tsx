@@ -1,12 +1,15 @@
 import * as Yup from "yup"
+import { useState } from "react"
 import { useFormik } from "formik"
 import { Link, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
+import { Eye, EyeOff } from "lucide-react"
 
 import { useLoginMutation } from "@/store/api/authApiSlice"
 import { setUserData } from "@/store/slices/userDataSlice"
 import { useAppDispatch } from "@/store/hook"
 import { Button } from "@/components/ui/button"
+import { Spinner } from "@/components/ui/spinner"
 import { NAVIGATION_ROUTES } from "@/constants/constants"
 import { emailValidation, requiredFieldValidation } from "@/utils/validations"
 import type { LoginFormValues } from "./login.types"
@@ -15,6 +18,7 @@ const Login = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const [login, { isLoading }] = useLoginMutation()
+  const [showPassword, setShowPassword] = useState(false)
 
   const formik = useFormik<LoginFormValues>({
     initialValues: {
@@ -89,23 +93,34 @@ const Login = () => {
             <label htmlFor="password" className="text-xs font-medium text-foreground">
               Password
             </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="••••••••"
-              value={formik.values.password}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/30"
-            />
+            <div className="relative">
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={formik.values.password}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 pr-9 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/30"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              </button>
+            </div>
             {formik.touched.password && formik.errors.password && (
               <p className="text-xs text-destructive">{formik.errors.password}</p>
             )}
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Signing in…" : "Sign in"}
+            {isLoading && <Spinner className="mr-2" />}
+            Sign in
           </Button>
         </form>
 

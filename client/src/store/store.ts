@@ -5,7 +5,6 @@ import storage from 'redux-persist/lib/storage';
 
 import { apiSlice } from "./api/apiSlice";
 import appReducer from "./slices";
-import { listenerMiddleware } from "./middlewares/listenerMiddleware";
 
 const persistConfig = {
   key: "root",
@@ -22,7 +21,6 @@ export const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: false,
     })
-    .prepend(listenerMiddleware.middleware) 
     .concat(apiSlice.middleware)
 });
 

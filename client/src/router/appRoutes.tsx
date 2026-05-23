@@ -2,7 +2,6 @@ import { lazy } from "react"
 import { Navigate, Route, Routes, Outlet } from "react-router-dom"
 
 import { useAppSelector } from "@/store/hook"
-import ProgressLoader from "@/components/progessLoader/progressLoader"
 
 const Layout = lazy(() => import("@/components/layout/layout"))
 const Login = lazy(() => import("@/pages/login/login"))
@@ -24,30 +23,25 @@ const AppRoutes = () => {
   const isSignedIn = useAppSelector((state) => state.userData.isSignedIn)
 
   return (
-    <>
-      <ProgressLoader />
-      <Routes>
-        {/* Public routes — no layout */}
-        <Route element={<PublicRoute />}>
-          <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
-        </Route>
+    <Routes>
+      <Route element={<PublicRoute />}>
+        <Route path="login" element={<Login />} />
+        <Route path="register" element={<Register />} />
+      </Route>
 
-        {/* Private routes — wrapped in Layout */}
-        <Route element={<PrivateRoute />}>
-          <Route element={<Layout />}>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="profile" element={<Profile />} />
-          </Route>
+      <Route element={<PrivateRoute />}>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="profile" element={<Profile />} />
         </Route>
+      </Route>
 
-        <Route
-          path="*"
-          element={<Navigate to={isSignedIn ? "/" : "/login"} replace />}
-        />
-      </Routes>
-    </>
+      <Route
+        path="*"
+        element={<Navigate to={isSignedIn ? "/" : "/login"} replace />}
+      />
+    </Routes>
   )
 }
 

@@ -11,17 +11,16 @@ const swaggerOptions = {
     },
     servers: [
       {
+        url: "http://localhost:3000/api",
+        description: "Local Server",
+      },
+      {
         url: `${config.serverRedirectURI}/api`,
         description: `Swagger Documentation for ${process.env.NODE_ENV} server`,
       },
-      {
-        url: "http://localhost:3000/api", 
-        description: "Local Server",
-      },
     ],
-
   },
-  apis: ["./app/routes/**/*.js"], 
+  apis: ["./app/routes/**/*.js"],
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);

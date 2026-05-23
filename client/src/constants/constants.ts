@@ -1,10 +1,10 @@
 export const BASE_URL = import.meta.env.VITE_BASE_URL
 
 export const API_ROUTES = {
-  LOGIN: "v1/auth/login",
-  REGISTER: "v1/auth/register",
-  ME: "v1/auth/me",
-  REFRESH: "v1/auth/refresh",
+  LOGIN: "auth/login",
+  REGISTER: "auth/register",
+  ME: "auth/me",
+  REFRESH: "auth/refresh",
 }
 
 export const NAVIGATION_ROUTES = {

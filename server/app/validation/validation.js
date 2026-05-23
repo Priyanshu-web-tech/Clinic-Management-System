@@ -33,4 +33,54 @@ const register = Joi.object({
     }),
 });
 
-module.exports = { login, register };
+const forgotPassword = Joi.object({
+  email: Joi.string().email().message("Please enter a valid email").required(),
+});
+
+const verifyOtp = Joi.object({
+  otp: Joi.string()
+    .pattern(/^\d+$/)
+    .length(Number(process.env.OTP_DIGIT) || 6)
+    .required()
+    .messages({
+      "string.length": `OTP must be ${Number(process.env.OTP_DIGIT) || 6} digits.`,
+      "string.pattern.base": "OTP must contain only digits.",
+      "any.required": "OTP is required.",
+    }),
+});
+
+const resetPassword = Joi.object({
+  password: passwordSchema,
+  confirmPassword: Joi.string()
+    .valid(Joi.ref("password"))
+    .required()
+    .messages({
+      "any.only": "Passwords do not match.",
+      "any.required": "Please confirm your password.",
+    }),
+});
+
+const updateProfile = Joi.object({
+  firstName: Joi.string().trim().required().messages({
+    "any.required": "First name is required.",
+  }),
+  lastName: Joi.string().trim().required().messages({
+    "any.required": "Last name is required.",
+  }),
+});
+
+const changePassword = Joi.object({
+  currentPassword: Joi.string().required().messages({
+    "any.required": "Current password is required.",
+  }),
+  newPassword: passwordSchema,
+  confirmPassword: Joi.string()
+    .valid(Joi.ref("newPassword"))
+    .required()
+    .messages({
+      "any.only": "Passwords do not match.",
+      "any.required": "Please confirm your new password.",
+    }),
+});
+
+module.exports = { login, register, forgotPassword, verifyOtp, resetPassword, updateProfile, changePassword };

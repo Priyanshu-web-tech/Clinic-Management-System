@@ -1,10 +1,19 @@
-import { useGetMeQuery } from "@/store/api/authApiSlice"
+import * as Yup from "yup"
+import { useState, useEffect } from "react"
+import { useFormik } from "formik"
+import { Eye, EyeOff } from "lucide-react"
+import { toast } from "sonner"
 
-const STATUS_LABEL: Record<string, string> = {
-  active: "Active",
-  deleted: "Deleted",
-  deactivated: "Deactivated",
-}
+import { useGetMeQuery, useUpdateProfileMutation, useChangePasswordMutation } from "@/store/api/authApiSlice"
+import { setUserData } from "@/store/slices/userDataSlice"
+import { useAppDispatch, useAppSelector } from "@/store/hook"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Spinner } from "@/components/ui/spinner"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { registerPasswordValidation, confirmPasswordValidation } from "@/utils/validations"
+import type { UpdateProfileFormValues, ChangePasswordFormValues } from "./profile.types"
 
 const USER_TYPE_LABEL: Record<string, string> = {
   admin: "Admin",
@@ -13,12 +22,28 @@ const USER_TYPE_LABEL: Record<string, string> = {
   pharmacist: "Pharmacist",
 }
 
-const Profile = () => {
-  const { data, isLoading, isError } = useGetMeQuery()
+const STATUS_LABEL: Record<string, string> = {
+  active: "Active",
+  deleted: "Deleted",
+  deactivated: "Deactivated",
+}
+
+// ── Personal Info Tab ──────────────────────────────────────────────────────────
+
+const PersonalInfoTab = () => {
+  const dispatch = useAppDispatch()
+  const user = useAppSelector((state) => state.userData)
+  const { data, isLoading, isError } = useGetMeQuery(undefined, { refetchOnMountOrArgChange: true })
+
+  useEffect(() => {
+    if (data?.result) {
+      dispatch(setUserData(data.result))
+    }
+  }, [data, dispatch])
 
   if (isLoading) {
     return (
-      <div className="flex flex-1 items-center justify-center p-10">
+      <div className="flex items-center justify-center py-10">
         <p className="text-sm text-muted-foreground">Loading profile…</p>
       </div>
     )
@@ -26,7 +51,7 @@ const Profile = () => {
 
   if (isError || !data?.result) {
     return (
-      <div className="flex flex-1 items-center justify-center p-10">
+      <div className="flex items-center justify-center py-10">
         <p className="text-sm text-destructive">Failed to load profile.</p>
       </div>
     )
@@ -35,48 +60,294 @@ const Profile = () => {
   const profile = data.result
 
   return (
-    <div className="p-6">
-      <div className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-sm">
-        <div className="mb-4 flex items-center gap-4">
-          <div className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-lg font-semibold text-primary">
-            {profile.first_name.charAt(0).toUpperCase()}
-            {profile.last_name.charAt(0).toUpperCase()}
-          </div>
-          <div>
-            <p className="font-medium text-foreground">
-              {profile.first_name} {profile.last_name}
-            </p>
-            <p className="text-xs text-muted-foreground">{profile.email}</p>
-          </div>
+    <div className="space-y-5">
+      <div className="flex items-center gap-4">
+        <div className="flex size-14 items-center justify-center rounded-full bg-primary/10 text-lg font-semibold text-primary">
+          {user.first_name.charAt(0).toUpperCase()}
+          {user.last_name.charAt(0).toUpperCase()}
         </div>
+        <div>
+          <p className="font-medium text-foreground">
+            {user.first_name} {user.last_name}
+          </p>
+          <p className="text-xs text-muted-foreground">{profile.email}</p>
+        </div>
+      </div>
 
-        <div className="space-y-3 border-t border-border pt-4">
-          <ProfileRow
-            label="Role"
-            value={USER_TYPE_LABEL[profile.user_type] ?? profile.user_type}
-          />
-          <ProfileRow
-            label="Status"
-            value={STATUS_LABEL[profile.status] ?? profile.status}
-          />
-          <ProfileRow
-            label="Member since"
-            value={new Date(profile.createdAt).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          />
-        </div>
+      <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
+        <ProfileRow label="Email" value={profile.email} />
+        <ProfileRow label="Role" value={USER_TYPE_LABEL[profile.user_type] ?? profile.user_type} />
+        <ProfileRow label="Status" value={STATUS_LABEL[profile.status] ?? profile.status} />
+        <ProfileRow
+          label="Member since"
+          value={new Date(profile.createdAt).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+        />
       </div>
     </div>
   )
 }
 
+// ── Edit Profile Tab ───────────────────────────────────────────────────────────
+
+const EditProfileTab = () => {
+  const dispatch = useAppDispatch()
+  const user = useAppSelector((state) => state.userData)
+  const [updateProfile, { isLoading }] = useUpdateProfileMutation()
+
+  const formik = useFormik<UpdateProfileFormValues>({
+    enableReinitialize: true,
+    initialValues: {
+      firstName: user.first_name ?? "",
+      lastName: user.last_name ?? "",
+    },
+    validationSchema: Yup.object({
+      firstName: Yup.string().trim().required("First name is required"),
+      lastName: Yup.string().trim().required("Last name is required"),
+    }),
+    onSubmit: async (values) => {
+      try {
+        const response = await updateProfile(values).unwrap()
+        if (response?.success) {
+          const { user: updated } = response.result
+          dispatch(
+            setUserData({
+              _id: updated._id,
+              email: updated.email,
+              first_name: updated.first_name,
+              last_name: updated.last_name,
+              user_type: updated.user_type,
+              status: updated.status,
+              createdAt: updated.createdAt,
+              updatedAt: updated.updatedAt,
+            }),
+          )
+          toast.success(response.message ?? "Profile updated.")
+        } else {
+          toast.error(response?.message ?? "Update failed.")
+        }
+      } catch (err: unknown) {
+        const message =
+          (err as { data?: { message?: string } })?.data?.message ?? "Update failed. Please try again."
+        toast.error(message)
+      }
+    },
+  })
+
+  return (
+    <div className="space-y-5 max-w-sm">
+      <div>
+        <p className="text-sm font-medium text-foreground">Update your name</p>
+        <p className="text-xs text-muted-foreground mt-0.5">Changes will reflect across the app immediately.</p>
+      </div>
+
+      <form onSubmit={formik.handleSubmit} className="space-y-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="firstName">First name</Label>
+          <Input
+            id="firstName"
+            name="firstName"
+            placeholder="John"
+            value={formik.values.firstName}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            aria-invalid={!!(formik.touched.firstName && formik.errors.firstName)}
+          />
+          {formik.touched.firstName && formik.errors.firstName && (
+            <p className="text-xs text-destructive">{formik.errors.firstName}</p>
+          )}
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="lastName">Last name</Label>
+          <Input
+            id="lastName"
+            name="lastName"
+            placeholder="Doe"
+            value={formik.values.lastName}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            aria-invalid={!!(formik.touched.lastName && formik.errors.lastName)}
+          />
+          {formik.touched.lastName && formik.errors.lastName && (
+            <p className="text-xs text-destructive">{formik.errors.lastName}</p>
+          )}
+        </div>
+
+        <Button type="submit" size="sm" disabled={isLoading}>
+          {isLoading && <Spinner className="mr-2" />}
+          Save changes
+        </Button>
+      </form>
+    </div>
+  )
+}
+
+// ── Password Tab ───────────────────────────────────────────────────────────────
+
+const PasswordTab = () => {
+  const [changePassword, { isLoading }] = useChangePasswordMutation()
+  const [show, setShow] = useState({ current: false, new: false, confirm: false })
+
+  const toggle = (field: keyof typeof show) =>
+    setShow((prev) => ({ ...prev, [field]: !prev[field] }))
+
+  const formik = useFormik<ChangePasswordFormValues>({
+    initialValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+    validationSchema: Yup.object({
+      currentPassword: Yup.string().required("Current password is required"),
+      newPassword: registerPasswordValidation,
+      confirmPassword: confirmPasswordValidation("newPassword"),
+    }),
+    onSubmit: async (values, { resetForm }) => {
+      try {
+        const response = await changePassword(values).unwrap()
+        if (response?.success) {
+          toast.success(response.message ?? "Password changed successfully.")
+          resetForm()
+        } else {
+          toast.error(response?.message ?? "Failed to change password.")
+        }
+      } catch (err: unknown) {
+        const message =
+          (err as { data?: { message?: string } })?.data?.message ?? "Failed to change password."
+        toast.error(message)
+      }
+    },
+  })
+
+  return (
+    <div className="space-y-5 max-w-sm">
+      <div>
+        <p className="text-sm font-medium text-foreground">Change your password</p>
+        <p className="text-xs text-muted-foreground mt-0.5">Must be at least 8 characters with uppercase, lowercase, number and special character.</p>
+      </div>
+
+      <form onSubmit={formik.handleSubmit} className="space-y-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="currentPassword">Current password</Label>
+          <div className="relative">
+            <Input
+              id="currentPassword"
+              name="currentPassword"
+              type={show.current ? "text" : "password"}
+              placeholder="••••••••"
+              value={formik.values.currentPassword}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              className="pr-9"
+              aria-invalid={!!(formik.touched.currentPassword && formik.errors.currentPassword)}
+            />
+            <PasswordToggle show={show.current} onClick={() => toggle("current")} />
+          </div>
+          {formik.touched.currentPassword && formik.errors.currentPassword && (
+            <p className="text-xs text-destructive">{formik.errors.currentPassword}</p>
+          )}
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="newPassword">New password</Label>
+          <div className="relative">
+            <Input
+              id="newPassword"
+              name="newPassword"
+              type={show.new ? "text" : "password"}
+              placeholder="••••••••"
+              value={formik.values.newPassword}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              className="pr-9"
+              aria-invalid={!!(formik.touched.newPassword && formik.errors.newPassword)}
+            />
+            <PasswordToggle show={show.new} onClick={() => toggle("new")} />
+          </div>
+          {formik.touched.newPassword && formik.errors.newPassword && (
+            <p className="text-xs text-destructive">{formik.errors.newPassword}</p>
+          )}
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="confirmPassword">Confirm new password</Label>
+          <div className="relative">
+            <Input
+              id="confirmPassword"
+              name="confirmPassword"
+              type={show.confirm ? "text" : "password"}
+              placeholder="••••••••"
+              value={formik.values.confirmPassword}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              className="pr-9"
+              aria-invalid={!!(formik.touched.confirmPassword && formik.errors.confirmPassword)}
+            />
+            <PasswordToggle show={show.confirm} onClick={() => toggle("confirm")} />
+          </div>
+          {formik.touched.confirmPassword && formik.errors.confirmPassword && (
+            <p className="text-xs text-destructive">{formik.errors.confirmPassword}</p>
+          )}
+        </div>
+
+        <Button type="submit" size="sm" disabled={isLoading}>
+          {isLoading && <Spinner className="mr-2" />}
+          Update password
+        </Button>
+      </form>
+    </div>
+  )
+}
+
+// ── Shared helpers ─────────────────────────────────────────────────────────────
+
 const ProfileRow = ({ label, value }: { label: string; value: string }) => (
   <div className="flex items-center justify-between">
     <span className="text-xs text-muted-foreground">{label}</span>
     <span className="text-sm font-medium text-foreground">{value}</span>
+  </div>
+)
+
+const PasswordToggle = ({ show, onClick }: { show: boolean; onClick: () => void }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    tabIndex={-1}
+    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+  >
+    {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+  </button>
+)
+
+// ── Page ───────────────────────────────────────────────────────────────────────
+
+const Profile = () => (
+  <div className="p-6">
+    <div className="w-full max-w-lg">
+      <Tabs defaultValue="info">
+        <TabsList>
+          <TabsTrigger value="info">Personal info</TabsTrigger>
+          <TabsTrigger value="edit">Edit profile</TabsTrigger>
+          <TabsTrigger value="password">Password</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="info">
+          <PersonalInfoTab />
+        </TabsContent>
+
+        <TabsContent value="edit">
+          <EditProfileTab />
+        </TabsContent>
+
+        <TabsContent value="password">
+          <PasswordTab />
+        </TabsContent>
+      </Tabs>
+    </div>
   </div>
 )
 

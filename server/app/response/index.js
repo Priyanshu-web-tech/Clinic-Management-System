@@ -31,25 +31,16 @@ exports.success = async (req, res, result, code, dbTrans) => {
       result: result.data ? result.data : {},
       time: Date.now(),
     };
-    if (result.totalCount !== undefined) {
-      response.totalCount = result.totalCount;
-    }
-    if (result.totalPages !== undefined) {
-      response.totalPages = result.totalPages;
-    }
-    if (result.currentPage !== undefined) {
-      response.currentPage = result.currentPage;
-    }
 
     if (dbTrans !== undefined) {
       await dbTrans.commit();
     }
     return res.status(code).json(response);
   } catch (error) {
-    console.log(
-      "🚀 ~ file: index.js ~ line 32 ~ exports.success= ~ error",
-      error
-    );
+    const logLevel = getLoggingMethod(error.status);
+    loggerToConsole[logLevel](JSON.stringify(error));
+    loggerToFile[logLevel](JSON.stringify(error));
+
     if (dbTrans !== undefined) {
       await dbTrans.rollback();
     }
@@ -113,6 +104,7 @@ exports.error = async (req, res, error, code, dbTrans) => {
     const logLevel = getLoggingMethod(err.status);
     loggerToConsole[logLevel](JSON.stringify(err));
     loggerToFile[logLevel](JSON.stringify(err));
+    
     return res.status(500).json({
       success: false,
       status_code: httpStatus.status.INTERNAL_SERVER_ERROR,

@@ -13,7 +13,8 @@ import { DropdownMenu } from "radix-ui"
 import { toast } from "sonner"
 
 import { useAppDispatch, useAppSelector } from "@/store/hook"
-import { clearUserData } from "@/store/slices/userDataSlice"
+import { clearUserData, setUserData } from "@/store/slices/userDataSlice"
+import { useLogoutMutation, useGetMeQuery } from "@/store/api/authApiSlice"
 import { NAVIGATION_ROUTES } from "@/constants/constants"
 import type { NavItem } from "./layout.types"
 
@@ -34,6 +35,15 @@ const Layout = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const user = useAppSelector((state) => state.userData)
+  const [logoutApi] = useLogoutMutation()
+
+  // Fetch fresh profile once on layout mount and sync into Redux store
+  const { data: meData } = useGetMeQuery()
+  useEffect(() => {
+    if (meData?.result) {
+      dispatch(setUserData(meData.result))
+    }
+  }, [meData, dispatch])
 
   const pageTitle = PAGE_TITLES[location.pathname] ?? "DocMate"
   const initials =
@@ -55,7 +65,12 @@ const Layout = () => {
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await logoutApi().unwrap()
+    } catch {
+      // proceed with local logout even if API call fails
+    }
     dispatch(clearUserData())
     toast.success("Logged out successfully.")
     navigate(NAVIGATION_ROUTES.LOGIN)

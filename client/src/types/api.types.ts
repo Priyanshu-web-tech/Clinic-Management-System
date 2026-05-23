@@ -45,3 +45,40 @@ export interface ApiResponse<T> {
   message?: string
   result: T
 }
+
+export interface ForgotPasswordRequest {
+  email: string
+}
+
+export interface VerifyOtpRequest {
+  otp: string
+}
+
+export interface ResetPasswordRequest {
+  password: string
+  confirmPassword: string
+}
+
+export interface UpdateProfileRequest {
+  firstName: string
+  lastName: string
+}
+
+export interface UpdateProfileResponse {
+  user: {
+    _id: string
+    email: string
+    first_name: string
+    last_name: string
+    user_type: UserType
+    status: UserStatus
+    createdAt: string
+    updatedAt: string
+  }
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string
+  newPassword: string
+  confirmPassword: string
+}

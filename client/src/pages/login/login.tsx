@@ -118,6 +118,15 @@ const Login = () => {
             )}
           </div>
 
+          <div className="flex items-center justify-end">
+            <Link
+              to={NAVIGATION_ROUTES.FORGOT_PASSWORD}
+              className="text-xs font-medium text-primary hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
+
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading && <Spinner className="mr-2" />}
             Sign in

@@ -5,6 +5,12 @@ export const API_ROUTES = {
   REGISTER: "auth/register",
   ME: "auth/me",
   REFRESH: "auth/refresh",
+  FORGOT_PASSWORD: "auth/forgot-password",
+  VERIFY_OTP: "auth/verify-otp",
+  RESET_PASSWORD: "auth/reset-password",
+  UPDATE_PROFILE: "auth/update-profile",
+  CHANGE_PASSWORD: "auth/change-password",
+  LOGOUT: "auth/logout",
 }
 
 export const NAVIGATION_ROUTES = {
@@ -12,4 +18,7 @@ export const NAVIGATION_ROUTES = {
   REGISTER: "/register",
   DASHBOARD: "/dashboard",
   PROFILE: "/profile",
+  FORGOT_PASSWORD: "/forgot-password",
+  VERIFY_OTP: "/verify-otp",
+  RESET_PASSWORD: "/reset-password",
 }

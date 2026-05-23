@@ -1,11 +1,16 @@
 const httpStatus = require("http-status").status;
+const otpGenerator = require("otp-generator");
 
 const { db } = require("../models/index");
 const sessionService = require("../services/sessionService");
 const authRepository = require("../repositories/authRepository");
+const otpRepository = require("../repositories/otpRepository");
 const { generateHash, comparePassword } = require("../utils/password");
-const { userStatus } = require("../constant/constant");
-const { verifyAccessTokenRaw } = require("../middlewares/jwt");
+const { userStatus, otpType } = require("../constant/constant");
+const { verifyAccessTokenRaw, generateOtpToken, generateVerifyToken } = require("../middlewares/jwt");
+const { sendEmail, emailTypeSubject } = require("../utils/mailer");
+const { getTimeDiffInMin } = require("../utils/helper");
+const sessionRepository = require("../repositories/sessionRepository");
 
 const loginByEmail = async (body, res) => {
   const transaction = await db.transaction();
@@ -183,9 +188,25 @@ const registerUser = async (body, res) => {
   }
 };
 
-const refreshTokens = async (refreshToken, res) => {
+const refreshTokens = async (req, res) => {
   const transaction = await db.transaction();
   try {
+    const refreshToken =
+      req.cookies?.["REFRESH-TOKEN"] ||
+      (req.headers?.authorization?.startsWith("Bearer ")
+        ? req.headers.authorization.split(" ")[1]
+        : null);
+
+    if (!refreshToken) {
+      return {
+        error: true,
+        data: {},
+        msgCode: "MISSING_TOKEN",
+        status: httpStatus.UNAUTHORIZED,
+        transaction,
+      };
+    }
+
     let decoded;
     try {
       decoded = verifyAccessTokenRaw(refreshToken);
@@ -279,4 +300,421 @@ const refreshTokens = async (refreshToken, res) => {
   }
 };
 
-module.exports = { loginByEmail, registerUser, refreshTokens };
+const forgotPassword = async (body, res) => {
+  const transaction = await db.transaction();
+  try {
+    const { email } = body;
+
+    const checkUser = await authRepository.findUserByEmail(email, null, transaction);
+    if (!checkUser) {
+      return {
+        error: true,
+        data: {},
+        msgCode: "USER_NOT_REGISTERED",
+        status: httpStatus.NOT_FOUND,
+        transaction,
+      };
+    }
+
+    if (checkUser.status === userStatus.DEACTIVATED) {
+      return {
+        error: true,
+        data: {},
+        msgCode: "YOU_ACCOUNT_HAS_BEEN_SUSPENDED",
+        status: httpStatus.UNAUTHORIZED,
+        transaction,
+      };
+    }
+
+    if (checkUser.status === userStatus.DELETED) {
+      return {
+        error: true,
+        data: {},
+        msgCode: "YOU_ACCOUNT_HAS_BEEN_DELETED",
+        status: httpStatus.UNAUTHORIZED,
+        transaction,
+      };
+    }
+
+    let otp;
+    if (process.env.OTP_BYPASS === "true") {
+      otp = process.env.OTP;
+    } else {
+      otp = otpGenerator.generate(Number(process.env.OTP_DIGIT) || 6, {
+        digits: true,
+        lowerCaseAlphabets: false,
+        upperCaseAlphabets: false,
+        specialChars: false,
+      });
+    }
+
+    const hashOtp = await generateHash(otp.toString());
+    const otpCond = { user_id: checkUser._id, otp_type: otpType.RESET_PASSWORD };
+    const checkOtp = await otpRepository.findByCondition(otpCond, transaction);
+
+    if (checkOtp) {
+      const timeDiffInMin = getTimeDiffInMin(checkOtp.otp_sent_at);
+      const retryTimeDiffInMin = getTimeDiffInMin(checkOtp.last_attempt);
+      let updateData = { otp: hashOtp, otp_sent_at: Date.now() };
+
+      if (checkOtp.otp_retries >= 2 && retryTimeDiffInMin < 10) {
+        return {
+          error: true,
+          data: {},
+          msgCode: `To protect your account, it's been temporarily locked. Try again in ${10 - retryTimeDiffInMin} minutes`,
+          status: httpStatus.UNAUTHORIZED,
+          transaction,
+        };
+      }
+
+      if (checkOtp.otp_sent >= 6 && timeDiffInMin < 10) {
+        return {
+          error: true,
+          data: { time_in_minutes: 10 - timeDiffInMin },
+          msgCode: `To protect your account, it's been temporarily locked. Try again in ${10 - timeDiffInMin} minutes`,
+          status: httpStatus.UNAUTHORIZED,
+          transaction,
+        };
+      }
+
+      if (timeDiffInMin <= 5) {
+        updateData.otp_sent = checkOtp.otp_sent + 1;
+      } else if (timeDiffInMin >= 10) {
+        updateData.otp_sent = 1;
+        updateData.otp_retries = 0;
+      } else {
+        updateData.otp_sent = checkOtp.otp_sent + 1;
+      }
+
+      const updateOtpDetails = await otpRepository.updateOtp(updateData, otpCond, transaction);
+      if (!updateOtpDetails) {
+        return {
+          error: true,
+          data: {},
+          msgCode: "UNABLE_TO_UPDATE",
+          status: httpStatus.INTERNAL_SERVER_ERROR,
+          transaction,
+        };
+      }
+    } else {
+      const otpData = {
+        user_id: checkUser._id,
+        otp: hashOtp,
+        otp_type: otpType.RESET_PASSWORD,
+        otp_sent_at: Date.now(),
+        otp_sent: 1,
+        otp_retries: 0,
+        last_attempt: null,
+      };
+
+      const createOtpDetails = await otpRepository.create(otpData, transaction);
+      if (!createOtpDetails) {
+        return {
+          error: true,
+          data: {},
+          msgCode: "OTP_NOT_SEND",
+          status: httpStatus.INTERNAL_SERVER_ERROR,
+          transaction,
+        };
+      }
+    }
+
+    generateOtpToken({ id: checkUser._id, email: checkUser.email }, res);
+
+    if (process.env.OTP_BYPASS !== "true") {
+      await sendEmail(
+        email,
+        { otp, userName: `${checkUser.first_name} ${checkUser.last_name}` },
+        emailTypeSubject.FORGET_PASSWORD
+      );
+    }
+
+    return {
+      error: false,
+      data: {},
+      msgCode: "OTP_SENT",
+      status: httpStatus.OK,
+      transaction,
+    };
+  } catch (err) {
+    console.log(err);
+    return {
+      error: true,
+      data: err,
+      msgCode: "INTERNAL_SERVER_ERROR",
+      status: httpStatus.INTERNAL_SERVER_ERROR,
+      transaction,
+    };
+  }
+};
+
+const verifyOtp = async (req, res) => {
+  const transaction = await db.transaction();
+  try {
+    const { otp } = req.body;
+    const { id: userId, email } = req.token;
+
+    const checkUser = await authRepository.findUserByEmail(email, null, transaction);
+    if (!checkUser) {
+      return {
+        error: true,
+        data: {},
+        msgCode: "USER_NOT_REGISTERED",
+        status: httpStatus.NOT_FOUND,
+        transaction,
+      };
+    }
+
+    const otpCond = { user_id: checkUser._id, otp_type: otpType.RESET_PASSWORD };
+    const checkOtp = await otpRepository.findByCondition(otpCond, transaction);
+
+    if (!checkOtp) {
+      return {
+        error: true,
+        data: {},
+        msgCode: "OTP_EXPIRED",
+        status: httpStatus.UNAUTHORIZED,
+        transaction,
+      };
+    }
+
+    if (checkOtp.otp_retries >= 3) {
+      const retryDiff = getTimeDiffInMin(checkOtp.last_attempt);
+      if (retryDiff < 10) {
+        return {
+          error: true,
+          data: {},
+          msgCode: `To protect your account, it's been temporarily locked. Try again in ${10 - retryDiff} minutes`,
+          status: httpStatus.UNAUTHORIZED,
+          transaction,
+        };
+      }
+      await otpRepository.updateOtp({ otp_retries: 0 }, otpCond, transaction);
+    }
+
+    const isOtpValid = await comparePassword(otp.toString(), checkOtp.otp);
+
+    if (!isOtpValid) {
+      await otpRepository.updateOtp(
+        { otp_retries: checkOtp.otp_retries + 1, last_attempt: Date.now() },
+        otpCond,
+        transaction
+      );
+      return {
+        error: true,
+        data: {},
+        msgCode: "INVALID_OTP",
+        status: httpStatus.UNAUTHORIZED,
+        transaction,
+      };
+    }
+
+    res.clearCookie("OTP-TOKEN", { httpOnly: true, secure: true, sameSite: "None" });
+    generateVerifyToken({ id: checkUser._id, email: checkUser.email }, res);
+
+    return {
+      error: false,
+      data: {},
+      msgCode: "OTP_VERIFIED",
+      status: httpStatus.OK,
+      transaction,
+    };
+  } catch (err) {
+    console.log(err);
+    return {
+      error: true,
+      data: err,
+      msgCode: "INTERNAL_SERVER_ERROR",
+      status: httpStatus.INTERNAL_SERVER_ERROR,
+      transaction,
+    };
+  }
+};
+
+const resetPassword = async (req, res) => {
+  const transaction = await db.transaction();
+  try {
+    const { password } = req.body;
+    const { email } = req.token;
+
+    const checkUser = await authRepository.findUserByEmail(email, null, transaction);
+    if (!checkUser) {
+      return {
+        error: true,
+        data: {},
+        msgCode: "USER_NOT_REGISTERED",
+        status: httpStatus.NOT_FOUND,
+        transaction,
+      };
+    }
+
+    const hash = await generateHash(password);
+    await authRepository.updateUser({ password: hash }, { _id: checkUser._id }, transaction);
+
+    await otpRepository.deleteByCondition(
+      { user_id: checkUser._id, otp_type: otpType.RESET_PASSWORD },
+      transaction
+    );
+
+    res.clearCookie("VERIFY-TOKEN", { httpOnly: true, secure: true, sameSite: "None" });
+    res.clearCookie("OTP-TOKEN", { httpOnly: true, secure: true, sameSite: "None" });
+
+    return {
+      error: false,
+      data: {},
+      msgCode: "PASSWORD_RESET_SUCCESSFUL",
+      status: httpStatus.OK,
+      transaction,
+    };
+  } catch (err) {
+    console.log(err);
+    return {
+      error: true,
+      data: err,
+      msgCode: "INTERNAL_SERVER_ERROR",
+      status: httpStatus.INTERNAL_SERVER_ERROR,
+      transaction,
+    };
+  }
+};
+
+const updateProfile = async (req) => {
+  const transaction = await db.transaction();
+  try {
+    const { firstName, lastName } = req.body;
+    const userId = req.data._id;
+
+    await authRepository.updateUser(
+      { first_name: firstName, last_name: lastName },
+      { _id: userId },
+      transaction
+    );
+
+    const updatedUser = await authRepository.findUserById(userId, "-password", transaction);
+
+    return {
+      error: false,
+      data: {
+        user: {
+          _id: updatedUser._id,
+          email: updatedUser.email,
+          first_name: updatedUser.first_name,
+          last_name: updatedUser.last_name,
+          user_type: updatedUser.user_type,
+          status: updatedUser.status,
+          createdAt: updatedUser.createdAt,
+          updatedAt: updatedUser.updatedAt,
+        },
+      },
+      msgCode: "PROFILE_UPDATED",
+      status: httpStatus.OK,
+      transaction,
+    };
+  } catch (err) {
+    console.log(err);
+    return {
+      error: true,
+      data: err,
+      msgCode: "INTERNAL_SERVER_ERROR",
+      status: httpStatus.INTERNAL_SERVER_ERROR,
+      transaction,
+    };
+  }
+};
+
+const changePassword = async (req) => {
+  const transaction = await db.transaction();
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.data._id;
+
+    const user = await authRepository.findUserById(userId, null, transaction);
+    if (!user) {
+      return {
+        error: true,
+        data: {},
+        msgCode: "USER_NOT_REGISTERED",
+        status: httpStatus.NOT_FOUND,
+        transaction,
+      };
+    }
+
+    const isCurrentPasswordValid = await comparePassword(currentPassword, user.password);
+    if (!isCurrentPasswordValid) {
+      return {
+        error: true,
+        data: {},
+        msgCode: "INVALID_CURRENT_PASSWORD",
+        status: httpStatus.UNAUTHORIZED,
+        transaction,
+      };
+    }
+
+    const isSamePassword = await comparePassword(newPassword, user.password);
+    if (isSamePassword) {
+      return {
+        error: true,
+        data: {},
+        msgCode: "SAME_PASSWORD",
+        status: httpStatus.BAD_REQUEST,
+        transaction,
+      };
+    }
+
+    const hash = await generateHash(newPassword);
+    await authRepository.updateUser({ password: hash }, { _id: userId }, transaction);
+
+    return {
+      error: false,
+      data: {},
+      msgCode: "PASSWORD_CHANGED",
+      status: httpStatus.OK,
+      transaction,
+    };
+  } catch (err) {
+    console.log(err);
+    return {
+      error: true,
+      data: err,
+      msgCode: "INTERNAL_SERVER_ERROR",
+      status: httpStatus.INTERNAL_SERVER_ERROR,
+      transaction,
+    };
+  }
+};
+
+const logout = async (req, res) => {
+  const transaction = await db.transaction();
+  try {
+    const userId = req.data._id;
+    const token =
+      req.cookies?.["SESSION-TOKEN"] ||
+      (req.headers?.authorization?.startsWith("Bearer ")
+        ? req.headers.authorization.split(" ")[1]
+        : null);
+
+    await sessionRepository.deleteSession({ user_id: userId, access_token: token });
+
+    res.clearCookie("SESSION-TOKEN", { httpOnly: true, secure: true, sameSite: "None" });
+    res.clearCookie("REFRESH-TOKEN", { httpOnly: true, secure: true, sameSite: "None" });
+
+    return {
+      error: false,
+      data: {},
+      msgCode: "LOGOUT_SUCCESSFUL",
+      status: httpStatus.OK,
+      transaction,
+    };
+  } catch (err) {
+    console.log(err);
+    return {
+      error: true,
+      data: err,
+      msgCode: "INTERNAL_SERVER_ERROR",
+      status: httpStatus.INTERNAL_SERVER_ERROR,
+      transaction,
+    };
+  }
+};
+
+module.exports = { loginByEmail, registerUser, refreshTokens, forgotPassword, verifyOtp, resetPassword, updateProfile, changePassword, logout };

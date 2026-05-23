@@ -47,4 +47,8 @@ const findSessionByCondition = async (condition, session) => {
   return await sessionRepository.findByCondition(condition, session);
 };
 
-module.exports = { generateSessionTokens, checkIfSessionExist, createSession, updateSession, findSessionByCondition };
+const deleteSession = async (condition, session) => {
+  return await sessionRepository.deleteSession(condition, session);
+};
+
+module.exports = { generateSessionTokens, checkIfSessionExist, createSession, updateSession, findSessionByCondition, deleteSession };

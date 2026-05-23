@@ -19,5 +19,19 @@
   "INVALID_REFRESH_TOKEN": "Invalid refresh token.",
   "REFRESH_TOKEN_EXPIRED": "Refresh token has expired. Please log in again.",
   "UNAUTHORIZED": "Unauthorized access.",
-  "FORBIDDEN": "You do not have permission to perform this action."
+  "FORBIDDEN": "You do not have permission to perform this action.",
+  "OTP_SENT": "OTP sent to your email address.",
+  "OTP_VERIFIED": "OTP verified successfully.",
+  "OTP_EXPIRED": "OTP has expired. Please request a new one.",
+  "INVALID_OTP": "The OTP you entered is incorrect.",
+  "OTP_NOT_SEND": "Failed to create OTP. Please try again.",
+  "UNABLE_TO_UPDATE": "Unable to update. Please try again.",
+  "PASSWORD_RESET_SUCCESSFUL": "Password reset successfully. You can now sign in.",
+  "MISSING_TOKEN": "Authentication token is missing.",
+  "OTP_TOKEN_EXPIRED": "OTP session expired. Please request a new OTP.",
+  "PROFILE_UPDATED": "Profile updated successfully.",
+  "PASSWORD_CHANGED": "Password changed successfully.",
+  "INVALID_CURRENT_PASSWORD": "Current password is incorrect.",
+  "SAME_PASSWORD": "New password must be different from the current password.",
+  "LOGOUT_SUCCESSFUL": "Logged out successfully."
 }

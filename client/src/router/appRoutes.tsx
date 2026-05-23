@@ -8,6 +8,9 @@ const Login = lazy(() => import("@/pages/login/login"))
 const Register = lazy(() => import("@/pages/register/register"))
 const Dashboard = lazy(() => import("@/pages/dashboard/dashboard"))
 const Profile = lazy(() => import("@/pages/profile/profile"))
+const ForgotPassword = lazy(() => import("@/pages/forgot-password/forgot-password"))
+const VerifyOtp = lazy(() => import("@/pages/verify-otp/verify-otp"))
+const ResetPassword = lazy(() => import("@/pages/reset-password/reset-password"))
 
 const PrivateRoute = () => {
   const isSignedIn = useAppSelector((state) => state.userData.isSignedIn)
@@ -28,6 +31,11 @@ const AppRoutes = () => {
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
       </Route>
+
+      {/* Password reset flow — accessible to everyone */}
+      <Route path="forgot-password" element={<ForgotPassword />} />
+      <Route path="verify-otp" element={<VerifyOtp />} />
+      <Route path="reset-password" element={<ResetPassword />} />
 
       <Route element={<PrivateRoute />}>
         <Route element={<Layout />}>

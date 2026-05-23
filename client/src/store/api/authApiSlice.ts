@@ -6,6 +6,12 @@ import type {
   AuthResponse,
   UserProfile,
   ApiResponse,
+  ForgotPasswordRequest,
+  VerifyOtpRequest,
+  ResetPasswordRequest,
+  UpdateProfileRequest,
+  UpdateProfileResponse,
+  ChangePasswordRequest,
 } from "@/types/api.types"
 
 export const authApi = apiSlice.injectEndpoints({
@@ -46,6 +52,59 @@ export const authApi = apiSlice.injectEndpoints({
         method: "POST",
       }),
     }),
+
+    // FORGOT PASSWORD
+    forgotPassword: builder.mutation<ApiResponse<Record<string, never>>, ForgotPasswordRequest>({
+      query: (body) => ({
+        url: API_ROUTES.FORGOT_PASSWORD,
+        method: "POST",
+        body,
+      }),
+    }),
+
+    // VERIFY OTP
+    verifyOtp: builder.mutation<ApiResponse<Record<string, never>>, VerifyOtpRequest>({
+      query: (body) => ({
+        url: API_ROUTES.VERIFY_OTP,
+        method: "POST",
+        body,
+      }),
+    }),
+
+    // RESET PASSWORD
+    resetPassword: builder.mutation<ApiResponse<Record<string, never>>, ResetPasswordRequest>({
+      query: (body) => ({
+        url: API_ROUTES.RESET_PASSWORD,
+        method: "POST",
+        body,
+      }),
+    }),
+
+    // UPDATE PROFILE
+    updateProfile: builder.mutation<ApiResponse<UpdateProfileResponse>, UpdateProfileRequest>({
+      query: (body) => ({
+        url: API_ROUTES.UPDATE_PROFILE,
+        method: "PUT",
+        body,
+      }),
+    }),
+
+    // CHANGE PASSWORD
+    changePassword: builder.mutation<ApiResponse<Record<string, never>>, ChangePasswordRequest>({
+      query: (body) => ({
+        url: API_ROUTES.CHANGE_PASSWORD,
+        method: "POST",
+        body,
+      }),
+    }),
+
+    // LOGOUT
+    logout: builder.mutation<ApiResponse<Record<string, never>>, void>({
+      query: () => ({
+        url: API_ROUTES.LOGOUT,
+        method: "POST",
+      }),
+    }),
   }),
   overrideExisting: false,
 })
@@ -55,4 +114,10 @@ export const {
   useRegisterMutation,
   useGetMeQuery,
   useLazyGetMeQuery,
+  useForgotPasswordMutation,
+  useVerifyOtpMutation,
+  useResetPasswordMutation,
+  useUpdateProfileMutation,
+  useChangePasswordMutation,
+  useLogoutMutation,
 } = authApi

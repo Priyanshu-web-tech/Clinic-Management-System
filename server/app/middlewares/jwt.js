@@ -67,7 +67,7 @@ const generateVerifyToken = (data, res) => {
   const options = { expiresIn: process.env.OTP_EXPIRES_IN };
   const verifyToken = jwt.sign(data, process.env.SECRET_KEY, options);
 
-  // Set the OTP token in a secure cookie
+  // Set the VERIFY token in a secure cookie
   res.cookie("VERIFY-TOKEN", verifyToken, {
     httpOnly: true,
     secure: true,
@@ -168,7 +168,7 @@ const verifyAuthToken = (req, res, next) => {
 const verifyOtpToken = (req, res, next) => {
   try {
     let token;
-    if (req.url === "/verify/otp") {
+    if (req.url === "/verify-otp") {
       token =
         req.cookies["OTP-TOKEN"] ||
         (req?.headers?.authorization?.startsWith("Bearer ")

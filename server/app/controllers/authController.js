@@ -63,25 +63,27 @@ const register = async (req, res) => {
 
 const refreshToken = async (req, res) => {
   try {
-    const token =
-      req.cookies["REFRESH-TOKEN"] ||
-      (req?.headers?.authorization?.startsWith("Bearer ")
-        ? req?.headers?.authorization?.split(" ")[1]
-        : null);
-
-    if (!token) {
-      return error(req, res, { msgCode: "MISSING_TOKEN", data: {} }, 401);
-    }
-
-    const result = await authService.refreshTokens(token, res);
+    const result = await authService.refreshTokens(req, res);
 
     if (result.error) {
       throw result;
     }
 
-    return success(req, res, { msgCode: result.msgCode, data: result.data }, result.status, result.transaction);
+    return success(
+      req,
+      res,
+      { msgCode: result.msgCode, data: result.data },
+      result.status,
+      result.transaction,
+    );
   } catch (err) {
-    return error(req, res, { msgCode: err.msgCode, data: err.data || {} }, err.status, err.transaction);
+    return error(
+      req,
+      res,
+      { msgCode: err.msgCode, data: err.data || {} },
+      err.status,
+      err.transaction,
+    );
   }
 };
 
@@ -93,4 +95,160 @@ const getProfile = async (req, res) => {
   }
 };
 
-module.exports = { login, register, refreshToken, getProfile };
+const forgotPassword = async (req, res) => {
+  try {
+    const result = await authService.forgotPassword(req.body, res);
+
+    if (result.error) {
+      throw result;
+    }
+
+    return success(
+      req,
+      res,
+      { msgCode: result.msgCode, data: result.data },
+      result.status,
+      result.transaction,
+    );
+  } catch (err) {
+    return error(
+      req,
+      res,
+      { msgCode: err.msgCode, data: err.data || {} },
+      err.status,
+      err.transaction,
+    );
+  }
+};
+
+const verifyOtp = async (req, res) => {
+  try {
+    const result = await authService.verifyOtp(req, res);
+
+    if (result.error) {
+      throw result;
+    }
+
+    return success(
+      req,
+      res,
+      { msgCode: result.msgCode, data: result.data },
+      result.status,
+      result.transaction,
+    );
+  } catch (err) {
+    return error(
+      req,
+      res,
+      { msgCode: err.msgCode, data: err.data || {} },
+      err.status,
+      err.transaction,
+    );
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const result = await authService.resetPassword(req, res);
+
+    if (result.error) {
+      throw result;
+    }
+
+    return success(
+      req,
+      res,
+      { msgCode: result.msgCode, data: result.data },
+      result.status,
+      result.transaction,
+    );
+  } catch (err) {
+    return error(
+      req,
+      res,
+      { msgCode: err.msgCode, data: err.data || {} },
+      err.status,
+      err.transaction,
+    );
+  }
+};
+
+const updateProfile = async (req, res) => {
+  try {
+    const result = await authService.updateProfile(req);
+
+    if (result.error) {
+      throw result;
+    }
+
+    return success(
+      req,
+      res,
+      { msgCode: result.msgCode, data: result.data },
+      result.status,
+      result.transaction,
+    );
+  } catch (err) {
+    return error(
+      req,
+      res,
+      { msgCode: err.msgCode, data: err.data || {} },
+      err.status,
+      err.transaction,
+    );
+  }
+};
+
+const changePassword = async (req, res) => {
+  try {
+    const result = await authService.changePassword(req);
+
+    if (result.error) {
+      throw result;
+    }
+
+    return success(
+      req,
+      res,
+      { msgCode: result.msgCode, data: result.data },
+      result.status,
+      result.transaction,
+    );
+  } catch (err) {
+    return error(
+      req,
+      res,
+      { msgCode: err.msgCode, data: err.data || {} },
+      err.status,
+      err.transaction,
+    );
+  }
+};
+
+const logout = async (req, res) => {
+  try {
+    const result = await authService.logout(req, res);
+
+    if (result.error) {
+      throw result;
+    }
+
+    return success(
+      req,
+      res,
+      { msgCode: result.msgCode, data: result.data },
+      result.status,
+      result.transaction,
+    );
+  } catch (err) {
+    return error(
+      req,
+      res,
+      { msgCode: err.msgCode, data: err.data || {} },
+      err.status,
+      err.transaction,
+    );
+  }
+};
+
+module.exports = { login, register, refreshToken, getProfile, forgotPassword, verifyOtp, resetPassword, updateProfile, changePassword, logout };

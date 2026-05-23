@@ -11,4 +11,8 @@ const userStatus = {
   DEACTIVATED: "deactivated",
 };
 
-module.exports = { userType, userStatus };
+const otpType = {
+  RESET_PASSWORD: "reset_password",
+};
+
+module.exports = { userType, userStatus, otpType };

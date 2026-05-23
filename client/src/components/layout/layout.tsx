@@ -111,8 +111,8 @@ const Layout = () => {
                   collapsed ? "md:justify-center" : "gap-3"
                 } ${
                   isActive
-                    ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                    ? "bg-sidebar-primary/15 font-semibold text-sidebar-primary ring-1 ring-sidebar-primary/20"
+                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 }`
               }
             >

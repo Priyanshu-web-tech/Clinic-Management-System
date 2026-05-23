@@ -1,0 +1,54 @@
+import { lazy } from "react"
+import { Navigate, Route, Routes, Outlet } from "react-router-dom"
+
+import { useAppSelector } from "@/store/hook"
+import ProgressLoader from "@/components/progessLoader/progressLoader"
+
+const Layout = lazy(() => import("@/components/layout/layout"))
+const Login = lazy(() => import("@/pages/login/login"))
+const Register = lazy(() => import("@/pages/register/register"))
+const Dashboard = lazy(() => import("@/pages/dashboard/dashboard"))
+const Profile = lazy(() => import("@/pages/profile/profile"))
+
+const PrivateRoute = () => {
+  const isSignedIn = useAppSelector((state) => state.userData.isSignedIn)
+  return isSignedIn ? <Outlet /> : <Navigate to="/login" replace />
+}
+
+const PublicRoute = () => {
+  const isSignedIn = useAppSelector((state) => state.userData.isSignedIn)
+  return !isSignedIn ? <Outlet /> : <Navigate to="/" replace />
+}
+
+const AppRoutes = () => {
+  const isSignedIn = useAppSelector((state) => state.userData.isSignedIn)
+
+  return (
+    <>
+      <ProgressLoader />
+      <Routes>
+        {/* Public routes — no layout */}
+        <Route element={<PublicRoute />}>
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
+        </Route>
+
+        {/* Private routes — wrapped in Layout */}
+        <Route element={<PrivateRoute />}>
+          <Route element={<Layout />}>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="profile" element={<Profile />} />
+          </Route>
+        </Route>
+
+        <Route
+          path="*"
+          element={<Navigate to={isSignedIn ? "/" : "/login"} replace />}
+        />
+      </Routes>
+    </>
+  )
+}
+
+export default AppRoutes

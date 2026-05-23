@@ -88,7 +88,7 @@ exports.error = async (req, res, error, code, dbTrans) => {
         message:
           (lngMsg[lng]
             ? lngMsg[lng][error.msgCode]
-            : lngMsg["en"][error.msgCode]) || httpStatus[code],
+            : lngMsg["en"][error.msgCode]) || error.msgCode,
         result: error.data ? error.data : {},
         time: Date.now(),
       };

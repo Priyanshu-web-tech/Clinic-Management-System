@@ -22,7 +22,7 @@ const validate =
       return response.error(
         req,
         res,
-        { msgCode: "VALIDATION_ERROR", data: message },
+        { msgCode: message },
         httpStatus.BAD_REQUEST
       );
     }

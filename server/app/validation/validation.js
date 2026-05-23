@@ -3,20 +3,33 @@ const { userType } = require("../constant/constant");
 
 const passwordSchema = Joi.string()
   .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/)
-  .message(
-    "Password must be at least 8 characters with uppercase, lowercase, number, and special character."
-  )
   .min(8)
   .max(30)
-  .required();
+  .required()
+  .messages({
+    "string.pattern.base": "Password must be at least 8 characters with uppercase, lowercase, number, and special character.",
+    "any.required": "Password is required.",
+    "string.empty": "Password is required.",
+  });
 
 const login = Joi.object({
-  email: Joi.string().email().message("Please enter a valid email").required(),
-  password: Joi.string().required(),
+  email: Joi.string().email().required().messages({
+    "string.email": "Please enter a valid email.",
+    "any.required": "Email is required.",
+    "string.empty": "Email is required.",
+  }),
+  password: Joi.string().required().messages({
+    "any.required": "Password is required.",
+    "string.empty": "Password is required.",
+  }),
 });
 
 const register = Joi.object({
-  email: Joi.string().email().message("Please enter a valid email").required(),
+  email: Joi.string().email().required().messages({
+    "string.email": "Please enter a valid email.",
+    "any.required": "Email is required.",
+    "string.empty": "Email is required.",
+  }),
   password: passwordSchema,
   firstName: Joi.string().trim().required().messages({
     "any.required": "First name is required.",
@@ -34,7 +47,11 @@ const register = Joi.object({
 });
 
 const forgotPassword = Joi.object({
-  email: Joi.string().email().message("Please enter a valid email").required(),
+  email: Joi.string().email().required().messages({
+    "string.email": "Please enter a valid email.",
+    "any.required": "Email is required.",
+    "string.empty": "Email is required.",
+  }),
 });
 
 const verifyOtp = Joi.object({

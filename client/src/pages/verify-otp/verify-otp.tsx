@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils"
 import type { VerifyOtpFormValues } from "./verify-otp.types"
 
 const OTP_LENGTH = 6
-const OTP_COOLDOWN_SECS = 120 // 2 minutes
+const OTP_COOLDOWN_SECS = 120
 
 const getStoredSecondsLeft = (): number => {
   const raw = localStorage.getItem("otpSentAt")
@@ -32,11 +32,8 @@ const VerifyOtp = () => {
   const [verifyOtp, { isLoading }] = useVerifyOtpMutation()
   const [forgotPassword, { isLoading: isResending }] = useForgotPasswordMutation()
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
-
   const [secondsLeft, setSecondsLeft] = useState<number>(getStoredSecondsLeft)
 
-  // Tick down every second, using setTimeout so the dependency on secondsLeft
-  // correctly restarts the timer whenever secondsLeft changes.
   useEffect(() => {
     if (secondsLeft <= 0) return
     const id = setTimeout(() => setSecondsLeft((s) => Math.max(0, s - 1)), 1000)
@@ -104,9 +101,7 @@ const VerifyOtp = () => {
       next[idx] = char.slice(-1)
       const joined = next.join("").replace(/\s/g, "")
       formik.setFieldValue("otp", joined)
-      if (char && idx < OTP_LENGTH - 1) {
-        inputRefs.current[idx + 1]?.focus()
-      }
+      if (char && idx < OTP_LENGTH - 1) inputRefs.current[idx + 1]?.focus()
     },
     [digits, formik],
   )
@@ -131,8 +126,7 @@ const VerifyOtp = () => {
       e.preventDefault()
       const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, OTP_LENGTH)
       formik.setFieldValue("otp", pasted)
-      const focusIdx = Math.min(pasted.length, OTP_LENGTH - 1)
-      inputRefs.current[focusIdx]?.focus()
+      inputRefs.current[Math.min(pasted.length, OTP_LENGTH - 1)]?.focus()
     },
     [formik],
   )
@@ -140,77 +134,73 @@ const VerifyOtp = () => {
   const hasError = !!(formik.touched.otp && formik.errors.otp)
 
   return (
-    <div className="flex h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-sm rounded-xl border border-border bg-card shadow-sm flex flex-col max-h-[calc(100vh-2rem)]">
+    <div className="w-full max-w-sm rounded-xl border border-border bg-card shadow-sm flex flex-col max-h-[calc(100vh-3rem)]">
 
-        {/* Header — fixed, never scrolls */}
-        <div className="px-8 pt-8 pb-4 shrink-0">
-          <h1 className="text-xl font-semibold text-foreground">Enter OTP</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            We sent a {OTP_LENGTH}-digit code to your email. Enter it below.
-          </p>
+      {/* Header */}
+      <div className="px-8 pt-8 pb-4 shrink-0">
+        <h1 className="text-xl font-semibold text-foreground">Enter OTP</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          We sent a {OTP_LENGTH}-digit code to your email. Enter it below.
+        </p>
+      </div>
+
+      <form onSubmit={formik.handleSubmit} className="flex flex-col flex-1 min-h-0">
+
+        {/* Scrollable fields */}
+        <div className="flex-1 overflow-y-auto px-8 space-y-6">
+          <div className="space-y-2 pb-2">
+            <div className="flex justify-center gap-2">
+              {Array.from({ length: OTP_LENGTH }).map((_, idx) => (
+                <input
+                  key={idx}
+                  ref={(el) => { inputRefs.current[idx] = el }}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  value={digits[idx] === " " || !digits[idx] ? "" : digits[idx]}
+                  onChange={(e) => handleDigitChange(idx, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(idx, e)}
+                  onPaste={handlePaste}
+                  onFocus={(e) => e.target.select()}
+                  className={cn(
+                    "h-12 w-10 rounded-md border border-input bg-background text-center text-base font-semibold text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/30",
+                    hasError && "border-destructive ring-2 ring-destructive/20",
+                  )}
+                />
+              ))}
+            </div>
+            {hasError && (
+              <p className="text-center text-xs text-destructive">{formik.errors.otp}</p>
+            )}
+          </div>
         </div>
 
-        <form onSubmit={formik.handleSubmit} className="flex flex-col flex-1 min-h-0">
-
-          {/* Scrollable fields */}
-          <div className="flex-1 overflow-y-auto px-8 space-y-6">
-            <div className="space-y-2 pb-2">
-              <div className="flex justify-center gap-2">
-                {Array.from({ length: OTP_LENGTH }).map((_, idx) => (
-                  <input
-                    key={idx}
-                    ref={(el) => {
-                      inputRefs.current[idx] = el
-                    }}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={digits[idx] === " " || !digits[idx] ? "" : digits[idx]}
-                    onChange={(e) => handleDigitChange(idx, e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(idx, e)}
-                    onPaste={handlePaste}
-                    onFocus={(e) => e.target.select()}
-                    className={cn(
-                      "h-12 w-10 rounded-md border border-input bg-background text-center text-base font-semibold text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/30",
-                      hasError && "border-destructive ring-2 ring-destructive/20",
-                    )}
-                  />
-                ))}
-              </div>
-              {hasError && (
-                <p className="text-center text-xs text-destructive">{formik.errors.otp}</p>
-              )}
-            </div>
+        {/* Footer */}
+        <div className="px-8 pt-4 pb-8 shrink-0">
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading && <Spinner className="mr-2" />}
+            Verify OTP
+          </Button>
+          <div className="mt-5 flex items-center justify-center gap-1 text-xs text-muted-foreground">
+            <span>Didn&apos;t receive a code?</span>
+            {secondsLeft > 0 ? (
+              <span className="font-medium text-foreground tabular-nums">
+                Resend in {formatTime(secondsLeft)}
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={isResending}
+                className="font-medium text-primary hover:underline disabled:pointer-events-none disabled:opacity-50"
+              >
+                {isResending ? "Sending…" : "Resend OTP"}
+              </button>
+            )}
           </div>
+        </div>
 
-          {/* Footer — fixed, never scrolls */}
-          <div className="px-8 pt-4 pb-8 shrink-0">
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading && <Spinner className="mr-2" />}
-              Verify OTP
-            </Button>
-            <div className="mt-5 flex items-center justify-center gap-1 text-xs text-muted-foreground">
-              <span>Didn&apos;t receive a code?</span>
-              {secondsLeft > 0 ? (
-                <span className="font-medium text-foreground tabular-nums">
-                  Resend in {formatTime(secondsLeft)}
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleResend}
-                  disabled={isResending}
-                  className="font-medium text-primary hover:underline disabled:pointer-events-none disabled:opacity-50"
-                >
-                  {isResending ? "Sending…" : "Resend OTP"}
-                </button>
-              )}
-            </div>
-          </div>
-
-        </form>
-      </div>
+      </form>
     </div>
   )
 }

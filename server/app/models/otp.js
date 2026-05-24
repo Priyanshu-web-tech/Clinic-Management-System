@@ -3,7 +3,7 @@ const { otpType } = require("../constant/constant");
 
 const otpSchema = new mongoose.Schema(
   {
-    user_id: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -12,24 +12,24 @@ const otpSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    otp_type: {
+    otpType: {
       type: String,
       enum: Object.values(otpType),
       required: true,
     },
-    otp_sent_at: {
+    otpSentAt: {
       type: Number,
       default: Date.now,
     },
-    otp_sent: {
+    otpSent: {
       type: Number,
       default: 1,
     },
-    otp_retries: {
+    otpRetries: {
       type: Number,
       default: 0,
     },
-    last_attempt: {
+    lastAttempt: {
       type: Number,
       default: null,
     },

@@ -15,7 +15,7 @@ const OTP_LENGTH = 6
 const OTP_COOLDOWN_SECS = 120 // 2 minutes
 
 const getStoredSecondsLeft = (): number => {
-  const raw = localStorage.getItem("otp_sent_at")
+  const raw = localStorage.getItem("otpSentAt")
   if (!raw) return 0
   const sentAt = parseInt(raw, 10)
   return Math.max(0, Math.ceil((sentAt + OTP_COOLDOWN_SECS * 1000 - Date.now()) / 1000))
@@ -79,7 +79,7 @@ const VerifyOtp = () => {
     try {
       const response = await forgotPassword({ email }).unwrap()
       if (response?.success) {
-        localStorage.setItem("otp_sent_at", Date.now().toString())
+        localStorage.setItem("otpSentAt", Date.now().toString())
         setSecondsLeft(OTP_COOLDOWN_SECS)
         formik.resetForm()
         inputRefs.current[0]?.focus()

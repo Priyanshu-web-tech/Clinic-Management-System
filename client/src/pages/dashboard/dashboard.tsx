@@ -7,7 +7,7 @@ const Dashboard = () => {
     <div className="p-6">
       <p className="text-sm text-muted-foreground">
         Welcome back,{" "}
-        <span className="font-medium text-foreground">{user.first_name} {user.last_name}</span>!
+        <span className="font-medium text-foreground">{user.firstName} {user.lastName}</span>!
       </p>
     </div>
   )

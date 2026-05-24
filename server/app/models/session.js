@@ -2,24 +2,24 @@ const mongoose = require("mongoose");
 
 const sessionSchema = new mongoose.Schema(
   {
-    user_id: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    device_id: {
+    deviceId: {
       type: String,
       required: true,
     },
-    access_token: {
+    accessToken: {
       type: String,
       required: true,
     },
-    refresh_token: {
+    refreshToken: {
       type: String,
       required: true,
     },
-    last_login: {
+    lastLogin: {
       type: Date,
       default: Date.now,
     },

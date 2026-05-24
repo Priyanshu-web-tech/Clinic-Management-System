@@ -57,12 +57,12 @@ const PersonalInfoTab = () => {
     <div className="space-y-5">
       <div className="flex items-center gap-4">
         <div className="flex size-14 items-center justify-center rounded-full bg-primary/10 text-lg font-semibold text-primary">
-          {user.first_name.charAt(0).toUpperCase()}
-          {user.last_name.charAt(0).toUpperCase()}
+          {user.firstName.charAt(0).toUpperCase()}
+          {user.lastName.charAt(0).toUpperCase()}
         </div>
         <div>
           <p className="font-medium text-foreground">
-            {user.first_name} {user.last_name}
+            {user.firstName} {user.lastName}
           </p>
           <p className="text-xs text-muted-foreground">{profile.email}</p>
         </div>
@@ -70,7 +70,7 @@ const PersonalInfoTab = () => {
 
       <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
         <ProfileRow label="Email" value={profile.email} />
-        <ProfileRow label="Role" value={USER_TYPE_LABEL[profile.user_type] ?? profile.user_type} />
+        <ProfileRow label="Role" value={USER_TYPE_LABEL[profile.userType] ?? profile.userType} />
         <ProfileRow
           label="Member since"
           value={new Date(profile.createdAt).toLocaleDateString("en-US", {
@@ -94,8 +94,8 @@ const EditProfileTab = () => {
   const formik = useFormik<UpdateProfileFormValues>({
     enableReinitialize: true,
     initialValues: {
-      firstName: user.first_name ?? "",
-      lastName: user.last_name ?? "",
+      firstName: user.firstName ?? "",
+      lastName: user.lastName ?? "",
     },
     validationSchema: Yup.object({
       firstName: Yup.string().trim().required("First name is required"),
@@ -110,9 +110,9 @@ const EditProfileTab = () => {
             setUserData({
               _id: updated._id,
               email: updated.email,
-              first_name: updated.first_name,
-              last_name: updated.last_name,
-              user_type: updated.user_type,
+              firstName: updated.firstName,
+              lastName: updated.lastName,
+              userType: updated.userType,
               createdAt: updated.createdAt,
               updatedAt: updated.updatedAt,
             }),

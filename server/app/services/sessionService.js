@@ -7,11 +7,11 @@ const generateSessionTokens = (data, res) => {
   const accessToken = generateUserToken(
     {
       id: user._id,
-      user_type: user.user_type,
+      userType: user.userType,
       email: user.email,
-      first_name: user.first_name,
-      last_name: user.last_name,
-      device_id: deviceId,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      deviceId,
     },
     res
   );
@@ -19,7 +19,7 @@ const generateSessionTokens = (data, res) => {
   const refreshToken = generateUserRefreshToken(
     {
       id: user._id,
-      device_id: deviceId,
+      deviceId,
     },
     res
   );
@@ -28,13 +28,13 @@ const generateSessionTokens = (data, res) => {
 };
 
 const checkIfSessionExist = async (userId, deviceId, session) => {
-  return await sessionRepository.findByCondition({ user_id: userId, device_id: deviceId }, session);
+  return await sessionRepository.findByCondition({ userId, deviceId }, session);
 };
 
 const createSession = async (data, session) => {
   const { userId, deviceId, accessToken, refreshToken } = data;
   return await sessionRepository.create(
-    { user_id: userId, device_id: deviceId, access_token: accessToken, refresh_token: refreshToken },
+    { userId, deviceId, accessToken, refreshToken },
     session
   );
 };

@@ -53,11 +53,11 @@ const { validate, verifyAuthToken, verifyOtpToken } = require("../../middlewares
  *                           type: string
  *                         email:
  *                           type: string
- *                         first_name:
+ *                         firstName:
  *                           type: string
- *                         last_name:
+ *                         lastName:
  *                           type: string
- *                         user_type:
+ *                         userType:
  *                           type: string
  *                           enum: [admin, doctor, staff, pharmacist]
  *       400:
@@ -133,11 +133,11 @@ router.post("/login", validate(schema.login), controller.login);
  *                           type: string
  *                         email:
  *                           type: string
- *                         first_name:
+ *                         firstName:
  *                           type: string
- *                         last_name:
+ *                         lastName:
  *                           type: string
- *                         user_type:
+ *                         userType:
  *                           type: string
  *                           enum: [admin, doctor, staff, pharmacist]
  *       400:
@@ -210,11 +210,11 @@ router.post("/refresh", controller.refreshToken);
  *                       type: string
  *                     email:
  *                       type: string
- *                     first_name:
+ *                     firstName:
  *                       type: string
- *                     last_name:
+ *                     lastName:
  *                       type: string
- *                     user_type:
+ *                     userType:
  *                       type: string
  *                       enum: [admin, doctor, staff, pharmacist]
  *       401:

@@ -107,7 +107,7 @@ const verifyAuthToken = (req, res, next) => {
         return response.error(req, res, { msgCode }, httpStatus.UNAUTHORIZED);
       }
 
-      const condition = { access_token: token };
+      const condition = { accessToken: token };
       const checkJwt = await sessionRepository.getAuthDetails(condition);
       if (!checkJwt) {
         return response.error(
@@ -120,7 +120,7 @@ const verifyAuthToken = (req, res, next) => {
         const userDetails = await authRepository.findUserForSessionData(decoded?.id);
         if(userDetails?.deleted_at) {
           await sessionRepository.deleteSession(
-            { user_id: userDetails?.id },
+            { userId: userDetails?.id },
             undefined,
             true
           );

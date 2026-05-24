@@ -71,9 +71,9 @@ const Register = () => {
             setUserData({
               _id: user.id,
               email: user.email,
-              first_name: user.first_name,
-              last_name: user.last_name,
-              user_type: user.user_type,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              userType: user.userType,
               createdAt: "",
               updatedAt: "",
             })

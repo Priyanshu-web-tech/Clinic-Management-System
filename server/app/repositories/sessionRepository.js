@@ -22,7 +22,7 @@ const getAuthDetails = async (condition) => {
   try {
     const result = await Session.findOne(condition)
       .select("-createdAt -updatedAt")
-      .populate({ path: "user_id", select: "-createdAt -updatedAt" });
+      .populate({ path: "userId", select: "-createdAt -updatedAt" });
     return result ? JSON.parse(JSON.stringify(result)) : false;
   } catch (error) {
     console.log("error>>", error);

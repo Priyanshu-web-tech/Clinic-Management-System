@@ -28,8 +28,8 @@ const loginByEmail = async (body, res) => {
       };
     }
 
-    if (checkUser.lock_until && Date.now() < checkUser.lock_until) {
-      const remainingMs = checkUser.lock_until - Date.now();
+    if (checkUser.lockUntil && Date.now() < checkUser.lockUntil) {
+      const remainingMs = checkUser.lockUntil - Date.now();
       const remainingMinutes = Math.ceil(remainingMs / (60 * 1000));
       const minutesText = `${remainingMinutes} minute${remainingMinutes !== 1 ? "s" : ""}`;
       return {
@@ -43,11 +43,11 @@ const loginByEmail = async (body, res) => {
 
     const isPasswordValid = await comparePassword(password, checkUser.password);
     if (!isPasswordValid) {
-      const newAttempts = (checkUser.login_attempts || 0) + 1;
-      const updateData = { login_attempts: newAttempts };
+      const newAttempts = (checkUser.loginAttempts || 0) + 1;
+      const updateData = { loginAttempts: newAttempts };
       if (newAttempts >= 5) {
-        updateData.lock_until = Date.now() + 10 * 60 * 1000;
-        updateData.login_attempts = 0;
+        updateData.lockUntil = Date.now() + 10 * 60 * 1000;
+        updateData.loginAttempts = 0;
       }
       await authRepository.updateUser(updateData, { _id: checkUser._id });
       if (newAttempts >= 5) {
@@ -68,7 +68,7 @@ const loginByEmail = async (body, res) => {
       };
     }
 
-    await authRepository.updateUser({ login_attempts: 0, lock_until: null }, { _id: checkUser._id });
+    await authRepository.updateUser({ loginAttempts: 0, lockUntil: null }, { _id: checkUser._id });
 
     const sessionTokens = sessionService.generateSessionTokens({ user: checkUser, deviceId }, res);
 
@@ -85,8 +85,8 @@ const loginByEmail = async (body, res) => {
       );
     } else {
       await sessionService.updateSession(
-        { user_id: checkUser._id, device_id: deviceId },
-        { access_token: sessionTokens.accessToken, refresh_token: sessionTokens.refreshToken, last_login: new Date() },
+        { userId: checkUser._id, deviceId },
+        { accessToken: sessionTokens.accessToken, refreshToken: sessionTokens.refreshToken, lastLogin: new Date() },
         transaction
       );
     }
@@ -99,9 +99,9 @@ const loginByEmail = async (body, res) => {
         user: {
           id: checkUser._id,
           email: checkUser.email,
-          first_name: checkUser.first_name,
-          last_name: checkUser.last_name,
-          user_type: checkUser.user_type,
+          firstName: checkUser.firstName,
+          lastName: checkUser.lastName,
+          userType: checkUser.userType,
         },
       },
       msgCode: "LOGIN_SUCCESSFUL",
@@ -141,9 +141,9 @@ const registerUser = async (body, res) => {
       {
         email,
         password: hash,
-        first_name: firstName,
-        last_name: lastName,
-        user_type: userType,
+        firstName,
+        lastName,
+        userType,
       },
       transaction
     );
@@ -178,9 +178,9 @@ const registerUser = async (body, res) => {
         user: {
           id: user._id,
           email: user.email,
-          first_name: user.first_name,
-          last_name: user.last_name,
-          user_type: user.user_type,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          userType: user.userType,
         },
       },
       msgCode: "REGISTERED_SUCCESSFULLY",
@@ -232,7 +232,7 @@ const refreshTokens = async (req, res) => {
     }
 
     const existingSession = await sessionService.findSessionByCondition(
-      { user_id: decoded.id, refresh_token: refreshToken },
+      { userId: decoded.id, refreshToken },
       transaction
     );
     if (!existingSession) {
@@ -256,15 +256,15 @@ const refreshTokens = async (req, res) => {
       };
     }
 
-    const deviceId = existingSession.device_id;
+    const deviceId = existingSession.deviceId;
     const sessionTokens = sessionService.generateSessionTokens({ user, deviceId }, res);
 
     await sessionService.updateSession(
-      { user_id: user._id, device_id: deviceId },
+      { userId: user._id, deviceId },
       {
-        access_token: sessionTokens.accessToken,
-        refresh_token: sessionTokens.refreshToken,
-        last_login: new Date(),
+        accessToken: sessionTokens.accessToken,
+        refreshToken: sessionTokens.refreshToken,
+        lastLogin: new Date(),
       },
       transaction
     );
@@ -320,15 +320,15 @@ const forgotPassword = async (body, res) => {
     }
 
     const hashOtp = await generateHash(otp.toString());
-    const otpCond = { user_id: checkUser._id, otp_type: otpType.RESET_PASSWORD };
+    const otpCond = { userId: checkUser._id, otpType: otpType.RESET_PASSWORD };
     const checkOtp = await otpRepository.findByCondition(otpCond, transaction);
 
     if (checkOtp) {
-      const timeDiffInMin = getTimeDiffInMin(checkOtp.otp_sent_at);
-      const retryTimeDiffInMin = getTimeDiffInMin(checkOtp.last_attempt);
-      let updateData = { otp: hashOtp, otp_sent_at: Date.now() };
+      const timeDiffInMin = getTimeDiffInMin(checkOtp.otpSentAt);
+      const retryTimeDiffInMin = getTimeDiffInMin(checkOtp.lastAttempt);
+      let updateData = { otp: hashOtp, otpSentAt: Date.now() };
 
-      if (checkOtp.otp_retries >= 2 && retryTimeDiffInMin < 10) {
+      if (checkOtp.otpRetries >= 2 && retryTimeDiffInMin < 10) {
         const remaining = Math.ceil(10 - retryTimeDiffInMin);
         const minutesText = remaining > 0 ? `${remaining} minute${remaining !== 1 ? "s" : ""}` : null;
         return {
@@ -340,7 +340,7 @@ const forgotPassword = async (body, res) => {
         };
       }
 
-      if (checkOtp.otp_sent >= 6 && timeDiffInMin < 10) {
+      if (checkOtp.otpSent >= 6 && timeDiffInMin < 10) {
         const remaining = Math.ceil(10 - timeDiffInMin);
         const minutesText = remaining > 0 ? `${remaining} minute${remaining !== 1 ? "s" : ""}` : null;
         return {
@@ -353,12 +353,12 @@ const forgotPassword = async (body, res) => {
       }
 
       if (timeDiffInMin <= 5) {
-        updateData.otp_sent = checkOtp.otp_sent + 1;
+        updateData.otpSent = checkOtp.otpSent + 1;
       } else if (timeDiffInMin >= 10) {
-        updateData.otp_sent = 1;
-        updateData.otp_retries = 0;
+        updateData.otpSent = 1;
+        updateData.otpRetries = 0;
       } else {
-        updateData.otp_sent = checkOtp.otp_sent + 1;
+        updateData.otpSent = checkOtp.otpSent + 1;
       }
 
       const updateOtpDetails = await otpRepository.updateOtp(updateData, otpCond, transaction);
@@ -373,13 +373,13 @@ const forgotPassword = async (body, res) => {
       }
     } else {
       const otpData = {
-        user_id: checkUser._id,
+        userId: checkUser._id,
         otp: hashOtp,
-        otp_type: otpType.RESET_PASSWORD,
-        otp_sent_at: Date.now(),
-        otp_sent: 1,
-        otp_retries: 0,
-        last_attempt: null,
+        otpType: otpType.RESET_PASSWORD,
+        otpSentAt: Date.now(),
+        otpSent: 1,
+        otpRetries: 0,
+        lastAttempt: null,
       };
 
       const createOtpDetails = await otpRepository.create(otpData, transaction);
@@ -399,7 +399,7 @@ const forgotPassword = async (body, res) => {
     if (process.env.OTP_BYPASS !== "true") {
       await sendEmail(
         email,
-        { otp, userName: `${checkUser.first_name} ${checkUser.last_name}` },
+        { otp, userName: `${checkUser.firstName} ${checkUser.lastName}` },
         emailTypeSubject.FORGET_PASSWORD
       );
     }
@@ -440,7 +440,7 @@ const verifyOtp = async (req, res) => {
       };
     }
 
-    const otpCond = { user_id: checkUser._id, otp_type: otpType.RESET_PASSWORD };
+    const otpCond = { userId: checkUser._id, otpType: otpType.RESET_PASSWORD };
     const checkOtp = await otpRepository.findByCondition(otpCond, transaction);
 
     if (!checkOtp) {
@@ -453,8 +453,8 @@ const verifyOtp = async (req, res) => {
       };
     }
 
-    if (checkOtp.otp_retries >= 3) {
-      const retryDiff = getTimeDiffInMin(checkOtp.last_attempt);
+    if (checkOtp.otpRetries >= 3) {
+      const retryDiff = getTimeDiffInMin(checkOtp.lastAttempt);
       if (retryDiff < 10) {
         const remaining = Math.ceil(10 - retryDiff);
         const minutesText = remaining > 0 ? `${remaining} minute${remaining !== 1 ? "s" : ""}` : null;
@@ -466,14 +466,14 @@ const verifyOtp = async (req, res) => {
           transaction,
         };
       }
-      await otpRepository.updateOtp({ otp_retries: 0 }, otpCond);
+      await otpRepository.updateOtp({ otpRetries: 0 }, otpCond);
     }
 
     const isOtpValid = await comparePassword(otp.toString(), checkOtp.otp);
 
     if (!isOtpValid) {
       await otpRepository.updateOtp(
-        { otp_retries: checkOtp.otp_retries + 1, last_attempt: Date.now() },
+        { otpRetries: checkOtp.otpRetries + 1, lastAttempt: Date.now() },
         otpCond
       );
       return {
@@ -525,10 +525,10 @@ const resetPassword = async (req, res) => {
     }
 
     const hash = await generateHash(password);
-    await authRepository.updateUser({ password: hash, login_attempts: 0, lock_until: null }, { _id: checkUser._id }, transaction);
+    await authRepository.updateUser({ password: hash, loginAttempts: 0, lockUntil: null }, { _id: checkUser._id }, transaction);
 
     await otpRepository.deleteByCondition(
-      { user_id: checkUser._id, otp_type: otpType.RESET_PASSWORD },
+      { userId: checkUser._id, otpType: otpType.RESET_PASSWORD },
       transaction
     );
 
@@ -561,7 +561,7 @@ const updateProfile = async (req) => {
     const userId = req.data._id;
 
     await authRepository.updateUser(
-      { first_name: firstName, last_name: lastName },
+      { firstName, lastName },
       { _id: userId },
       transaction
     );
@@ -574,9 +574,9 @@ const updateProfile = async (req) => {
         user: {
           _id: updatedUser._id,
           email: updatedUser.email,
-          first_name: updatedUser.first_name,
-          last_name: updatedUser.last_name,
-          user_type: updatedUser.user_type,
+          firstName: updatedUser.firstName,
+          lastName: updatedUser.lastName,
+          userType: updatedUser.userType,
           createdAt: updatedUser.createdAt,
           updatedAt: updatedUser.updatedAt,
         },
@@ -668,7 +668,7 @@ const logout = async (req, res) => {
         ? req.headers.authorization.split(" ")[1]
         : null);
 
-    await sessionRepository.deleteSession({ user_id: userId, access_token: token });
+    await sessionRepository.deleteSession({ userId, accessToken: token });
 
     res.clearCookie("SESSION-TOKEN", { httpOnly: true, secure: true, sameSite: "None" });
     res.clearCookie("REFRESH-TOKEN", { httpOnly: true, secure: true, sameSite: "None" });

@@ -3,9 +3,9 @@ const response = require("../response/index");
 
 const authorizeRoles = (...allowedRoles) => {
   return (req, res, next) => {
-    const { user_type } = req.data;
+    const { userType } = req.data;
 
-    if (!allowedRoles.includes(user_type)) {
+    if (!allowedRoles.includes(userType)) {
       return response.error(
         req,
         res,

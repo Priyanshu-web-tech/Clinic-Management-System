@@ -3,17 +3,17 @@ const { userType } = require("../constant/constant");
 
 const userSchema = new mongoose.Schema(
   {
-    user_type: {
+    userType: {
       type: String,
       enum: Object.values(userType),
       required: true,
     },
-    first_name: {
+    firstName: {
       type: String,
       required: true,
       trim: true,
     },
-    last_name: {
+    lastName: {
       type: String,
       required: true,
       trim: true,
@@ -30,11 +30,11 @@ const userSchema = new mongoose.Schema(
       required: true,
       minlength: 6,
     },
-    login_attempts: {
+    loginAttempts: {
       type: Number,
       default: 0,
     },
-    lock_until: {
+    lockUntil: {
       type: Number,
       default: null,
     },

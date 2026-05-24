@@ -16,9 +16,9 @@ export interface RegisterRequest {
 export interface AuthUser {
   id: string
   email: string
-  first_name: string
-  last_name: string
-  user_type: UserType
+  firstName: string
+  lastName: string
+  userType: UserType
 }
 
 export interface AuthResponse {
@@ -30,9 +30,9 @@ export interface AuthResponse {
 export interface UserProfile {
   _id: string
   email: string
-  first_name: string
-  last_name: string
-  user_type: UserType
+  firstName: string
+  lastName: string
+  userType: UserType
   createdAt: string
   updatedAt: string
 }
@@ -66,9 +66,9 @@ export interface UpdateProfileResponse {
   user: {
     _id: string
     email: string
-    first_name: string
-    last_name: string
-    user_type: UserType
+    firstName: string
+    lastName: string
+    userType: UserType
     createdAt: string
     updatedAt: string
   }

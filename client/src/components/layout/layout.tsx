@@ -48,8 +48,8 @@ const Layout = () => {
 
   const pageTitle = PAGE_TITLES[location.pathname] ?? "DocMate"
   const initials =
-    user.first_name && user.last_name
-      ? `${user.first_name.charAt(0)}${user.last_name.charAt(0)}`.toUpperCase()
+    user.firstName && user.lastName
+      ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
       : "?"
 
   // Close mobile drawer on route change
@@ -186,7 +186,7 @@ const Layout = () => {
               >
                 <div className="px-2 py-1.5">
                   <p className="text-xs font-medium text-foreground">
-                    {user.first_name} {user.last_name}
+                    {user.firstName} {user.lastName}
                   </p>
                   <p className="truncate text-[11px] text-muted-foreground">
                     {user.email}

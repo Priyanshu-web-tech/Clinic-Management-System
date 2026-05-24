@@ -4,9 +4,9 @@ import type { UserType } from "@/types/api.types"
 
 export interface IUserSessionData {
   _id: string
-  user_type: UserType
-  first_name: string
-  last_name: string
+  userType: UserType
+  firstName: string
+  lastName: string
   email: string
   createdAt: string
   updatedAt: string
@@ -15,9 +15,9 @@ export interface IUserSessionData {
 
 const initialState: IUserSessionData = {
   _id: "",
-  user_type: "doctor",
-  first_name: "",
-  last_name: "",
+  userType: "doctor",
+  firstName: "",
+  lastName: "",
   email: "",
   createdAt: "",
   updatedAt: "",

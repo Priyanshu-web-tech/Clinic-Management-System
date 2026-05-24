@@ -24,7 +24,7 @@ const ForgotPassword = () => {
         const response = await forgotPassword(values).unwrap()
         if (response?.success) {
           localStorage.setItem("otp_email", values.email)
-          localStorage.setItem("otp_sent_at", Date.now().toString())
+          localStorage.setItem("otpSentAt", Date.now().toString())
           toast.success("OTP sent! Check your email.")
           navigate(NAVIGATION_ROUTES.VERIFY_OTP)
         } else {

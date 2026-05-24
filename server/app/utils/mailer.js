@@ -4,6 +4,7 @@ const path = require("path");
 
 const emailTypeSubject = {
   FORGET_PASSWORD: "Reset Your DocMate Password",
+  WELCOME_USER: "Welcome to DocMate - Your Account Credentials",
 };
 
 const transporter = nodemailer.createTransport({
@@ -19,6 +20,10 @@ const templateMap = {
     __dirname,
     "../emails/templates/forgotPassword.html"
   ),
+  [emailTypeSubject.WELCOME_USER]: path.join(
+    __dirname,
+    "../emails/templates/welcomeUser.html"
+  ),
 };
 
 const sendEmail = async (to, data, type) => {
@@ -26,8 +31,10 @@ const sendEmail = async (to, data, type) => {
   if (!templatePath) throw new Error(`No template for email type: ${type}`);
 
   let html = fs.readFileSync(templatePath, "utf8");
-  html = html.replace(/\{\{otp\}\}/g, data.otp);
-  html = html.replace(/\{\{userName\}\}/g, data.userName);
+
+  Object.entries(data).forEach(([key, value]) => {
+    html = html.replace(new RegExp(`\\{\\{${key}\\}\\}`, "g"), value);
+  });
 
   const mailOptions = {
     from: `"DocMate" <${process.env.EMAIL_USER}>`,

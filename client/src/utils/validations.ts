@@ -46,3 +46,11 @@ export const registerPasswordValidation = Yup.string()
   .matches(/[A-Z]/, "Must include an uppercase letter")
   .matches(/[0-9]/, "Must include a number")
   .matches(/[@$!%*?&#]/, "Must include a special character (@$!%*?&#)")
+
+export const phoneValidation = Yup.string()
+  .matches(/^\d{10}$/, "Phone number must be exactly 10 digits.")
+  .optional()
+
+export const manageableUserTypeValidation = Yup.string()
+  .oneOf(["staff", "chemist"], "Please select a valid role.")
+  .required("Role is required.")

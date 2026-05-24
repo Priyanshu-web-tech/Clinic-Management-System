@@ -12,6 +12,7 @@ export const API_ROUTES = {
   CHANGE_PASSWORD: "auth/change-password",
   LOGOUT: "auth/logout",
   UPDATE_HOSPITAL: "hospital",
+  USERS: "users",
 }
 
 export const USER_TYPE_OPTIONS = [
@@ -33,4 +34,5 @@ export const NAVIGATION_ROUTES = {
   FORGOT_PASSWORD: "/forgot-password",
   VERIFY_OTP: "/verify-otp",
   RESET_PASSWORD: "/reset-password",
+  USERS: "/users",
 }

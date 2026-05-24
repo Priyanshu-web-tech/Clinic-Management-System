@@ -104,3 +104,52 @@ export interface ChangePasswordRequest {
   newPassword: string
   confirmPassword: string
 }
+
+// ── User Management ──────────────────────────────────────
+
+export interface StaffUser {
+  _id: string
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+  userType: UserType
+  isActive: boolean
+  hospital: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface GetUsersRequest {
+  page?: number
+  pageSize?: number
+  search?: string
+  role?: UserType | ""
+}
+
+export interface GetUsersResponse {
+  users: StaffUser[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
+export interface CreateUserRequest {
+  firstName: string
+  lastName: string
+  email: string
+  phone?: string
+  userType: UserType
+}
+
+export interface UpdateUserRequest {
+  firstName: string
+  lastName: string
+  phone?: string
+  userType: UserType
+}
+
+export interface UserMutationResponse {
+  user: StaffUser
+}

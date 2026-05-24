@@ -424,35 +424,42 @@ const PasswordToggle = ({ show, onClick }: { show: boolean; onClick: () => void 
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 
-const Profile = () => (
-  <div className="p-6">
-    <div className="w-full max-w-lg">
-      <Tabs defaultValue="info">
-        <TabsList>
-          <TabsTrigger value="info">Personal info</TabsTrigger>
-          <TabsTrigger value="edit">Edit profile</TabsTrigger>
-          <TabsTrigger value="hospital">Hospital</TabsTrigger>
-          <TabsTrigger value="password">Password</TabsTrigger>
-        </TabsList>
+const Profile = () => {
+  const userType = useAppSelector((state) => state.userData.userType)
+  const isDoctor = userType === "doctor"
 
-        <TabsContent value="info">
-          <PersonalInfoTab />
-        </TabsContent>
+  return (
+    <div className="p-6">
+      <div className="w-full max-w-lg">
+        <Tabs defaultValue="info">
+          <TabsList>
+            <TabsTrigger value="info">Personal info</TabsTrigger>
+            <TabsTrigger value="edit">Edit profile</TabsTrigger>
+            {isDoctor && <TabsTrigger value="hospital">Hospital</TabsTrigger>}
+            <TabsTrigger value="password">Password</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="edit">
-          <EditProfileTab />
-        </TabsContent>
+          <TabsContent value="info">
+            <PersonalInfoTab />
+          </TabsContent>
 
-        <TabsContent value="hospital">
-          <HospitalTab />
-        </TabsContent>
+          <TabsContent value="edit">
+            <EditProfileTab />
+          </TabsContent>
 
-        <TabsContent value="password">
-          <PasswordTab />
-        </TabsContent>
-      </Tabs>
+          {isDoctor && (
+            <TabsContent value="hospital">
+              <HospitalTab />
+            </TabsContent>
+          )}
+
+          <TabsContent value="password">
+            <PasswordTab />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
-  </div>
-)
+  )
+}
 
 export default Profile

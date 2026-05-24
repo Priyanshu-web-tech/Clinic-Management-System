@@ -7,6 +7,7 @@ import {
   LogOut,
   Stethoscope,
   UserRound,
+  Users,
   Menu,
 } from "lucide-react"
 import { DropdownMenu } from "radix-ui"
@@ -19,12 +20,14 @@ import { apiSlice } from "@/store/api/apiSlice"
 import { NAVIGATION_ROUTES, USER_TYPE_LABEL } from "@/constants/constants"
 import type { NavItem } from "./layout.types"
 
-const NAV_ITEMS: NavItem[] = [
+const ALL_NAV_ITEMS: (NavItem & { roles?: string[] })[] = [
   { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+  { label: "Team", path: "/users", icon: Users, roles: ["doctor", "admin"] },
 ]
 
 const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
+  "/users": "Team",
   "/profile": "Profile",
 }
 
@@ -36,6 +39,10 @@ const Layout = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const user = useAppSelector((state) => state.userData)
+
+  const navItems = ALL_NAV_ITEMS.filter(
+    (item) => !item.roles || item.roles.includes(user.userType)
+  )
   const [logoutApi] = useLogoutMutation()
 
   // Fetch fresh profile once on layout mount and sync into Redux store
@@ -118,7 +125,7 @@ const Layout = () => {
 
         {/* Nav links */}
         <nav className="flex-1 overflow-y-auto px-2 py-3">
-          {NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}

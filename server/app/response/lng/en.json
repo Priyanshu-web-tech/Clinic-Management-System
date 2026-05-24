@@ -32,5 +32,13 @@
   "SAME_PASSWORD": "New password must be different from the current password.",
   "LOGOUT_SUCCESSFUL": "Logged out successfully.",
   "HOSPITAL_UPDATED": "Hospital details updated successfully.",
-  "HOSPITAL_NOT_FOUND": "Hospital not found."
+  "HOSPITAL_NOT_FOUND": "Hospital not found.",
+  "USERS_FETCHED": "Users fetched successfully.",
+  "USER_CREATED": "Member added. Login credentials have been sent to their email.",
+  "USER_UPDATED": "Member updated successfully.",
+  "USER_DELETED": "Member removed successfully.",
+  "USER_NOT_FOUND": "User not found.",
+  "USER_ALREADY_EXISTS": "A user with this email already exists.",
+  "CANNOT_DELETE_SELF": "You cannot deactivate your own account.",
+  "FORBIDDEN_USER_TYPE": "You are not allowed to create a user of this role."
 }

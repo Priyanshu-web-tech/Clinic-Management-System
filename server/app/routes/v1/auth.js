@@ -73,8 +73,8 @@ router.post("/login", validate(schema.login), controller.login);
  * @swagger
  * /v1/auth/register:
  *   post:
- *     summary: Register a new user
- *     description: Create a new DocMate user account. Returns JWT tokens on success.
+ *     summary: Register a new doctor
+ *     description: Creates a hospital and a doctor account linked to it. Role is hardcoded as "doctor". Returns JWT tokens on success.
  *     tags:
  *       - Authentication
  *     requestBody:
@@ -88,29 +88,36 @@ router.post("/login", validate(schema.login), controller.login);
  *               - password
  *               - firstName
  *               - lastName
- *               - userType
+ *               - hospitalName
  *             properties:
- *               email:
+ *               hospitalName:
  *                 type: string
- *                 format: email
- *                 example: doctor@docmate.com
- *               password:
- *                 type: string
- *                 example: Password@123
- *                 description: Min 8 chars, must include uppercase, lowercase, number, and special character.
+ *                 example: City General Hospital
  *               firstName:
  *                 type: string
  *                 example: John
  *               lastName:
  *                 type: string
  *                 example: Doe
- *               userType:
+ *               email:
  *                 type: string
- *                 enum: [admin, doctor, staff, chemist]
- *                 example: doctor
+ *                 format: email
+ *                 example: doctor@docmate.com
+ *               phone:
+ *                 type: string
+ *                 example: "9876543210"
+ *                 description: Optional. Must be exactly 10 digits if provided.
+ *               address:
+ *                 type: string
+ *                 example: 123 Main St, City
+ *                 description: Optional. Hospital address.
+ *               password:
+ *                 type: string
+ *                 example: Password@123
+ *                 description: Min 8 chars, must include uppercase, lowercase, number, and special character.
  *     responses:
  *       201:
- *         description: User registered successfully.
+ *         description: Doctor and hospital registered successfully.
  *         content:
  *           application/json:
  *             schema:
@@ -139,7 +146,7 @@ router.post("/login", validate(schema.login), controller.login);
  *                           type: string
  *                         userType:
  *                           type: string
- *                           enum: [admin, doctor, staff, chemist]
+ *                           example: doctor
  *       400:
  *         description: Validation error.
  *       409:
@@ -347,6 +354,10 @@ router.post("/reset-password", verifyOtpToken, validate(schema.resetPassword), c
  *               lastName:
  *                 type: string
  *                 example: Doe
+ *               phone:
+ *                 type: string
+ *                 example: "9876543210"
+ *                 description: Optional. Must be exactly 10 digits if provided.
  *     responses:
  *       200:
  *         description: Profile updated successfully.

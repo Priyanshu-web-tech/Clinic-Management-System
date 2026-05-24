@@ -11,6 +11,7 @@ export const API_ROUTES = {
   UPDATE_PROFILE: "auth/update-profile",
   CHANGE_PASSWORD: "auth/change-password",
   LOGOUT: "auth/logout",
+  UPDATE_HOSPITAL: "hospital",
 }
 
 export const USER_TYPE_OPTIONS = [

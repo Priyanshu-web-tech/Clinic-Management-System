@@ -1,6 +1,7 @@
 const httpStatus = require("http-status").status;
 const otpGenerator = require("otp-generator");
 
+const Hospital = require("../models/hospital");
 const { db } = require("../models/index");
 const sessionService = require("../services/sessionService");
 const authRepository = require("../repositories/authRepository");
@@ -123,7 +124,7 @@ const loginByEmail = async (body, res) => {
 const registerUser = async (body, res) => {
   const transaction = await db.transaction();
   try {
-    const { email, password, firstName, lastName, userType, deviceId } = body;
+    const { email, password, firstName, lastName, phone, hospitalName, address, deviceId } = body;
 
     const existingUser = await authRepository.findUserByEmail(email, null, transaction);
     if (existingUser) {
@@ -136,6 +137,9 @@ const registerUser = async (body, res) => {
       };
     }
 
+    const hospitalDocs = await Hospital.create([{ name: hospitalName, address }], { session: transaction });
+    const hospital = hospitalDocs[0];
+
     const hash = await generateHash(password);
     const user = await authRepository.createUser(
       {
@@ -143,7 +147,9 @@ const registerUser = async (body, res) => {
         password: hash,
         firstName,
         lastName,
-        userType,
+        phone,
+        userType: "doctor",
+        hospital: hospital._id,
       },
       transaction
     );
@@ -158,9 +164,11 @@ const registerUser = async (body, res) => {
       };
     }
 
+    await Hospital.updateOne({ _id: hospital._id }, { $set: { owner: user._id } }, { session: transaction });
+
     const sessionTokens = sessionService.generateSessionTokens({ user, deviceId }, res);
 
-    await sessionService.createSession(
+    const newSession = await sessionService.createSession(
       {
         userId: user._id,
         deviceId,
@@ -169,6 +177,16 @@ const registerUser = async (body, res) => {
       },
       transaction
     );
+
+    if (!newSession) {
+      return {
+        error: true,
+        data: {},
+        msgCode: "UNABLE_TO_CREATE",
+        status: httpStatus.INTERNAL_SERVER_ERROR,
+        transaction,
+      };
+    }
 
     return {
       error: false,
@@ -557,14 +575,13 @@ const resetPassword = async (req, res) => {
 const updateProfile = async (req) => {
   const transaction = await db.transaction();
   try {
-    const { firstName, lastName } = req.body;
+    const { firstName, lastName, phone } = req.body;
     const userId = req.data._id;
 
-    await authRepository.updateUser(
-      { firstName, lastName },
-      { _id: userId },
-      transaction
-    );
+    const updateData = { firstName, lastName };
+    if (phone !== undefined) updateData.phone = phone;
+
+    await authRepository.updateUser(updateData, { _id: userId }, transaction);
 
     const updatedUser = await authRepository.findUserById(userId, "-password", transaction);
 
@@ -577,6 +594,7 @@ const updateProfile = async (req) => {
           firstName: updatedUser.firstName,
           lastName: updatedUser.lastName,
           userType: updatedUser.userType,
+          phone: updatedUser.phone,
           createdAt: updatedUser.createdAt,
           updatedAt: updatedUser.updatedAt,
         },

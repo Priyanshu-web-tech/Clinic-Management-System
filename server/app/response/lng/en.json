@@ -30,5 +30,7 @@
   "PASSWORD_CHANGED": "Password changed successfully.",
   "INVALID_CURRENT_PASSWORD": "Current password is incorrect.",
   "SAME_PASSWORD": "New password must be different from the current password.",
-  "LOGOUT_SUCCESSFUL": "Logged out successfully."
+  "LOGOUT_SUCCESSFUL": "Logged out successfully.",
+  "HOSPITAL_UPDATED": "Hospital details updated successfully.",
+  "HOSPITAL_NOT_FOUND": "Hospital not found."
 }

@@ -16,7 +16,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hook"
 import { clearUserData, setUserData } from "@/store/slices/userDataSlice"
 import { useLogoutMutation, useGetMeQuery } from "@/store/api/authApiSlice"
 import { apiSlice } from "@/store/api/apiSlice"
-import { NAVIGATION_ROUTES } from "@/constants/constants"
+import { NAVIGATION_ROUTES, USER_TYPE_LABEL } from "@/constants/constants"
 import type { NavItem } from "./layout.types"
 
 const NAV_ITEMS: NavItem[] = [
@@ -170,7 +170,12 @@ const Layout = () => {
             <h1 className="text-sm font-semibold text-foreground">{pageTitle}</h1>
           </div>
 
-          {/* Avatar dropdown */}
+          {/* Role + Avatar dropdown */}
+          <div className="flex items-center gap-2.5">
+            <span className="hidden text-xs font-medium text-muted-foreground sm:block">
+              {USER_TYPE_LABEL[user.userType] ?? user.userType}
+            </span>
+
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
               <button className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary transition-colors hover:bg-primary/20 focus:outline-none">
@@ -215,6 +220,7 @@ const Layout = () => {
               </DropdownMenu.Content>
             </DropdownMenu.Portal>
           </DropdownMenu.Root>
+          </div>
         </header>
 
         {/* Page content */}

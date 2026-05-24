@@ -1,5 +1,4 @@
 const Joi = require("joi");
-const { userType } = require("../constant/constant");
 
 const passwordSchema = Joi.string()
   .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/)
@@ -37,13 +36,17 @@ const register = Joi.object({
   lastName: Joi.string().trim().required().messages({
     "any.required": "Last name is required.",
   }),
-  userType: Joi.string()
-    .valid(...Object.values(userType))
-    .required()
+  phone: Joi.string()
+    .pattern(/^\d{10}$/)
+    .optional()
+    .allow("")
     .messages({
-      "any.only": `User type must be one of [${Object.values(userType).join(", ")}]`,
-      "any.required": "User type is required.",
+      "string.pattern.base": "Phone number must be exactly 10 digits.",
     }),
+  hospitalName: Joi.string().trim().required().messages({
+    "any.required": "Hospital name is required.",
+  }),
+  address: Joi.string().trim().optional().allow(""),
 });
 
 const forgotPassword = Joi.object({
@@ -84,6 +87,20 @@ const updateProfile = Joi.object({
   lastName: Joi.string().trim().required().messages({
     "any.required": "Last name is required.",
   }),
+  phone: Joi.string()
+    .pattern(/^\d{10}$/)
+    .optional()
+    .allow("")
+    .messages({
+      "string.pattern.base": "Phone number must be exactly 10 digits.",
+    }),
+});
+
+const updateHospital = Joi.object({
+  name: Joi.string().trim().required().messages({
+    "any.required": "Hospital name is required.",
+  }),
+  address: Joi.string().trim().optional().allow(""),
 });
 
 const changePassword = Joi.object({
@@ -100,4 +117,4 @@ const changePassword = Joi.object({
     }),
 });
 
-module.exports = { login, register, forgotPassword, verifyOtp, resetPassword, updateProfile, changePassword };
+module.exports = { login, register, forgotPassword, verifyOtp, resetPassword, updateProfile, changePassword, updateHospital };

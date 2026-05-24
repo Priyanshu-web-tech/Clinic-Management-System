@@ -25,10 +25,24 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
+    phone: {
+      type: String,
+      default: "",
+    },
     password: {
       type: String,
       required: true,
       minlength: 6,
+    },
+    hospital: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Hospital",
+      default: null, // allowed for global users - admin
+      index: true,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
     },
     loginAttempts: {
       type: Number,
@@ -39,7 +53,7 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("User", userSchema);

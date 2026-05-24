@@ -4,7 +4,7 @@ import { useFormik } from "formik"
 import { Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner"
 
-import { useGetMeQuery, useUpdateProfileMutation, useChangePasswordMutation } from "@/store/api/authApiSlice"
+import { useGetMeQuery, useUpdateProfileMutation, useUpdateHospitalMutation, useChangePasswordMutation } from "@/store/api/authApiSlice"
 import { setUserData } from "@/store/slices/userDataSlice"
 import { useAppDispatch, useAppSelector } from "@/store/hook"
 import { Button } from "@/components/ui/button"
@@ -64,7 +64,16 @@ const PersonalInfoTab = () => {
 
       <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
         <ProfileRow label="Email" value={profile.email} />
+        {profile.phone && <ProfileRow label="Phone" value={profile.phone} />}
         <ProfileRow label="Role" value={USER_TYPE_LABEL[profile.userType] ?? profile.userType} />
+        {profile.hospital && (
+          <>
+            <ProfileRow label="Hospital" value={profile.hospital.name} />
+            {profile.hospital.address && (
+              <ProfileRow label="Address" value={profile.hospital.address} />
+            )}
+          </>
+        )}
         <ProfileRow
           label="Member since"
           value={new Date(profile.createdAt).toLocaleDateString("en-US", {
@@ -83,6 +92,7 @@ const PersonalInfoTab = () => {
 const EditProfileTab = () => {
   const dispatch = useAppDispatch()
   const user = useAppSelector((state) => state.userData)
+  const { data: meData } = useGetMeQuery(undefined, { refetchOnMountOrArgChange: true })
   const [updateProfile, { isLoading }] = useUpdateProfileMutation()
 
   const formik = useFormik<UpdateProfileFormValues>({
@@ -90,10 +100,14 @@ const EditProfileTab = () => {
     initialValues: {
       firstName: user.firstName ?? "",
       lastName: user.lastName ?? "",
+      phone: meData?.result?.phone ?? "",
     },
     validationSchema: Yup.object({
       firstName: Yup.string().trim().required("First name is required"),
       lastName: Yup.string().trim().required("Last name is required"),
+      phone: Yup.string()
+        .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
+        .optional(),
     }),
     onSubmit: async (values) => {
       try {
@@ -126,7 +140,7 @@ const EditProfileTab = () => {
   return (
     <div className="space-y-5 max-w-sm">
       <div>
-        <p className="text-sm font-medium text-foreground">Update your name</p>
+        <p className="text-sm font-medium text-foreground">Update your details</p>
         <p className="text-xs text-muted-foreground mt-0.5">Changes will reflect across the app immediately.</p>
       </div>
 
@@ -161,6 +175,106 @@ const EditProfileTab = () => {
           {formik.touched.lastName && formik.errors.lastName && (
             <p className="text-xs text-destructive">{formik.errors.lastName}</p>
           )}
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="phone">Contact number</Label>
+          <Input
+            id="phone"
+            name="phone"
+            type="text"
+            inputMode="numeric"
+            placeholder="9876543210"
+            value={formik.values.phone}
+            onChange={(e) => {
+              const digits = e.target.value.replace(/\D/g, "").slice(0, 10)
+              formik.setFieldValue("phone", digits)
+            }}
+            onBlur={formik.handleBlur}
+            aria-invalid={!!(formik.touched.phone && formik.errors.phone)}
+          />
+          {formik.touched.phone && formik.errors.phone && (
+            <p className="text-xs text-destructive">{formik.errors.phone}</p>
+          )}
+        </div>
+
+        <Button type="submit" size="sm" disabled={isLoading}>
+          {isLoading && <Spinner className="mr-2" />}
+          Save changes
+        </Button>
+      </form>
+    </div>
+  )
+}
+
+// ── Hospital Tab ───────────────────────────────────────────────────────────────
+
+const HospitalTab = () => {
+  const { data: meData } = useGetMeQuery(undefined, { refetchOnMountOrArgChange: true })
+  const [updateHospital, { isLoading }] = useUpdateHospitalMutation()
+
+  const hospital = meData?.result?.hospital
+
+  const formik = useFormik({
+    enableReinitialize: true,
+    initialValues: {
+      name: hospital?.name ?? "",
+      address: hospital?.address ?? "",
+    },
+    validationSchema: Yup.object({
+      name: Yup.string().trim().required("Hospital name is required"),
+      address: Yup.string().optional(),
+    }),
+    onSubmit: async (values) => {
+      try {
+        const response = await updateHospital(values).unwrap()
+        if (response?.success) {
+          toast.success(response.message ?? "Hospital updated.")
+        } else {
+          toast.error(response?.message ?? "Update failed.")
+        }
+      } catch (err: unknown) {
+        const message =
+          (err as { data?: { message?: string } })?.data?.message ?? "Update failed. Please try again."
+        toast.error(message)
+      }
+    },
+  })
+
+  return (
+    <div className="space-y-5 max-w-sm">
+      <div>
+        <p className="text-sm font-medium text-foreground">Hospital details</p>
+        <p className="text-xs text-muted-foreground mt-0.5">Update your hospital name and address.</p>
+      </div>
+
+      <form onSubmit={formik.handleSubmit} className="space-y-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="hospitalName">Hospital name</Label>
+          <Input
+            id="hospitalName"
+            name="name"
+            placeholder="City General Hospital"
+            value={formik.values.name}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            aria-invalid={!!(formik.touched.name && formik.errors.name)}
+          />
+          {formik.touched.name && formik.errors.name && (
+            <p className="text-xs text-destructive">{formik.errors.name}</p>
+          )}
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="hospitalAddress">Address</Label>
+          <Input
+            id="hospitalAddress"
+            name="address"
+            placeholder="123 Main St, City"
+            value={formik.values.address}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+          />
         </div>
 
         <Button type="submit" size="sm" disabled={isLoading}>
@@ -318,6 +432,7 @@ const Profile = () => (
         <TabsList>
           <TabsTrigger value="info">Personal info</TabsTrigger>
           <TabsTrigger value="edit">Edit profile</TabsTrigger>
+          <TabsTrigger value="hospital">Hospital</TabsTrigger>
           <TabsTrigger value="password">Password</TabsTrigger>
         </TabsList>
 
@@ -327,6 +442,10 @@ const Profile = () => (
 
         <TabsContent value="edit">
           <EditProfileTab />
+        </TabsContent>
+
+        <TabsContent value="hospital">
+          <HospitalTab />
         </TabsContent>
 
         <TabsContent value="password">

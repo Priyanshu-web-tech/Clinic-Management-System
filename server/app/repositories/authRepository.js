@@ -5,7 +5,7 @@ const findUserByEmail = async (email, select, session) => {
 };
 
 const findUserForSessionData = async (userId) => {
-  return await User.findById(userId).select("-password");
+  return await User.findById(userId).select("-password").populate("hospital", "name address");
 };
 
 const findUserById = async (userId, select, session) => {

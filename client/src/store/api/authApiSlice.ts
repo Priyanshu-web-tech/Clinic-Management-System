@@ -11,6 +11,8 @@ import type {
   ResetPasswordRequest,
   UpdateProfileRequest,
   UpdateProfileResponse,
+  UpdateHospitalRequest,
+  UpdateHospitalResponse,
   ChangePasswordRequest,
 } from "@/types/api.types"
 
@@ -98,6 +100,15 @@ export const authApi = apiSlice.injectEndpoints({
       }),
     }),
 
+    // UPDATE HOSPITAL
+    updateHospital: builder.mutation<ApiResponse<UpdateHospitalResponse>, UpdateHospitalRequest>({
+      query: (body) => ({
+        url: API_ROUTES.UPDATE_HOSPITAL,
+        method: "PUT",
+        body,
+      }),
+    }),
+
     // LOGOUT
     logout: builder.mutation<ApiResponse<Record<string, never>>, void>({
       query: () => ({
@@ -118,6 +129,7 @@ export const {
   useVerifyOtpMutation,
   useResetPasswordMutation,
   useUpdateProfileMutation,
+  useUpdateHospitalMutation,
   useChangePasswordMutation,
   useLogoutMutation,
 } = authApi

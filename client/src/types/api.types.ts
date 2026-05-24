@@ -10,7 +10,9 @@ export interface RegisterRequest {
   password: string
   firstName: string
   lastName: string
-  userType: UserType
+  phone: string
+  hospitalName: string
+  address: string
 }
 
 export interface AuthUser {
@@ -27,12 +29,20 @@ export interface AuthResponse {
   user: AuthUser
 }
 
+export interface Hospital {
+  _id: string
+  name: string
+  address: string
+}
+
 export interface UserProfile {
   _id: string
   email: string
   firstName: string
   lastName: string
   userType: UserType
+  phone: string
+  hospital: Hospital | null
   createdAt: string
   updatedAt: string
 }
@@ -60,6 +70,7 @@ export interface ResetPasswordRequest {
 export interface UpdateProfileRequest {
   firstName: string
   lastName: string
+  phone?: string
 }
 
 export interface UpdateProfileResponse {
@@ -69,8 +80,22 @@ export interface UpdateProfileResponse {
     firstName: string
     lastName: string
     userType: UserType
+    phone: string
     createdAt: string
     updatedAt: string
+  }
+}
+
+export interface UpdateHospitalRequest {
+  name: string
+  address?: string
+}
+
+export interface UpdateHospitalResponse {
+  hospital: {
+    _id: string
+    name: string
+    address: string
   }
 }
 

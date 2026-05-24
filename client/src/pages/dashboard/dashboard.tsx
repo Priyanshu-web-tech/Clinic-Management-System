@@ -5,10 +5,9 @@ const Dashboard = () => {
 
   return (
     <div className="p-6">
-      <p className="text-sm text-muted-foreground">
-        Welcome back,{" "}
-        <span className="font-medium text-foreground">{user.firstName} {user.lastName}</span>!
-      </p>
+      <h2 className="text-lg font-semibold text-foreground">
+        Welcome back, {user.firstName} {user.lastName}
+      </h2>
     </div>
   )
 }

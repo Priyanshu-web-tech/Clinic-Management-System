@@ -1,9 +1,10 @@
-import type { UserType } from "@/types/api.types"
-
 export interface RegisterFormValues {
+  hospitalName: string
   firstName: string
   lastName: string
   email: string
+  phone: string
+  address: string
   password: string
-  userType: UserType | ""
+  confirmPassword: string
 }

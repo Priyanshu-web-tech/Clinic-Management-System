@@ -1,6 +1,7 @@
 export interface UpdateProfileFormValues {
   firstName: string
   lastName: string
+  phone: string
 }
 
 export interface ChangePasswordFormValues {

@@ -1,5 +1,4 @@
 export type UserType = "admin" | "doctor" | "staff" | "pharmacist"
-export type UserStatus = "active" | "deleted" | "deactivated"
 
 export interface LoginRequest {
   email: string
@@ -34,7 +33,6 @@ export interface UserProfile {
   first_name: string
   last_name: string
   user_type: UserType
-  status: UserStatus
   createdAt: string
   updatedAt: string
 }
@@ -71,7 +69,6 @@ export interface UpdateProfileResponse {
     first_name: string
     last_name: string
     user_type: UserType
-    status: UserStatus
     createdAt: string
     updatedAt: string
   }

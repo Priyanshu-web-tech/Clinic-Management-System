@@ -15,6 +15,7 @@ import { toast } from "sonner"
 import { useAppDispatch, useAppSelector } from "@/store/hook"
 import { clearUserData, setUserData } from "@/store/slices/userDataSlice"
 import { useLogoutMutation, useGetMeQuery } from "@/store/api/authApiSlice"
+import { apiSlice } from "@/store/api/apiSlice"
 import { NAVIGATION_ROUTES } from "@/constants/constants"
 import type { NavItem } from "./layout.types"
 
@@ -72,6 +73,7 @@ const Layout = () => {
       // proceed with local logout even if API call fails
     }
     dispatch(clearUserData())
+    dispatch(apiSlice.util.resetApiState())
     toast.success("Logged out successfully.")
     navigate(NAVIGATION_ROUTES.LOGIN)
   }

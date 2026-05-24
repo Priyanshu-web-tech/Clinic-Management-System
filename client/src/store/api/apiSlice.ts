@@ -26,6 +26,7 @@ const handleLogout = (api: BaseQueryApi) => {
 
   isLoggingOut = true
   api.dispatch(clearUserData())
+  api.dispatch(apiSlice.util.resetApiState())
 
   toast.error("Session expired. Please login again.")
   navigate(NAVIGATION_ROUTES.LOGIN)

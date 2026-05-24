@@ -5,8 +5,6 @@ const httpStatus = require("http-status").status;
 const response = require("../response/index");
 const authRepository = require("../repositories/authRepository");
 const sessionRepository = require("../repositories/sessionRepository");
-const { userStatus } = require("../constant/constant");
-
 
 const generateUserToken = (data, res) => {
   const privateToken = fs.readFileSync("private.key", "utf8");
@@ -120,24 +118,6 @@ const verifyAuthToken = (req, res, next) => {
         );
       } else {
         const userDetails = await authRepository.findUserForSessionData(decoded?.id);
-        if(userDetails?.status === userStatus.DEACTIVATED) {
-          return response.error(
-            req,
-            res,
-            { msgCode: "YOU_ACCOUNT_HAS_BEEN_SUSPENDED" },
-            httpStatus.FORBIDDEN
-          );
-        }
-
-        if(userDetails?.status === userStatus.DELETED) {
-          return response.error(
-            req,
-            res,
-            { msgCode: "YOU_ACCOUNT_HAS_BEEN_DELETED" },
-            httpStatus.FORBIDDEN
-          );
-        }
-
         if(userDetails?.deleted_at) {
           await sessionRepository.deleteSession(
             { user_id: userDetails?.id },

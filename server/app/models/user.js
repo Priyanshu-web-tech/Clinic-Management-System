@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { userType, userStatus } = require("../constant/constant");
+const { userType } = require("../constant/constant");
 
 const userSchema = new mongoose.Schema(
   {
@@ -7,11 +7,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: Object.values(userType),
       required: true,
-    },
-    status: {
-      type: String,
-      enum: Object.values(userStatus),
-      default: userStatus.ACTIVE,
     },
     first_name: {
       type: String,
@@ -34,6 +29,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 6,
+    },
+    login_attempts: {
+      type: Number,
+      default: 0,
+    },
+    lock_until: {
+      type: Number,
+      default: null,
     },
   },
   { timestamps: true }

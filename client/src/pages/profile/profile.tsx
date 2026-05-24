@@ -22,12 +22,6 @@ const USER_TYPE_LABEL: Record<string, string> = {
   pharmacist: "Pharmacist",
 }
 
-const STATUS_LABEL: Record<string, string> = {
-  active: "Active",
-  deleted: "Deleted",
-  deactivated: "Deactivated",
-}
-
 // ── Personal Info Tab ──────────────────────────────────────────────────────────
 
 const PersonalInfoTab = () => {
@@ -77,7 +71,6 @@ const PersonalInfoTab = () => {
       <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
         <ProfileRow label="Email" value={profile.email} />
         <ProfileRow label="Role" value={USER_TYPE_LABEL[profile.user_type] ?? profile.user_type} />
-        <ProfileRow label="Status" value={STATUS_LABEL[profile.status] ?? profile.status} />
         <ProfileRow
           label="Member since"
           value={new Date(profile.createdAt).toLocaleDateString("en-US", {
@@ -120,7 +113,6 @@ const EditProfileTab = () => {
               first_name: updated.first_name,
               last_name: updated.last_name,
               user_type: updated.user_type,
-              status: updated.status,
               createdAt: updated.createdAt,
               updatedAt: updated.updatedAt,
             }),

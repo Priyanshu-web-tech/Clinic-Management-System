@@ -6,7 +6,7 @@ const sessionService = require("../services/sessionService");
 const authRepository = require("../repositories/authRepository");
 const otpRepository = require("../repositories/otpRepository");
 const { generateHash, comparePassword } = require("../utils/password");
-const { userStatus, otpType } = require("../constant/constant");
+const { otpType } = require("../constant/constant");
 const { verifyAccessTokenRaw, generateOtpToken, generateVerifyToken } = require("../middlewares/jwt");
 const { sendEmail, emailTypeSubject } = require("../utils/mailer");
 const { getTimeDiffInMin } = require("../utils/helper");
@@ -28,21 +28,14 @@ const loginByEmail = async (body, res) => {
       };
     }
 
-    if (checkUser.status === userStatus.DEACTIVATED) {
+    if (checkUser.lock_until && Date.now() < checkUser.lock_until) {
+      const remainingMs = checkUser.lock_until - Date.now();
+      const remainingMinutes = Math.ceil(remainingMs / (60 * 1000));
+      const minutesText = `${remainingMinutes} minute${remainingMinutes !== 1 ? "s" : ""}`;
       return {
         error: true,
         data: {},
-        msgCode: "YOU_ACCOUNT_HAS_BEEN_SUSPENDED",
-        status: httpStatus.UNAUTHORIZED,
-        transaction,
-      };
-    }
-
-    if (checkUser.status === userStatus.DELETED) {
-      return {
-        error: true,
-        data: {},
-        msgCode: "YOU_ACCOUNT_HAS_BEEN_DELETED",
+        msgCode: `Your account has been temporarily locked due to multiple failed login attempts. Please try again in ${minutesText} or reset your password.`,
         status: httpStatus.UNAUTHORIZED,
         transaction,
       };
@@ -50,6 +43,22 @@ const loginByEmail = async (body, res) => {
 
     const isPasswordValid = await comparePassword(password, checkUser.password);
     if (!isPasswordValid) {
+      const newAttempts = (checkUser.login_attempts || 0) + 1;
+      const updateData = { login_attempts: newAttempts };
+      if (newAttempts >= 5) {
+        updateData.lock_until = Date.now() + 10 * 60 * 1000;
+        updateData.login_attempts = 0;
+      }
+      await authRepository.updateUser(updateData, { _id: checkUser._id });
+      if (newAttempts >= 5) {
+        return {
+          error: true,
+          data: {},
+          msgCode: `Your account has been temporarily locked due to multiple failed login attempts. Please try again in 10 minutes or reset your password.`,
+          status: httpStatus.UNAUTHORIZED,
+          transaction,
+        };
+      }
       return {
         error: true,
         data: {},
@@ -58,6 +67,8 @@ const loginByEmail = async (body, res) => {
         transaction,
       };
     }
+
+    await authRepository.updateUser({ login_attempts: 0, lock_until: null }, { _id: checkUser._id });
 
     const sessionTokens = sessionService.generateSessionTokens({ user: checkUser, deviceId }, res);
 
@@ -245,26 +256,6 @@ const refreshTokens = async (req, res) => {
       };
     }
 
-    if (user.status === userStatus.DEACTIVATED) {
-      return {
-        error: true,
-        data: {},
-        msgCode: "YOU_ACCOUNT_HAS_BEEN_SUSPENDED",
-        status: httpStatus.UNAUTHORIZED,
-        transaction,
-      };
-    }
-
-    if (user.status === userStatus.DELETED) {
-      return {
-        error: true,
-        data: {},
-        msgCode: "YOU_ACCOUNT_HAS_BEEN_DELETED",
-        status: httpStatus.UNAUTHORIZED,
-        transaction,
-      };
-    }
-
     const deviceId = existingSession.device_id;
     const sessionTokens = sessionService.generateSessionTokens({ user, deviceId }, res);
 
@@ -316,26 +307,6 @@ const forgotPassword = async (body, res) => {
       };
     }
 
-    if (checkUser.status === userStatus.DEACTIVATED) {
-      return {
-        error: true,
-        data: {},
-        msgCode: "YOU_ACCOUNT_HAS_BEEN_SUSPENDED",
-        status: httpStatus.UNAUTHORIZED,
-        transaction,
-      };
-    }
-
-    if (checkUser.status === userStatus.DELETED) {
-      return {
-        error: true,
-        data: {},
-        msgCode: "YOU_ACCOUNT_HAS_BEEN_DELETED",
-        status: httpStatus.UNAUTHORIZED,
-        transaction,
-      };
-    }
-
     let otp;
     if (process.env.OTP_BYPASS === "true") {
       otp = process.env.OTP;
@@ -358,20 +329,24 @@ const forgotPassword = async (body, res) => {
       let updateData = { otp: hashOtp, otp_sent_at: Date.now() };
 
       if (checkOtp.otp_retries >= 2 && retryTimeDiffInMin < 10) {
+        const remaining = Math.ceil(10 - retryTimeDiffInMin);
+        const minutesText = remaining > 0 ? `${remaining} minute${remaining !== 1 ? "s" : ""}` : null;
         return {
           error: true,
           data: {},
-          msgCode: `To protect your account, it's been temporarily locked. Try again in ${10 - retryTimeDiffInMin} minutes`,
+          msgCode: `Your account has been temporarily locked due to multiple failed attempts.${minutesText ? ` Please try again in ${minutesText}.` : ` Please try again later.`}`,
           status: httpStatus.UNAUTHORIZED,
           transaction,
         };
       }
 
       if (checkOtp.otp_sent >= 6 && timeDiffInMin < 10) {
+        const remaining = Math.ceil(10 - timeDiffInMin);
+        const minutesText = remaining > 0 ? `${remaining} minute${remaining !== 1 ? "s" : ""}` : null;
         return {
           error: true,
           data: { time_in_minutes: 10 - timeDiffInMin },
-          msgCode: `To protect your account, it's been temporarily locked. Try again in ${10 - timeDiffInMin} minutes`,
+          msgCode: `Your account has been temporarily locked due to multiple failed attempts.${minutesText ? ` Please try again in ${minutesText}.` : ` Please try again later.`}`,
           status: httpStatus.UNAUTHORIZED,
           transaction,
         };
@@ -481,15 +456,17 @@ const verifyOtp = async (req, res) => {
     if (checkOtp.otp_retries >= 3) {
       const retryDiff = getTimeDiffInMin(checkOtp.last_attempt);
       if (retryDiff < 10) {
+        const remaining = Math.ceil(10 - retryDiff);
+        const minutesText = remaining > 0 ? `${remaining} minute${remaining !== 1 ? "s" : ""}` : null;
         return {
           error: true,
           data: {},
-          msgCode: `To protect your account, it's been temporarily locked. Try again in ${10 - retryDiff} minutes`,
+          msgCode: `Your account has been temporarily locked due to multiple failed attempts.${minutesText ? ` Please try again in ${minutesText}.` : ` Please try again later.`}`,
           status: httpStatus.UNAUTHORIZED,
           transaction,
         };
       }
-      await otpRepository.updateOtp({ otp_retries: 0 }, otpCond, transaction);
+      await otpRepository.updateOtp({ otp_retries: 0 }, otpCond);
     }
 
     const isOtpValid = await comparePassword(otp.toString(), checkOtp.otp);
@@ -497,8 +474,7 @@ const verifyOtp = async (req, res) => {
     if (!isOtpValid) {
       await otpRepository.updateOtp(
         { otp_retries: checkOtp.otp_retries + 1, last_attempt: Date.now() },
-        otpCond,
-        transaction
+        otpCond
       );
       return {
         error: true,
@@ -549,7 +525,7 @@ const resetPassword = async (req, res) => {
     }
 
     const hash = await generateHash(password);
-    await authRepository.updateUser({ password: hash }, { _id: checkUser._id }, transaction);
+    await authRepository.updateUser({ password: hash, login_attempts: 0, lock_until: null }, { _id: checkUser._id }, transaction);
 
     await otpRepository.deleteByCondition(
       { user_id: checkUser._id, otp_type: otpType.RESET_PASSWORD },
@@ -601,7 +577,6 @@ const updateProfile = async (req) => {
           first_name: updatedUser.first_name,
           last_name: updatedUser.last_name,
           user_type: updatedUser.user_type,
-          status: updatedUser.status,
           createdAt: updatedUser.createdAt,
           updatedAt: updatedUser.updatedAt,
         },

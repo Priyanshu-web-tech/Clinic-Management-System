@@ -217,9 +217,6 @@ router.post("/refresh", controller.refreshToken);
  *                     user_type:
  *                       type: string
  *                       enum: [admin, doctor, staff, pharmacist]
- *                     status:
- *                       type: string
- *                       enum: [active, deleted, deactivated]
  *       401:
  *         description: Missing or invalid token.
  */

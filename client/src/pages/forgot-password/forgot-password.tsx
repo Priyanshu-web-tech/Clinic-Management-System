@@ -40,48 +40,57 @@ const ForgotPassword = () => {
   })
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-sm rounded-xl border border-border bg-card p-8 shadow-sm">
-        <div className="mb-6">
+    <div className="flex h-screen items-center justify-center bg-background px-4">
+      <div className="w-full max-w-sm rounded-xl border border-border bg-card shadow-sm flex flex-col max-h-[calc(100vh-2rem)]">
+
+        {/* Header — fixed, never scrolls */}
+        <div className="px-8 pt-8 pb-4 shrink-0">
           <h1 className="text-xl font-semibold text-foreground">Forgot password</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Enter your email and we&apos;ll send you a one-time password.
           </p>
         </div>
 
-        <form onSubmit={formik.handleSubmit} className="space-y-4">
-          <div className="space-y-1">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="you@example.com"
-              value={formik.values.email}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              aria-invalid={!!(formik.touched.email && formik.errors.email)}
-            />
-            {formik.touched.email && formik.errors.email && (
-              <p className="text-xs text-destructive">{formik.errors.email}</p>
-            )}
+        <form onSubmit={formik.handleSubmit} className="flex flex-col flex-1 min-h-0">
+
+          {/* Scrollable fields */}
+          <div className="flex-1 overflow-y-auto px-8 space-y-4">
+            <div className="space-y-1 pb-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="you@example.com"
+                value={formik.values.email}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                aria-invalid={!!(formik.touched.email && formik.errors.email)}
+              />
+              {formik.touched.email && formik.errors.email && (
+                <p className="text-xs text-destructive">{formik.errors.email}</p>
+              )}
+            </div>
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading && <Spinner className="mr-2" />}
-            Send OTP
-          </Button>
-        </form>
+          {/* Footer — fixed, never scrolls */}
+          <div className="px-8 pt-4 pb-8 shrink-0">
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading && <Spinner className="mr-2" />}
+              Send OTP
+            </Button>
+            <p className="mt-5 text-center text-xs text-muted-foreground">
+              Remember your password?{" "}
+              <Link
+                to={NAVIGATION_ROUTES.LOGIN}
+                className="font-medium text-primary hover:underline"
+              >
+                Sign in
+              </Link>
+            </p>
+          </div>
 
-        <p className="mt-5 text-center text-xs text-muted-foreground">
-          Remember your password?{" "}
-          <Link
-            to={NAVIGATION_ROUTES.LOGIN}
-            className="font-medium text-primary hover:underline"
-          >
-            Sign in
-          </Link>
-        </p>
+        </form>
       </div>
     </div>
   )

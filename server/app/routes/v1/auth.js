@@ -59,7 +59,7 @@ const { validate, verifyAuthToken, verifyOtpToken } = require("../../middlewares
  *                           type: string
  *                         userType:
  *                           type: string
- *                           enum: [admin, doctor, staff, pharmacist]
+ *                           enum: [admin, doctor, staff, chemist]
  *       400:
  *         description: Validation error.
  *       401:
@@ -106,7 +106,7 @@ router.post("/login", validate(schema.login), controller.login);
  *                 example: Doe
  *               userType:
  *                 type: string
- *                 enum: [admin, doctor, staff, pharmacist]
+ *                 enum: [admin, doctor, staff, chemist]
  *                 example: doctor
  *     responses:
  *       201:
@@ -139,7 +139,7 @@ router.post("/login", validate(schema.login), controller.login);
  *                           type: string
  *                         userType:
  *                           type: string
- *                           enum: [admin, doctor, staff, pharmacist]
+ *                           enum: [admin, doctor, staff, chemist]
  *       400:
  *         description: Validation error.
  *       409:
@@ -216,7 +216,7 @@ router.post("/refresh", controller.refreshToken);
  *                       type: string
  *                     userType:
  *                       type: string
- *                       enum: [admin, doctor, staff, pharmacist]
+ *                       enum: [admin, doctor, staff, chemist]
  *       401:
  *         description: Missing or invalid token.
  */

@@ -2,7 +2,7 @@ const userType = {
   ADMIN: "admin",
   DOCTOR: "doctor",
   STAFF: "staff",
-  PHARMACIST: "pharmacist",
+  CHEMIST: "chemist",
 };
 
 const otpType = {

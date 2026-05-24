@@ -13,14 +13,8 @@ import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { registerPasswordValidation, confirmPasswordValidation } from "@/utils/validations"
+import { USER_TYPE_LABEL } from "@/constants/constants"
 import type { UpdateProfileFormValues, ChangePasswordFormValues } from "./profile.types"
-
-const USER_TYPE_LABEL: Record<string, string> = {
-  admin: "Admin",
-  doctor: "Doctor",
-  staff: "Staff",
-  pharmacist: "Pharmacist",
-}
 
 // ── Personal Info Tab ──────────────────────────────────────────────────────────
 

@@ -1,4 +1,4 @@
-export type UserType = "admin" | "doctor" | "staff" | "pharmacist"
+export type UserType = "admin" | "doctor" | "staff" | "chemist"
 
 export interface LoginRequest {
   email: string

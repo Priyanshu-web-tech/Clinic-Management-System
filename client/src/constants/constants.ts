@@ -13,6 +13,17 @@ export const API_ROUTES = {
   LOGOUT: "auth/logout",
 }
 
+export const USER_TYPE_OPTIONS = [
+  { value: "admin", label: "Admin" },
+  { value: "doctor", label: "Doctor" },
+  { value: "staff", label: "Staff" },
+  { value: "chemist", label: "Chemist" },
+] as const
+
+export const USER_TYPE_LABEL: Record<string, string> = Object.fromEntries(
+  USER_TYPE_OPTIONS.map(({ value, label }) => [value, label])
+)
+
 export const NAVIGATION_ROUTES = {
   LOGIN: "/login",
   REGISTER: "/register",

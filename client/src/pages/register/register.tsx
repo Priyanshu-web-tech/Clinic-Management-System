@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { NAVIGATION_ROUTES } from "@/constants/constants"
+import { NAVIGATION_ROUTES, USER_TYPE_OPTIONS } from "@/constants/constants"
 import {
   emailValidation,
   requiredFieldValidation,
@@ -25,12 +25,6 @@ import {
 } from "@/utils/validations"
 import type { RegisterFormValues } from "./register.types"
 
-const USER_TYPE_OPTIONS = [
-  { value: "admin", label: "Admin" },
-  { value: "doctor", label: "Doctor" },
-  { value: "staff", label: "Staff" },
-  { value: "pharmacist", label: "Pharmacist" },
-] as const
 
 const Register = () => {
   const dispatch = useAppDispatch()
@@ -52,7 +46,7 @@ const Register = () => {
       email: emailValidation,
       password: registerPasswordValidation,
       userType: Yup.string()
-        .oneOf(["admin", "doctor", "staff", "pharmacist"], "Select a valid role")
+        .oneOf(USER_TYPE_OPTIONS.map((o) => o.value), "Select a valid role")
         .required("Role is required"),
     }),
     onSubmit: async (values) => {

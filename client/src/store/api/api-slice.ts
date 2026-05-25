@@ -8,7 +8,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 import { toast } from "sonner"
 
 import type { RootState } from "../store"
-import { clearUserData } from "../slices/userDataSlice"
+import { clearUserData } from "../slices/user-data-slice"
 import { BASE_URL, API_ROUTES, NAVIGATION_ROUTES } from "@/constants/constants"
 import { navigate } from "@/utils/navigation"
 

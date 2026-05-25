@@ -4,7 +4,7 @@ import { useFormik } from "formik"
 import * as Yup from "yup"
 import { toast } from "sonner"
 
-import { useVerifyOtpMutation, useForgotPasswordMutation } from "@/store/api/authApiSlice"
+import { useVerifyOtpMutation, useForgotPasswordMutation } from "@/store/api/auth-api-slice"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { NAVIGATION_ROUTES } from "@/constants/constants"

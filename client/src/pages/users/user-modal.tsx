@@ -8,7 +8,7 @@ import {
   phoneValidation,
   designationValidation,
 } from "@/utils/validations"
-import { useCreateUserMutation, useUpdateUserMutation } from "@/store/api/userApiSlice"
+import { useCreateUserMutation, useUpdateUserMutation } from "@/store/api/user-api-slice"
 import { DESIGNATION_OPTIONS } from "@/constants/constants"
 import type { StaffUser, Designation } from "@/types/api.types"
 

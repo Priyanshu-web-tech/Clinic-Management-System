@@ -1,7 +1,7 @@
 import { combineReducers } from "@reduxjs/toolkit";
 
-import userDataReducer from "./userDataSlice";
-import { apiSlice } from "../api/apiSlice";
+import userDataReducer from "./user-data-slice";
+import { apiSlice } from "../api/api-slice";
 
 const appReducer = combineReducers({
   userData: userDataReducer,

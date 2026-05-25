@@ -3,8 +3,8 @@ import { Navigate, Route, Routes, Outlet } from "react-router-dom"
 
 import { useAppSelector } from "@/store/hook"
 
-const Layout = lazy(() => import("@/components/layout/layout"))
-const AuthLayout = lazy(() => import("@/components/layout/auth-layout"))
+const Layout = lazy(() => import("@/components/layout"))
+const AuthLayout = lazy(() => import("@/components/auth-layout"))
 const Login = lazy(() => import("@/pages/login/login"))
 const Register = lazy(() => import("@/pages/register/register"))
 const Dashboard = lazy(() => import("@/pages/dashboard/dashboard"))

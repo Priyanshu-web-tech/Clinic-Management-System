@@ -12,13 +12,13 @@ import {
 } from "lucide-react"
 import { DropdownMenu } from "radix-ui"
 import { toast } from "sonner"
+import type { LucideIcon } from "lucide-react"
 
 import { useAppDispatch, useAppSelector } from "@/store/hook"
-import { clearUserData, setUserData } from "@/store/slices/userDataSlice"
-import { useLogoutMutation, useGetMeQuery } from "@/store/api/authApiSlice"
-import { apiSlice } from "@/store/api/apiSlice"
+import { clearUserData, setUserData } from "@/store/slices/user-data-slice"
+import { useLogoutMutation, useGetMeQuery } from "@/store/api/auth-api-slice"
+import { apiSlice } from "@/store/api/api-slice"
 import { NAVIGATION_ROUTES, USER_TYPE_LABEL } from "@/constants/constants"
-import type { NavItem } from "./layout.types"
 
 const ALL_NAV_ITEMS: (NavItem & { roles?: string[] })[] = [
   { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
@@ -29,6 +29,12 @@ const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/users": "Team",
   "/profile": "Profile",
+}
+
+export interface NavItem {
+  label: string
+  path: string
+  icon: LucideIcon
 }
 
 const Layout = () => {
@@ -97,13 +103,7 @@ const Layout = () => {
 
       {/* ── Sidebar ── */}
       <aside
-        className={`
-          fixed inset-y-0 left-0 z-40 flex w-56 flex-col border-r border-sidebar-border bg-sidebar
-          transition-transform duration-300 ease-in-out
-          md:relative md:z-auto md:translate-x-0 md:transition-[width,transform]
-          ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
-          ${collapsed ? "md:w-14" : "md:w-56"}
-        `}
+        className={`fixed inset-y-0 left-0 z-40 flex w-56 flex-col border-r border-sidebar-border bg-sidebar transition-transform duration-300 ease-in-out md:relative md:z-auto md:translate-x-0 md:transition-[width,transform] ${mobileOpen ? "translate-x-0" : "-translate-x-full"} ${collapsed ? "md:w-14" : "md:w-56"} `}
       >
         {/* Brand */}
         <div
@@ -174,7 +174,9 @@ const Layout = () => {
             >
               <Menu className="size-4" />
             </button>
-            <h1 className="text-sm font-semibold text-foreground">{pageTitle}</h1>
+            <h1 className="text-sm font-semibold text-foreground">
+              {pageTitle}
+            </h1>
           </div>
 
           {/* Role + Avatar dropdown */}
@@ -183,50 +185,50 @@ const Layout = () => {
               {USER_TYPE_LABEL[user.userType] ?? user.userType}
             </span>
 
-          <DropdownMenu.Root>
-            <DropdownMenu.Trigger asChild>
-              <button className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary transition-colors hover:bg-primary/20 focus:outline-none">
-                {initials}
-              </button>
-            </DropdownMenu.Trigger>
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger asChild>
+                <button className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary transition-colors hover:bg-primary/20 focus:outline-none">
+                  {initials}
+                </button>
+              </DropdownMenu.Trigger>
 
-            <DropdownMenu.Portal>
-              <DropdownMenu.Content
-                align="end"
-                sideOffset={8}
-                className="z-50 min-w-40 overflow-hidden rounded-lg border border-border bg-card p-1 shadow-md animate-in fade-in-0 zoom-in-95"
-              >
-                <div className="px-2 py-1.5">
-                  <p className="text-xs font-medium text-foreground">
-                    {user.firstName} {user.lastName}
-                  </p>
-                  <p className="truncate text-[11px] text-muted-foreground">
-                    {user.email}
-                  </p>
-                </div>
-
-                <DropdownMenu.Separator className="my-1 h-px bg-border" />
-
-                <DropdownMenu.Item
-                  onSelect={() => navigate(NAVIGATION_ROUTES.PROFILE)}
-                  className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs text-foreground outline-none transition-colors hover:bg-accent hover:text-accent-foreground data-highlighted:bg-accent data-highlighted:text-accent-foreground"
+              <DropdownMenu.Portal>
+                <DropdownMenu.Content
+                  align="end"
+                  sideOffset={8}
+                  className="z-50 min-w-40 animate-in overflow-hidden rounded-lg border border-border bg-card p-1 shadow-md fade-in-0 zoom-in-95"
                 >
-                  <UserRound className="size-3.5" />
-                  Profile
-                </DropdownMenu.Item>
+                  <div className="px-2 py-1.5">
+                    <p className="text-xs font-medium text-foreground">
+                      {user.firstName} {user.lastName}
+                    </p>
+                    <p className="truncate text-[11px] text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
 
-                <DropdownMenu.Separator className="my-1 h-px bg-border" />
+                  <DropdownMenu.Separator className="my-1 h-px bg-border" />
 
-                <DropdownMenu.Item
-                  onSelect={handleLogout}
-                  className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs text-destructive outline-none transition-colors hover:bg-destructive/10 data-highlighted:bg-destructive/10"
-                >
-                  <LogOut className="size-3.5" />
-                  Logout
-                </DropdownMenu.Item>
-              </DropdownMenu.Content>
-            </DropdownMenu.Portal>
-          </DropdownMenu.Root>
+                  <DropdownMenu.Item
+                    onSelect={() => navigate(NAVIGATION_ROUTES.PROFILE)}
+                    className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs text-foreground transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-highlighted:bg-accent data-highlighted:text-accent-foreground"
+                  >
+                    <UserRound className="size-3.5" />
+                    Profile
+                  </DropdownMenu.Item>
+
+                  <DropdownMenu.Separator className="my-1 h-px bg-border" />
+
+                  <DropdownMenu.Item
+                    onSelect={handleLogout}
+                    className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs text-destructive transition-colors outline-none hover:bg-destructive/10 data-highlighted:bg-destructive/10"
+                  >
+                    <LogOut className="size-3.5" />
+                    Logout
+                  </DropdownMenu.Item>
+                </DropdownMenu.Content>
+              </DropdownMenu.Portal>
+            </DropdownMenu.Root>
           </div>
         </header>
 

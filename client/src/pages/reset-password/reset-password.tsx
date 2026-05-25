@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { Eye, EyeOff } from "lucide-react"
 
-import { useResetPasswordMutation } from "@/store/api/authApiSlice"
+import { useResetPasswordMutation } from "@/store/api/auth-api-slice"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"

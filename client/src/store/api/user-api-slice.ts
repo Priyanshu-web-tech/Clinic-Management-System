@@ -1,5 +1,5 @@
 import { API_ROUTES } from "@/constants/constants"
-import { apiSlice } from "./apiSlice"
+import { apiSlice } from "./api-slice"
 import type {
   ApiResponse,
   GetUsersRequest,

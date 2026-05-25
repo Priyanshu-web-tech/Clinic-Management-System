@@ -5,16 +5,14 @@ import {
   Trash2,
   Plus,
   Search,
-  ChevronLeft,
-  ChevronRight,
   Users as UsersIcon,
 } from "lucide-react"
 
 import {
   useGetUsersQuery,
   useDeleteUserMutation,
-} from "@/store/api/userApiSlice"
-import { DESIGNATION_OPTIONS, DESIGNATION_LABEL } from "@/constants/constants"
+} from "@/store/api/user-api-slice"
+import { DESIGNATION_OPTIONS, DESIGNATION_LABEL, USERS_TABLE_COLUMNS } from "@/constants/constants"
 import type { StaffUser, Designation } from "@/types/api.types"
 
 import { Button } from "@/components/ui/button"
@@ -27,25 +25,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Spinner } from "@/components/ui/spinner"
+import DataTable from "@/components/data-table"
+import DeleteConfirmDialog from "@/components/delete-confirm-dialog"
+import Pagination from "@/components/pagination"
 import UserModal from "./user-modal"
 
 // ── Constants ─────────────────────────────────────────────
@@ -128,6 +110,48 @@ const Users = () => {
     }
   }
 
+  // ── Table rows ───────────────────────────────────────────
+
+  const rows = users.map((user) => ({
+    id: user._id,
+    data: [
+      <span className="font-medium">
+        {user.firstName} {user.lastName}
+      </span>,
+      <span className="text-muted-foreground">{user.email}</span>,
+      <span className="text-muted-foreground">
+        {user.phone || <span className="text-border">—</span>}
+      </span>,
+      <Badge variant={DESIGNATION_BADGE_VARIANT[user.designation ?? ""] ?? "outline"}>
+        {user.designation
+          ? DESIGNATION_LABEL[user.designation]
+          : <span className="text-muted-foreground">—</span>}
+      </Badge>,
+      <Badge variant={user.isActive ? "success" : "secondary"}>
+        {user.isActive ? "Active" : "Inactive"}
+      </Badge>,
+      <div className="flex items-center justify-end gap-1">
+        <button
+          onClick={() => openEdit(user)}
+          title="Edit member"
+          className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+        >
+          <Pencil className="size-3.5" />
+        </button>
+        <button
+          onClick={() => {
+            setDeleteTarget(user)
+            setDeleteOpen(true)
+          }}
+          title="Remove member"
+          className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+        >
+          <Trash2 className="size-3.5" />
+        </button>
+      </div>,
+    ],
+  }))
+
   // ── Render ───────────────────────────────────────────────
 
   return (
@@ -180,137 +204,22 @@ const Users = () => {
       </div>
 
       {/* Table */}
-      <div className="mt-5 flex min-h-0 flex-1 flex-col overflow-auto rounded-lg border border-border bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Designation</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={6} className="h-40 text-center">
-                  <Spinner className="mx-auto size-5" />
-                </TableCell>
-              </TableRow>
-            ) : users.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={6}
-                  className="h-40 text-center text-sm text-muted-foreground"
-                >
-                  No team members found.
-                </TableCell>
-              </TableRow>
-            ) : (
-              users.map((user) => (
-                <TableRow key={user._id}>
-                  <TableCell className="font-medium">
-                    {user.firstName} {user.lastName}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {user.email}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {user.phone || <span className="text-border">—</span>}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={DESIGNATION_BADGE_VARIANT[user.designation ?? ""] ?? "outline"}
-                    >
-                      {user.designation ? DESIGNATION_LABEL[user.designation] : <span className="text-muted-foreground">—</span>}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={user.isActive ? "success" : "secondary"}>
-                      {user.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <button
-                        onClick={() => openEdit(user)}
-                        title="Edit member"
-                        className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-                      >
-                        <Pencil className="size-3.5" />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setDeleteTarget(user)
-                          setDeleteOpen(true)
-                        }}
-                        title="Remove member"
-                        className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                      >
-                        <Trash2 className="size-3.5" />
-                      </button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <DataTable
+        columns={USERS_TABLE_COLUMNS}
+        rows={rows}
+        isLoading={isLoading}
+        fallbackMessage="No team members found."
+        className="mt-5"
+      />
 
       {/* Pagination */}
-      <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-        <span>
-          Showing {(page - 1) * PAGE_SIZE + 1}–
-          {Math.min(page * PAGE_SIZE, total)} of {total}
-        </span>
-        <div className="flex items-center gap-1">
-          <button
-            disabled={page <= 1}
-            onClick={() => setPage((p) => p - 1)}
-            className="flex size-7 items-center justify-center rounded-md border border-border bg-card transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-40"
-          >
-            <ChevronLeft className="size-3.5" />
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1)
-            .filter(
-              (p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1
-            )
-            .reduce<(number | "...")[]>((acc, p, idx, arr) => {
-              if (idx > 0 && p - (arr[idx - 1] as number) > 1) acc.push("...")
-              acc.push(p)
-              return acc
-            }, [])
-            .map((item, idx) =>
-              item === "..." ? (
-                <span key={`ellipsis-${idx}`} className="px-1">
-                  ...
-                </span>
-              ) : (
-                <button
-                  key={item}
-                  onClick={() => setPage(item as number)}
-                  className={`flex size-7 items-center justify-center rounded-md border text-xs transition-colors ${
-                    page === item
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border bg-card hover:bg-accent"
-                  }`}
-                >
-                  {item}
-                </button>
-              )
-            )}
-          <button
-            disabled={page >= totalPages}
-            onClick={() => setPage((p) => p + 1)}
-            className="flex size-7 items-center justify-center rounded-md border border-border bg-card transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-40"
-          >
-            <ChevronRight className="size-3.5" />
-          </button>
-        </div>
-      </div>
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        pageSize={PAGE_SIZE}
+        onPageChange={setPage}
+      />
 
       {/* Add / Edit Modal */}
       <UserModal
@@ -323,30 +232,23 @@ const Users = () => {
       />
 
       {/* Delete Confirmation */}
-      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remove Member</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to remove{" "}
-              <span className="font-medium text-foreground">
-                {deleteTarget?.firstName} {deleteTarget?.lastName}
-              </span>{" "}
-              from your team? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mt-4">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteConfirm}
-              disabled={isDeleting}
-            >
-              {isDeleting && <Spinner className="mr-1.5 size-3" />}
-              Remove
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteConfirmDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        onConfirm={handleDeleteConfirm}
+        isLoading={isDeleting}
+        title="Remove Member"
+        confirmLabel="Remove"
+        description={
+          <>
+            Are you sure you want to remove{" "}
+            <span className="font-medium text-foreground">
+              {deleteTarget?.firstName} {deleteTarget?.lastName}
+            </span>{" "}
+            from your team? This action cannot be undone.
+          </>
+        }
+      />
     </div>
   )
 }

@@ -3,7 +3,7 @@ import { useFormik } from "formik"
 import { Link, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 
-import { useForgotPasswordMutation } from "@/store/api/authApiSlice"
+import { useForgotPasswordMutation } from "@/store/api/auth-api-slice"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"

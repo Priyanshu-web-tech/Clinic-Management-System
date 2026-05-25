@@ -36,6 +36,15 @@ export const DESIGNATION_LABEL: Record<string, string> = Object.fromEntries(
 
 export type Designation = "receptionist" | "chemist"
 
+export const USERS_TABLE_COLUMNS = [
+  { name: "Name" },
+  { name: "Email" },
+  { name: "Phone" },
+  { name: "Designation" },
+  { name: "Status" },
+  { name: "Actions", className: "text-right" },
+]
+
 export const NAVIGATION_ROUTES = {
   LOGIN: "/login",
   REGISTER: "/register",

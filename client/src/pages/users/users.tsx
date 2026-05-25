@@ -10,6 +10,8 @@ import {
   DESIGNATION_OPTIONS,
   DESIGNATION_LABEL,
   USERS_TABLE_COLUMNS,
+  PAGE_SIZE,
+  DESIGNATION_BADGE_VARIANT,
 } from "@/constants/constants"
 import type { StaffUser, Designation } from "@/types/api.types"
 import usePaginatedQuery from "@/hooks/use-paginated-query"
@@ -28,20 +30,6 @@ import DataTable from "@/components/data-table"
 import DeleteConfirmDialog from "@/components/delete-confirm-dialog"
 import Pagination from "@/components/pagination"
 import UserModal from "./user-modal"
-
-// ── Constants ─────────────────────────────────────────────
-
-const PAGE_SIZE = 10
-
-const DESIGNATION_BADGE_VARIANT: Record<
-  string,
-  "default" | "secondary" | "success" | "warning" | "outline"
-> = {
-  receptionist: "success",
-  chemist: "warning",
-}
-
-// ── Component ─────────────────────────────────────────────
 
 const Users = () => {
   const [search, setSearch] = useState("")
@@ -124,7 +112,11 @@ const Users = () => {
         {user.phone || <span className="text-border">—</span>}
       </span>,
       <Badge
-        variant={DESIGNATION_BADGE_VARIANT[user.designation ?? ""] ?? "outline"}
+        variant={
+          user.designation
+            ? DESIGNATION_BADGE_VARIANT[user.designation]
+            : "outline"
+        }
       >
         {user.designation ? (
           DESIGNATION_LABEL[user.designation]

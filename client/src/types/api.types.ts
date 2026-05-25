@@ -1,5 +1,15 @@
-export type UserType = "admin" | "doctor" | "staff"
-export type Designation = "receptionist" | "chemist"
+export const UserType = {
+  Admin: "admin",
+  Doctor: "doctor",
+  Staff: "staff",
+} as const
+export type UserType = (typeof UserType)[keyof typeof UserType]
+
+export const Designation = {
+  Receptionist: "receptionist",
+  Chemist: "chemist",
+} as const
+export type Designation = (typeof Designation)[keyof typeof Designation]
 
 export interface LoginRequest {
   email: string
@@ -43,6 +53,7 @@ export interface UserProfile {
   lastName: string
   userType: UserType
   phone: string
+  designation?: Designation | null
   hospital: Hospital | null
   createdAt: string
   updatedAt: string

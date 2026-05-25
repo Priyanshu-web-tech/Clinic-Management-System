@@ -1,4 +1,5 @@
 import * as Yup from "yup"
+import { Designation } from "@/types/api.types"
 
 export const emailValidation = Yup.string()
   .email("Invalid email address")
@@ -52,5 +53,5 @@ export const phoneValidation = Yup.string()
   .optional()
 
 export const designationValidation = Yup.string()
-  .oneOf(["receptionist", "chemist"], "Please select a valid designation.")
+  .oneOf(Object.values(Designation), "Please select a valid designation.")
   .required("Designation is required.")

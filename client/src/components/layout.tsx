@@ -1,54 +1,23 @@
 import { useEffect, useState } from "react"
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom"
-import {
-  LayoutDashboard,
-  ChevronLeft,
-  ChevronRight,
-  LogOut,
-  Stethoscope,
-  UserRound,
-  Users,
-  Menu,
-} from "lucide-react"
-import { DropdownMenu } from "radix-ui"
-import { toast } from "sonner"
-import type { LucideIcon } from "lucide-react"
+import { Outlet, useLocation, useNavigate } from "react-router-dom"
 
-import { useAppDispatch, useAppSelector } from "@/store/hook"
+import { toast } from "sonner"
+
+import { useAppDispatch } from "@/store/hook"
 import { clearUserData, setUserData } from "@/store/slices/user-data-slice"
 import { useLogoutMutation, useGetMeQuery } from "@/store/api/auth-api-slice"
 import { apiSlice } from "@/store/api/api-slice"
-import { NAVIGATION_ROUTES, USER_TYPE_LABEL } from "@/constants/constants"
-
-const ALL_NAV_ITEMS: (NavItem & { roles?: string[] })[] = [
-  { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-  { label: "Team", path: "/users", icon: Users, roles: ["doctor", "admin"] },
-]
-
-const PAGE_TITLES: Record<string, string> = {
-  "/dashboard": "Dashboard",
-  "/users": "Team",
-  "/profile": "Profile",
-}
-
-export interface NavItem {
-  label: string
-  path: string
-  icon: LucideIcon
-}
+import { NAVIGATION_ROUTES } from "@/constants/constants"
+import AppHeader from "@/components/app-header"
+import AppSidebar from "@/components/app-sidebar"
 
 const Layout = () => {
-  const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const location = useLocation()
-  const user = useAppSelector((state) => state.userData)
 
-  const navItems = ALL_NAV_ITEMS.filter(
-    (item) => !item.roles || item.roles.includes(user.userType)
-  )
   const [logoutApi] = useLogoutMutation()
 
   // Fetch fresh profile once on layout mount and sync into Redux store
@@ -58,12 +27,6 @@ const Layout = () => {
       dispatch(setUserData(meData.result))
     }
   }, [meData, dispatch])
-
-  const pageTitle = PAGE_TITLES[location.pathname] ?? "DocMate"
-  const initials =
-    user.firstName && user.lastName
-      ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
-      : "?"
 
   // Close mobile drawer on route change
   useEffect(() => {
@@ -101,136 +64,14 @@ const Layout = () => {
         />
       )}
 
-      {/* ── Sidebar ── */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-56 flex-col border-r border-sidebar-border bg-sidebar transition-transform duration-300 ease-in-out md:relative md:z-auto md:translate-x-0 md:transition-[width,transform] ${mobileOpen ? "translate-x-0" : "-translate-x-full"} ${collapsed ? "md:w-14" : "md:w-56"} `}
-      >
-        {/* Brand */}
-        <div
-          className={`flex h-14 shrink-0 items-center border-b border-sidebar-border px-3 ${
-            collapsed ? "md:justify-center" : "gap-2.5"
-          }`}
-        >
-          <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-            <Stethoscope className="size-4" />
-          </div>
-          <span
-            className={`text-sm font-semibold tracking-tight text-sidebar-foreground ${
-              collapsed ? "md:hidden" : ""
-            }`}
-          >
-            Doc Mate
-          </span>
-        </div>
-
-        {/* Nav links */}
-        <nav className="flex-1 overflow-y-auto px-2 py-3">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              title={collapsed ? item.label : undefined}
-              className={({ isActive }) =>
-                `flex items-center rounded-md px-2 py-2 text-sm transition-colors ${
-                  collapsed ? "md:justify-center" : "gap-3"
-                } ${
-                  isActive
-                    ? "bg-sidebar-primary/15 font-semibold text-sidebar-primary ring-1 ring-sidebar-primary/20"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                }`
-              }
-            >
-              <item.icon className="size-4 shrink-0" />
-              <span className={collapsed ? "md:hidden" : ""}>{item.label}</span>
-            </NavLink>
-          ))}
-        </nav>
-
-        {/* Collapse toggle — desktop only */}
-        <div className="hidden border-t border-sidebar-border p-2 md:block">
-          <button
-            onClick={() => setCollapsed((c) => !c)}
-            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className="flex w-full items-center justify-center rounded-md px-2 py-1.5 text-xs text-sidebar-foreground transition-colors hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
-          >
-            {collapsed ? (
-              <ChevronRight className="size-4" />
-            ) : (
-              <ChevronLeft className="size-4" />
-            )}
-          </button>
-        </div>
-      </aside>
+      <AppSidebar mobileOpen={mobileOpen} />
 
       {/* ── Main area ── */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        {/* Header */}
-        <header className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-card px-4">
-          <div className="flex items-center gap-3">
-            {/* Hamburger — mobile only */}
-            <button
-              className="flex items-center justify-center rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground md:hidden"
-              onClick={() => setMobileOpen(true)}
-            >
-              <Menu className="size-4" />
-            </button>
-            <h1 className="text-sm font-semibold text-foreground">
-              {pageTitle}
-            </h1>
-          </div>
-
-          {/* Role + Avatar dropdown */}
-          <div className="flex items-center gap-2.5">
-            <span className="hidden text-xs font-medium text-muted-foreground sm:block">
-              {USER_TYPE_LABEL[user.userType] ?? user.userType}
-            </span>
-
-            <DropdownMenu.Root>
-              <DropdownMenu.Trigger asChild>
-                <button className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary transition-colors hover:bg-primary/20 focus:outline-none">
-                  {initials}
-                </button>
-              </DropdownMenu.Trigger>
-
-              <DropdownMenu.Portal>
-                <DropdownMenu.Content
-                  align="end"
-                  sideOffset={8}
-                  className="z-50 min-w-40 animate-in overflow-hidden rounded-lg border border-border bg-card p-1 shadow-md fade-in-0 zoom-in-95"
-                >
-                  <div className="px-2 py-1.5">
-                    <p className="text-xs font-medium text-foreground">
-                      {user.firstName} {user.lastName}
-                    </p>
-                    <p className="truncate text-[11px] text-muted-foreground">
-                      {user.email}
-                    </p>
-                  </div>
-
-                  <DropdownMenu.Separator className="my-1 h-px bg-border" />
-
-                  <DropdownMenu.Item
-                    onSelect={() => navigate(NAVIGATION_ROUTES.PROFILE)}
-                    className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs text-foreground transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-highlighted:bg-accent data-highlighted:text-accent-foreground"
-                  >
-                    <UserRound className="size-3.5" />
-                    Profile
-                  </DropdownMenu.Item>
-
-                  <DropdownMenu.Separator className="my-1 h-px bg-border" />
-
-                  <DropdownMenu.Item
-                    onSelect={handleLogout}
-                    className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs text-destructive transition-colors outline-none hover:bg-destructive/10 data-highlighted:bg-destructive/10"
-                  >
-                    <LogOut className="size-3.5" />
-                    Logout
-                  </DropdownMenu.Item>
-                </DropdownMenu.Content>
-              </DropdownMenu.Portal>
-            </DropdownMenu.Root>
-          </div>
-        </header>
+        <AppHeader
+          onMenuOpen={() => setMobileOpen(true)}
+          onLogout={handleLogout}
+        />
 
         {/* Page content */}
         <main className="flex-1 overflow-y-auto">

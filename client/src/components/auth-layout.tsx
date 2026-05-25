@@ -1,21 +1,15 @@
 import { Check, Stethoscope } from "lucide-react"
 import { Outlet } from "react-router-dom"
-
-const FEATURES = [
-  "Manage patients & staff with ease",
-  "Prescriptions, labs & reports in one place",
-  "Secure, role-based access control",
-]
+import { AUTH_FEATURES } from "@/constants/constants"
 
 const AuthLayout = () => {
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-
       {/* Left branding panel — desktop only */}
-      <div className="relative hidden md:flex md:w-[42%] flex-col items-center justify-center overflow-hidden bg-primary px-12">
+      <div className="relative hidden flex-col items-center justify-center overflow-hidden bg-primary px-12 md:flex md:w-[42%]">
         <div className="pointer-events-none absolute -top-20 -left-20 size-64 rounded-full bg-white/5" />
         <div className="pointer-events-none absolute top-16 right-0 size-40 rounded-full bg-white/5" />
-        <div className="pointer-events-none absolute -bottom-28 -right-16 size-72 rounded-full bg-white/5" />
+        <div className="pointer-events-none absolute -right-16 -bottom-28 size-72 rounded-full bg-white/5" />
         <div className="pointer-events-none absolute bottom-24 left-4 size-24 rounded-full bg-white/5" />
 
         <div className="relative z-10 flex max-w-xs flex-col items-center gap-6 text-center">
@@ -24,16 +18,20 @@ const AuthLayout = () => {
           </div>
 
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-white">Doc Mate</h2>
+            <h2 className="text-2xl font-bold tracking-tight text-white">
+              Doc Mate
+            </h2>
             <p className="mt-2 text-sm leading-relaxed text-white/65">
-              Smart healthcare documentation,<br />simplified for your team.
+              Smart healthcare documentation,
+              <br />
+              simplified for your team.
             </p>
           </div>
 
           <div className="h-px w-10 bg-white/20" />
 
           <div className="flex flex-col gap-3 text-left">
-            {FEATURES.map((feat) => (
+            {AUTH_FEATURES.map((feat) => (
               <div key={feat} className="flex items-start gap-3">
                 <div className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-white/20">
                   <Check className="size-3 text-white" />
@@ -52,12 +50,13 @@ const AuthLayout = () => {
           <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10">
             <Stethoscope className="size-5 text-primary" />
           </div>
-          <span className="text-sm font-bold tracking-tight text-foreground">Doc Mate</span>
+          <span className="text-sm font-bold tracking-tight text-foreground">
+            Doc Mate
+          </span>
         </div>
 
         <Outlet />
       </div>
-
     </div>
   )
 }

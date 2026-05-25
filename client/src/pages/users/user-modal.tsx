@@ -6,11 +6,11 @@ import {
   emailValidation,
   requiredFieldValidation,
   phoneValidation,
-  manageableUserTypeValidation,
+  designationValidation,
 } from "@/utils/validations"
 import { useCreateUserMutation, useUpdateUserMutation } from "@/store/api/userApiSlice"
-import { USER_TYPE_OPTIONS } from "@/constants/constants"
-import type { StaffUser, UserType } from "@/types/api.types"
+import { DESIGNATION_OPTIONS } from "@/constants/constants"
+import type { StaffUser, Designation } from "@/types/api.types"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -31,12 +31,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 
-// ── Constants ─────────────────────────────────────────────
-
-const MANAGEABLE_ROLES = USER_TYPE_OPTIONS.filter(
-  (o) => o.value === "staff" || o.value === "chemist"
-)
-
 // ── Schemas ───────────────────────────────────────────────
 
 const addUserSchema = Yup.object({
@@ -44,14 +38,14 @@ const addUserSchema = Yup.object({
   lastName: requiredFieldValidation("Last name"),
   email: emailValidation,
   phone: phoneValidation,
-  userType: manageableUserTypeValidation,
+  designation: designationValidation,
 })
 
 const editUserSchema = Yup.object({
   firstName: requiredFieldValidation("First name"),
   lastName: requiredFieldValidation("Last name"),
   phone: phoneValidation,
-  userType: manageableUserTypeValidation,
+  designation: designationValidation,
 })
 
 // ── Types ─────────────────────────────────────────────────
@@ -78,7 +72,7 @@ const UserModal = ({ open, onClose, editTarget }: UserModalProps) => {
       lastName: editTarget?.lastName ?? "",
       email: editTarget?.email ?? "",
       phone: editTarget?.phone ?? "",
-      userType: (editTarget?.userType ?? "") as UserType | "",
+      designation: (editTarget?.designation ?? "") as Designation | "",
     },
     validationSchema: isEditing ? editUserSchema : addUserSchema,
     onSubmit: async (values) => {
@@ -89,7 +83,7 @@ const UserModal = ({ open, onClose, editTarget }: UserModalProps) => {
             firstName: values.firstName,
             lastName: values.lastName,
             phone: values.phone,
-            userType: values.userType as UserType,
+            designation: values.designation as Designation,
           }).unwrap()
           toast.success(res.message ?? "Member updated successfully.")
         } else {
@@ -98,7 +92,7 @@ const UserModal = ({ open, onClose, editTarget }: UserModalProps) => {
             lastName: values.lastName,
             email: values.email,
             phone: values.phone,
-            userType: values.userType as UserType,
+            designation: values.designation as Designation,
           }).unwrap()
           toast.success(res.message ?? "Member added.")
         }
@@ -203,30 +197,30 @@ const UserModal = ({ open, onClose, editTarget }: UserModalProps) => {
               )}
             </div>
 
-            {/* Role */}
+            {/* Designation */}
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="userType" className="text-xs">Role <span className="text-destructive">*</span></Label>
+              <Label htmlFor="designation" className="text-xs">Designation <span className="text-destructive">*</span></Label>
               <Select
-                value={formik.values.userType}
-                onValueChange={(val) => formik.setFieldValue("userType", val)}
+                value={formik.values.designation}
+                onValueChange={(val) => formik.setFieldValue("designation", val)}
               >
                 <SelectTrigger
-                  id="userType"
+                  id="designation"
                   className="h-8 w-full text-xs"
-                  aria-invalid={!!(formik.touched.userType && formik.errors.userType)}
+                  aria-invalid={!!(formik.touched.designation && formik.errors.designation)}
                 >
-                  <SelectValue placeholder="Select role" />
+                  <SelectValue placeholder="Select designation" />
                 </SelectTrigger>
                 <SelectContent>
-                  {MANAGEABLE_ROLES.map((opt) => (
+                  {DESIGNATION_OPTIONS.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {formik.touched.userType && formik.errors.userType && (
-                <p className="text-[11px] text-destructive">{formik.errors.userType}</p>
+              {formik.touched.designation && formik.errors.designation && (
+                <p className="text-[11px] text-destructive">{formik.errors.designation}</p>
               )}
             </div>
           </div>

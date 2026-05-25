@@ -5,17 +5,14 @@ const { generatePassword } = require("../utils/helper");
 const { sendEmail, emailTypeSubject } = require("../utils/mailer");
 const { userType: userTypeConst } = require("../constant/constant");
 
-// Roles that cannot be created/updated via this API by anyone
-const FORBIDDEN_TYPES = [userTypeConst.ADMIN, userTypeConst.DOCTOR];
-
 const getUsers = async (req) => {
   try {
-    const { page, pageSize, search, role } = req.query;
+    const { page, pageSize, search, designation } = req.query;
     const currentUser = req.data;
 
     const filter = {
       isActive: true,
-      userType: { $nin: [userTypeConst.ADMIN, userTypeConst.DOCTOR] },
+      userType: userTypeConst.STAFF,
     };
 
     // Hospital-scoped: doctors only see their hospital's users
@@ -23,9 +20,8 @@ const getUsers = async (req) => {
       filter.hospital = currentUser.hospital?._id;
     }
 
-    // Role filter only applies within the allowed set (staff/chemist)
-    if (role && !FORBIDDEN_TYPES.includes(role)) {
-      filter.userType = role;
+    if (designation) {
+      filter.designation = designation;
     }
 
     const { users, total } = await userRepository.findUsers({
@@ -62,18 +58,8 @@ const getUsers = async (req) => {
 
 const createUser = async (req) => {
   try {
-    const { firstName, lastName, email, phone, userType } = req.body;
+    const { firstName, lastName, email, phone, designation } = req.body;
     const currentUser = req.data;
-
-    // Nobody can create admin or doctor via this API
-    if (FORBIDDEN_TYPES.includes(userType)) {
-      return {
-        error: true,
-        data: {},
-        msgCode: "FORBIDDEN_USER_TYPE",
-        status: httpStatus.FORBIDDEN,
-      };
-    }
 
     const existing = await userRepository.findUserByEmail(email);
     if (existing) {
@@ -98,7 +84,8 @@ const createUser = async (req) => {
       lastName,
       email,
       phone: phone || "",
-      userType,
+      userType: userTypeConst.STAFF,
+      designation,
       password: hashedPassword,
       hospital,
       isActive: true,
@@ -108,7 +95,7 @@ const createUser = async (req) => {
     sendEmail(
       email,
       { userName: `${firstName} ${lastName}`, email, password: plainPassword },
-      emailTypeSubject.WELCOME_USER
+      emailTypeSubject.WELCOME_USER,
     ).catch((err) => console.error("Welcome email failed:", err));
 
     return {
@@ -121,6 +108,7 @@ const createUser = async (req) => {
           email: newUser.email,
           phone: newUser.phone,
           userType: newUser.userType,
+          designation: newUser.designation,
           isActive: newUser.isActive,
           createdAt: newUser.createdAt,
         },
@@ -142,7 +130,7 @@ const createUser = async (req) => {
 const updateUser = async (req) => {
   try {
     const { id } = req.params;
-    const { firstName, lastName, phone, userType } = req.body;
+    const { firstName, lastName, phone, designation } = req.body;
     const currentUser = req.data;
 
     const target = await userRepository.findUserById(id);
@@ -168,21 +156,11 @@ const updateUser = async (req) => {
       };
     }
 
-    // Nobody can assign admin or doctor role via this API
-    if (FORBIDDEN_TYPES.includes(userType)) {
-      return {
-        error: true,
-        data: {},
-        msgCode: "FORBIDDEN_USER_TYPE",
-        status: httpStatus.FORBIDDEN,
-      };
-    }
-
     const updated = await userRepository.updateUserById(id, {
       firstName,
       lastName,
       phone: phone || "",
-      userType,
+      designation,
     });
 
     return {

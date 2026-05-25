@@ -1,5 +1,6 @@
 
 import { configureStore } from "@reduxjs/toolkit";
+import { setupListeners } from "@reduxjs/toolkit/query";
 import { persistReducer, persistStore } from "redux-persist";
 import storage from 'redux-persist/lib/storage';
 
@@ -25,6 +26,8 @@ export const store = configureStore({
 });
 
 export const persistor = persistStore(store);
+
+setupListeners(store.dispatch);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

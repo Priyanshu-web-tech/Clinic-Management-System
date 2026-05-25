@@ -1,4 +1,5 @@
-export type UserType = "admin" | "doctor" | "staff" | "chemist"
+export type UserType = "admin" | "doctor" | "staff"
+export type Designation = "receptionist" | "chemist"
 
 export interface LoginRequest {
   email: string
@@ -114,6 +115,7 @@ export interface StaffUser {
   email: string
   phone: string
   userType: UserType
+  designation: Designation | null
   isActive: boolean
   hospital: string | null
   createdAt: string
@@ -124,7 +126,7 @@ export interface GetUsersRequest {
   page?: number
   pageSize?: number
   search?: string
-  role?: UserType | ""
+  designation?: Designation | ""
 }
 
 export interface GetUsersResponse {
@@ -140,14 +142,14 @@ export interface CreateUserRequest {
   lastName: string
   email: string
   phone?: string
-  userType: UserType
+  designation: Designation
 }
 
 export interface UpdateUserRequest {
   firstName: string
   lastName: string
   phone?: string
-  userType: UserType
+  designation: Designation
 }
 
 export interface UserMutationResponse {

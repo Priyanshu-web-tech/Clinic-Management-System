@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { userType } = require("../constant/constant");
+const { userType, designation } = require("../constant/constant");
 
 const userSchema = new mongoose.Schema(
   {
@@ -28,6 +28,11 @@ const userSchema = new mongoose.Schema(
     phone: {
       type: String,
       default: "",
+    },
+    designation: {
+      type: String,
+      enum: [...Object.values(designation), null],
+      default: null,
     },
     password: {
       type: String,

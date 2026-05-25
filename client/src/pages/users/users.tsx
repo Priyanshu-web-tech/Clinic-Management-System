@@ -14,8 +14,8 @@ import {
   useGetUsersQuery,
   useDeleteUserMutation,
 } from "@/store/api/userApiSlice"
-import { USER_TYPE_OPTIONS, USER_TYPE_LABEL } from "@/constants/constants"
-import type { StaffUser, UserType } from "@/types/api.types"
+import { DESIGNATION_OPTIONS, DESIGNATION_LABEL } from "@/constants/constants"
+import type { StaffUser, Designation } from "@/types/api.types"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -52,16 +52,11 @@ import UserModal from "./user-modal"
 
 const PAGE_SIZE = 10
 
-const MANAGEABLE_ROLES = USER_TYPE_OPTIONS.filter(
-  (o) => o.value === "staff" || o.value === "chemist"
-)
-
-const ROLE_BADGE_VARIANT: Record<
+const DESIGNATION_BADGE_VARIANT: Record<
   string,
   "default" | "secondary" | "success" | "warning" | "outline"
 > = {
-  doctor: "default",
-  staff: "success",
+  receptionist: "success",
   chemist: "warning",
 }
 
@@ -71,7 +66,7 @@ const Users = () => {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [roleFilter, setRoleFilter] = useState<UserType | "">("")
+  const [designationFilter, setDesignationFilter] = useState<Designation | "">("")
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<StaffUser | null>(null)
@@ -87,12 +82,15 @@ const Users = () => {
     return () => clearTimeout(timer)
   }, [search])
 
-  const { data, isLoading, isFetching } = useGetUsersQuery({
-    page,
-    pageSize: PAGE_SIZE,
-    search: debouncedSearch || undefined,
-    role: roleFilter || undefined,
-  })
+  const { data, isLoading } = useGetUsersQuery(
+    {
+      page,
+      pageSize: PAGE_SIZE,
+      search: debouncedSearch || undefined,
+      designation: designationFilter || undefined,
+    },
+    { refetchOnMountOrArgChange: true, refetchOnFocus: true }
+  )
 
   const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation()
 
@@ -102,8 +100,8 @@ const Users = () => {
 
   // ── Handlers ─────────────────────────────────────────────
 
-  const handleRoleFilter = (value: string) => {
-    setRoleFilter(value === "all" ? "" : (value as UserType))
+  const handleDesignationFilter = (value: string) => {
+    setDesignationFilter(value === "all" ? "" : (value as Designation))
     setPage(1)
   }
 
@@ -165,13 +163,13 @@ const Users = () => {
           />
         </div>
         <div className="w-36">
-          <Select value={roleFilter || "all"} onValueChange={handleRoleFilter}>
+          <Select value={designationFilter || "all"} onValueChange={handleDesignationFilter}>
             <SelectTrigger className="h-8 w-full text-xs">
-              <SelectValue placeholder="All Roles" />
+              <SelectValue placeholder="All" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Roles</SelectItem>
-              {MANAGEABLE_ROLES.map((opt) => (
+              <SelectItem value="all">All</SelectItem>
+              {DESIGNATION_OPTIONS.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value}>
                   {opt.label}
                 </SelectItem>
@@ -189,13 +187,13 @@ const Users = () => {
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Phone</TableHead>
-              <TableHead>Role</TableHead>
+              <TableHead>Designation</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading || isFetching ? (
+            {isLoading ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-40 text-center">
                   <Spinner className="mx-auto size-5" />
@@ -224,9 +222,9 @@ const Users = () => {
                   </TableCell>
                   <TableCell>
                     <Badge
-                      variant={ROLE_BADGE_VARIANT[user.userType] ?? "outline"}
+                      variant={DESIGNATION_BADGE_VARIANT[user.designation ?? ""] ?? "outline"}
                     >
-                      {USER_TYPE_LABEL[user.userType] ?? user.userType}
+                      {user.designation ? DESIGNATION_LABEL[user.designation] : <span className="text-muted-foreground">—</span>}
                     </Badge>
                   </TableCell>
                   <TableCell>

@@ -19,12 +19,22 @@ export const USER_TYPE_OPTIONS = [
   { value: "admin", label: "Admin" },
   { value: "doctor", label: "Doctor" },
   { value: "staff", label: "Staff" },
-  { value: "chemist", label: "Chemist" },
 ] as const
 
 export const USER_TYPE_LABEL: Record<string, string> = Object.fromEntries(
   USER_TYPE_OPTIONS.map(({ value, label }) => [value, label])
 )
+
+export const DESIGNATION_OPTIONS = [
+  { value: "receptionist", label: "Receptionist" },
+  { value: "chemist", label: "Chemist" },
+] as const
+
+export const DESIGNATION_LABEL: Record<string, string> = Object.fromEntries(
+  DESIGNATION_OPTIONS.map(({ value, label }) => [value, label])
+)
+
+export type Designation = "receptionist" | "chemist"
 
 export const NAVIGATION_ROUTES = {
   LOGIN: "/login",

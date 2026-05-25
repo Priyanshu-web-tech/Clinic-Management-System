@@ -8,11 +8,7 @@ const findUsers = async ({ filter, search, page, pageSize }) => {
 
   if (search) {
     const regex = new RegExp(search, "i");
-    query.$or = [
-      { firstName: regex },
-      { lastName: regex },
-      { email: regex },
-    ];
+    query.$or = [{ firstName: regex }, { lastName: regex }, { email: regex }];
   }
 
   const [users, total] = await Promise.all([
@@ -23,6 +19,15 @@ const findUsers = async ({ filter, search, page, pageSize }) => {
       .limit(limit),
     User.countDocuments(query),
   ]);
+
+  console.log(
+    "User query:",
+    JSON.stringify(query),
+    "Page:",
+    page,
+    "PageSize:",
+    pageSize,
+  );
 
   return { users, total };
 };
@@ -42,8 +47,14 @@ const createUser = async (data) => {
 
 const updateUserById = async (id, data) => {
   return await User.findByIdAndUpdate(id, { $set: data }, { new: true }).select(
-    "-password -loginAttempts -lockUntil"
+    "-password -loginAttempts -lockUntil",
   );
 };
 
-module.exports = { findUsers, findUserById, findUserByEmail, createUser, updateUserById };
+module.exports = {
+  findUsers,
+  findUserById,
+  findUserByEmail,
+  createUser,
+  updateUserById,
+};

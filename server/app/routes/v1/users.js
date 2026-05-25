@@ -1,7 +1,11 @@
 const router = require("express").Router();
 const schema = require("../../validation/validation");
 const controller = require("../../controllers/userController");
-const { validate, verifyAuthToken, authorizeRoles } = require("../../middlewares/index");
+const {
+  validate,
+  verifyAuthToken,
+  authorizeRoles,
+} = require("../../middlewares/index");
 
 /**
  * @swagger
@@ -30,13 +34,19 @@ const { validate, verifyAuthToken, authorizeRoles } = require("../../middlewares
  *         schema: { type: string }
  *         description: Search by name or email
  *       - in: query
- *         name: role
- *         schema: { type: string, enum: [admin, doctor, staff, chemist] }
+ *         name: designation
+ *         schema: { type: string, enum: [receptionist, chemist] }
+ *         description: Filter by staff designation
  *     responses:
  *       200:
  *         description: Users fetched successfully.
  */
-router.get("/", verifyAuthToken, authorizeRoles("admin", "doctor"), controller.getUsers);
+router.get(
+  "/",
+  verifyAuthToken,
+  authorizeRoles("admin", "doctor"),
+  controller.getUsers,
+);
 
 /**
  * @swagger
@@ -52,18 +62,24 @@ router.get("/", verifyAuthToken, authorizeRoles("admin", "doctor"), controller.g
  *         application/json:
  *           schema:
  *             type: object
- *             required: [firstName, lastName, email, userType]
+ *             required: [firstName, lastName, email, designation]
  *             properties:
  *               firstName: { type: string }
  *               lastName: { type: string }
  *               email: { type: string }
  *               phone: { type: string }
- *               userType: { type: string, enum: [admin, doctor, staff, chemist] }
+ *               designation: { type: string, enum: [receptionist, chemist] }
  *     responses:
  *       201:
  *         description: User created successfully.
  */
-router.post("/", verifyAuthToken, authorizeRoles("admin", "doctor"), validate(schema.createUser), controller.createUser);
+router.post(
+  "/",
+  verifyAuthToken,
+  authorizeRoles("admin", "doctor"),
+  validate(schema.createUser),
+  controller.createUser,
+);
 
 /**
  * @swagger
@@ -84,17 +100,23 @@ router.post("/", verifyAuthToken, authorizeRoles("admin", "doctor"), validate(sc
  *         application/json:
  *           schema:
  *             type: object
- *             required: [firstName, lastName, userType]
+ *             required: [firstName, lastName, designation]
  *             properties:
  *               firstName: { type: string }
  *               lastName: { type: string }
  *               phone: { type: string }
- *               userType: { type: string, enum: [admin, doctor, staff, chemist] }
+ *               designation: { type: string, enum: [receptionist, chemist] }
  *     responses:
  *       200:
  *         description: User updated successfully.
  */
-router.put("/:id", verifyAuthToken, authorizeRoles("admin", "doctor"), validate(schema.updateUser), controller.updateUser);
+router.put(
+  "/:id",
+  verifyAuthToken,
+  authorizeRoles("admin", "doctor"),
+  validate(schema.updateUser),
+  controller.updateUser,
+);
 
 /**
  * @swagger
@@ -113,6 +135,11 @@ router.put("/:id", verifyAuthToken, authorizeRoles("admin", "doctor"), validate(
  *       200:
  *         description: User deactivated successfully.
  */
-router.delete("/:id", verifyAuthToken, authorizeRoles("admin", "doctor"), controller.deleteUser);
+router.delete(
+  "/:id",
+  verifyAuthToken,
+  authorizeRoles("admin", "doctor"),
+  controller.deleteUser,
+);
 
 module.exports = router;

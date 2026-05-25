@@ -1,12 +1,15 @@
 const Joi = require("joi");
 
 const passwordSchema = Joi.string()
-  .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/)
+  .regex(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/,
+  )
   .min(8)
   .max(30)
   .required()
   .messages({
-    "string.pattern.base": "Password must be at least 8 characters with uppercase, lowercase, number, and special character.",
+    "string.pattern.base":
+      "Password must be at least 8 characters with uppercase, lowercase, number, and special character.",
     "any.required": "Password is required.",
     "string.empty": "Password is required.",
   });
@@ -71,13 +74,10 @@ const verifyOtp = Joi.object({
 
 const resetPassword = Joi.object({
   password: passwordSchema,
-  confirmPassword: Joi.string()
-    .valid(Joi.ref("password"))
-    .required()
-    .messages({
-      "any.only": "Passwords do not match.",
-      "any.required": "Please confirm your password.",
-    }),
+  confirmPassword: Joi.string().valid(Joi.ref("password")).required().messages({
+    "any.only": "Passwords do not match.",
+    "any.required": "Please confirm your password.",
+  }),
 });
 
 const updateProfile = Joi.object({
@@ -117,7 +117,7 @@ const changePassword = Joi.object({
     }),
 });
 
-const userTypeValues = ["staff", "chemist"];
+const designationValues = ["receptionist", "chemist"];
 
 const createUser = Joi.object({
   firstName: Joi.string().trim().required().messages({
@@ -138,12 +138,12 @@ const createUser = Joi.object({
     .messages({
       "string.pattern.base": "Phone number must be exactly 10 digits.",
     }),
-  userType: Joi.string()
-    .valid(...userTypeValues)
+  designation: Joi.string()
+    .valid(...designationValues)
     .required()
     .messages({
-      "any.only": `Role must be one of: ${userTypeValues.join(", ")}.`,
-      "any.required": "Role is required.",
+      "any.only": `Designation must be one of: ${designationValues.join(", ")}.`,
+      "any.required": "Designation is required.",
     }),
 });
 
@@ -161,13 +161,24 @@ const updateUser = Joi.object({
     .messages({
       "string.pattern.base": "Phone number must be exactly 10 digits.",
     }),
-  userType: Joi.string()
-    .valid(...userTypeValues)
+  designation: Joi.string()
+    .valid(...designationValues)
     .required()
     .messages({
-      "any.only": `Role must be one of: ${userTypeValues.join(", ")}.`,
-      "any.required": "Role is required.",
+      "any.only": `Designation must be one of: ${designationValues.join(", ")}.`,
+      "any.required": "Designation is required.",
     }),
 });
 
-module.exports = { login, register, forgotPassword, verifyOtp, resetPassword, updateProfile, changePassword, updateHospital, createUser, updateUser };
+module.exports = {
+  login,
+  register,
+  forgotPassword,
+  verifyOtp,
+  resetPassword,
+  updateProfile,
+  changePassword,
+  updateHospital,
+  createUser,
+  updateUser,
+};

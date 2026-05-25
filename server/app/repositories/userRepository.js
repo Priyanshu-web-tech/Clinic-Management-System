@@ -8,7 +8,24 @@ const findUsers = async ({ filter, search, page, pageSize }) => {
 
   if (search) {
     const regex = new RegExp(search, "i");
-    query.$or = [{ firstName: regex }, { lastName: regex }, { email: regex }];
+    const orConditions = [
+      { firstName: regex },
+      { lastName: regex },
+      { email: regex },
+      { phone: regex },
+    ];
+
+    const parts = search.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      const firstRegex = new RegExp(parts[0], "i");
+      const lastRegex = new RegExp(parts.slice(1).join(" "), "i");
+      orConditions.push(
+        { firstName: firstRegex, lastName: lastRegex },
+        { firstName: lastRegex, lastName: firstRegex },
+      );
+    }
+
+    query.$or = orConditions;
   }
 
   const [users, total] = await Promise.all([

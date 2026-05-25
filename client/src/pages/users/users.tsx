@@ -1,19 +1,18 @@
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
-import {
-  Pencil,
-  Trash2,
-  Plus,
-  Search,
-  Users as UsersIcon,
-} from "lucide-react"
+import { Pencil, Trash2, Plus, Search, Users as UsersIcon } from "lucide-react"
 
 import {
   useGetUsersQuery,
   useDeleteUserMutation,
 } from "@/store/api/user-api-slice"
-import { DESIGNATION_OPTIONS, DESIGNATION_LABEL, USERS_TABLE_COLUMNS } from "@/constants/constants"
+import {
+  DESIGNATION_OPTIONS,
+  DESIGNATION_LABEL,
+  USERS_TABLE_COLUMNS,
+} from "@/constants/constants"
 import type { StaffUser, Designation } from "@/types/api.types"
+import usePaginatedQuery from "@/hooks/use-paginated-query"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -45,10 +44,11 @@ const DESIGNATION_BADGE_VARIANT: Record<
 // ── Component ─────────────────────────────────────────────
 
 const Users = () => {
-  const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [designationFilter, setDesignationFilter] = useState<Designation | "">("")
+  const [designationFilter, setDesignationFilter] = useState<Designation | "">(
+    ""
+  )
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<StaffUser | null>(null)
@@ -57,34 +57,35 @@ const Users = () => {
   const [deleteOpen, setDeleteOpen] = useState(false)
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(search)
-      setPage(1)
-    }, 400)
+    const timer = setTimeout(() => setDebouncedSearch(search), 400)
     return () => clearTimeout(timer)
   }, [search])
 
-  const { data, isLoading } = useGetUsersQuery(
+  const {
+    items: users,
+    page,
+    setPage,
+    total,
+    totalPages,
+    isLoading,
+  } = usePaginatedQuery<
+    StaffUser,
+    { search?: string; designation?: Designation }
+  >(
+    useGetUsersQuery,
     {
-      page,
-      pageSize: PAGE_SIZE,
       search: debouncedSearch || undefined,
       designation: designationFilter || undefined,
     },
-    { refetchOnMountOrArgChange: true, refetchOnFocus: true }
+    PAGE_SIZE
   )
 
   const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation()
-
-  const users = data?.result?.users ?? []
-  const total = data?.result?.total ?? 0
-  const totalPages = data?.result?.totalPages ?? 1
 
   // ── Handlers ─────────────────────────────────────────────
 
   const handleDesignationFilter = (value: string) => {
     setDesignationFilter(value === "all" ? "" : (value as Designation))
-    setPage(1)
   }
 
   const openAdd = () => {
@@ -122,10 +123,14 @@ const Users = () => {
       <span className="text-muted-foreground">
         {user.phone || <span className="text-border">—</span>}
       </span>,
-      <Badge variant={DESIGNATION_BADGE_VARIANT[user.designation ?? ""] ?? "outline"}>
-        {user.designation
-          ? DESIGNATION_LABEL[user.designation]
-          : <span className="text-muted-foreground">—</span>}
+      <Badge
+        variant={DESIGNATION_BADGE_VARIANT[user.designation ?? ""] ?? "outline"}
+      >
+        {user.designation ? (
+          DESIGNATION_LABEL[user.designation]
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        )}
       </Badge>,
       <Badge variant={user.isActive ? "success" : "secondary"}>
         {user.isActive ? "Active" : "Inactive"}
@@ -181,13 +186,16 @@ const Users = () => {
           <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             className="h-8 pl-8 text-xs"
-            placeholder="Search by name or email..."
+            placeholder="Search by name, email, or phone..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         <div className="w-36">
-          <Select value={designationFilter || "all"} onValueChange={handleDesignationFilter}>
+          <Select
+            value={designationFilter || "all"}
+            onValueChange={handleDesignationFilter}
+          >
             <SelectTrigger className="h-8 w-full text-xs">
               <SelectValue placeholder="All" />
             </SelectTrigger>

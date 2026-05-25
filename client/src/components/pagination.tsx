@@ -20,7 +20,7 @@ const Pagination = ({ page, totalPages, total, pageSize, onPageChange }: Paginat
   return (
     <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
       <span>
-        Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} of {total}
+        Showing {total === 0 ? 0 : (page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} of {total}
       </span>
       <div className="flex items-center gap-1">
         <button

@@ -36,7 +36,7 @@ const getUsers = async (req) => {
     return {
       error: false,
       data: {
-        users,
+        data: users,
         total,
         page: parseInt(page) || 1,
         pageSize: limit,

@@ -55,6 +55,14 @@ export interface ApiResponse<T> {
   result: T
 }
 
+export interface PaginatedResponse<T> {
+  data: T[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
 export interface ForgotPasswordRequest {
   email: string
 }
@@ -129,13 +137,7 @@ export interface GetUsersRequest {
   designation?: Designation | ""
 }
 
-export interface GetUsersResponse {
-  users: StaffUser[]
-  total: number
-  page: number
-  pageSize: number
-  totalPages: number
-}
+export type GetUsersResponse = PaginatedResponse<StaffUser>
 
 export interface CreateUserRequest {
   firstName: string

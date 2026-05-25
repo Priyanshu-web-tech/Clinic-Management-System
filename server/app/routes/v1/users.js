@@ -32,7 +32,7 @@ const {
  *       - in: query
  *         name: search
  *         schema: { type: string }
- *         description: Search by name or email
+ *         description: Search by name, email, or phone number
  *       - in: query
  *         name: designation
  *         schema: { type: string, enum: [receptionist, chemist] }
@@ -40,6 +40,23 @@ const {
  *     responses:
  *       200:
  *         description: Users fetched successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 result:
+ *                   type: object
+ *                   properties:
+ *                     data:
+ *                       type: array
+ *                       items: { type: object }
+ *                       description: Array of staff users
+ *                     total: { type: integer }
+ *                     page: { type: integer }
+ *                     pageSize: { type: integer }
+ *                     totalPages: { type: integer }
  */
 router.get(
   "/",

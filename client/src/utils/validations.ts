@@ -71,3 +71,5 @@ export const requiredPhoneValidation = phoneValidation.required("Phone is requir
 export const bloodGroupValidation = Yup.string().optional().nullable()
 
 export const stringArrayValidation = Yup.array().of(Yup.string()).optional()
+
+export const nullableStringValidation = Yup.string().nullable().optional()

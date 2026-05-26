@@ -43,8 +43,19 @@
   "FORBIDDEN_USER_TYPE": "You are not allowed to create a user of this role.",
   "ACCESS_DENIED": "You do not have permission to perform this action.",
   "PATIENTS_FETCHED": "Patients fetched successfully.",
+  "PATIENT_FETCHED": "Patient fetched successfully.",
   "PATIENT_CREATED": "Patient added successfully.",
   "PATIENT_UPDATED": "Patient updated successfully.",
   "PATIENT_DELETED": "Patient removed successfully.",
-  "PATIENT_NOT_FOUND": "Patient not found."
+  "PATIENT_NOT_FOUND": "Patient not found.",
+  "VISITS_FETCHED": "Visits fetched successfully.",
+  "VISIT_CREATED": "Patient moved to queue successfully.",
+  "VISIT_UPDATED": "Visit updated successfully.",
+  "VISIT_NOT_FOUND": "Visit not found.",
+  "VISIT_ALREADY_ACTIVE": "This patient already has an active visit.",
+  "INVALID_STATUS_TRANSITION": "Invalid status transition.",
+  "DOCTOR_NOT_FOUND": "Doctor not found.",
+  "DOCTORS_FETCHED": "Doctors fetched successfully.",
+  "VISIT_FETCHED": "Visit fetched successfully.",
+  "DOCTOR_ALREADY_IN_CONSULTATION": "You are already in consultation with another patient."
 }

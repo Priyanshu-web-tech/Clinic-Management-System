@@ -9,6 +9,7 @@ import type {
   PatientMutationResponse,
 } from "@/types/api.types"
 
+
 export const patientApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getPatients: builder.query<ApiResponse<GetPatientsResponse>, GetPatientsRequest>({
@@ -48,6 +49,11 @@ export const patientApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Patients"],
     }),
+
+    getPatientById: builder.query<ApiResponse<PatientMutationResponse>, string>({
+      query: (id) => ({ url: `${API_ROUTES.PATIENTS}/${id}`, method: "GET" }),
+      providesTags: (_result, _error, id) => [{ type: "Patients", id }],
+    }),
   }),
   overrideExisting: false,
 })
@@ -57,4 +63,5 @@ export const {
   useCreatePatientMutation,
   useUpdatePatientMutation,
   useDeletePatientMutation,
+  useGetPatientByIdQuery,
 } = patientApi

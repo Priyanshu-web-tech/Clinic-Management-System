@@ -1,3 +1,14 @@
+import { differenceInDays, differenceInMonths, differenceInYears, parseISO } from "date-fns"
+
+export const formatAge = (dob: string): string => {
+  const date = parseISO(dob)
+  const years = differenceInYears(new Date(), date)
+  if (years >= 1) return `${years} yrs`
+  const months = differenceInMonths(new Date(), date)
+  if (months >= 1) return `${months} mo`
+  return `${differenceInDays(new Date(), date)} days`
+}
+
 export const getInitials = (firstName?: string, lastName?: string): string => {
   if (!firstName || !lastName) return "?"
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()

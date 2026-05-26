@@ -4,7 +4,7 @@ const controller = require("../../controllers/patientController");
 const {
   validate,
   verifyAuthToken,
-  authorizePatientAccess,
+  authorizeResourceAccess,
 } = require("../../middlewares/index");
 
 /**
@@ -46,8 +46,35 @@ const {
 router.get(
   "/",
   verifyAuthToken,
-  authorizePatientAccess,
+  authorizeResourceAccess,
   controller.getPatients,
+);
+
+/**
+ * @swagger
+ * /v1/patients/{id}:
+ *   get:
+ *     summary: Get a single patient by ID
+ *     tags: [Patients]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *         description: Patient ID
+ *     responses:
+ *       200:
+ *         description: Patient fetched successfully.
+ *       404:
+ *         description: Patient not found.
+ */
+router.get(
+  "/:id",
+  verifyAuthToken,
+  authorizeResourceAccess,
+  controller.getPatientById,
 );
 
 /**
@@ -81,7 +108,7 @@ router.get(
 router.post(
   "/",
   verifyAuthToken,
-  authorizePatientAccess,
+  authorizeResourceAccess,
   validate(schema.createPatient),
   controller.createPatient,
 );
@@ -106,7 +133,7 @@ router.post(
 router.put(
   "/:id",
   verifyAuthToken,
-  authorizePatientAccess,
+  authorizeResourceAccess,
   validate(schema.updatePatient),
   controller.updatePatient,
 );
@@ -131,7 +158,7 @@ router.put(
 router.delete(
   "/:id",
   verifyAuthToken,
-  authorizePatientAccess,
+  authorizeResourceAccess,
   controller.deletePatient,
 );
 

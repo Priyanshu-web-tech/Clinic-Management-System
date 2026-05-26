@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
-import { Pencil, Trash2, Plus, Search, UserRound } from "lucide-react"
+import { Pencil, Trash2, Plus, Search, UserRound, CalendarPlus, Eye } from "lucide-react"
 
 import {
   useGetPatientsQuery,
@@ -15,7 +15,13 @@ import {
   BLOOD_GROUP_LABEL,
 } from "@/constants/constants"
 import type { Patient, Gender, BloodGroup } from "@/types/api.types"
+import { VisitStatus } from "@/types/api.types"
+import { VISIT_STATUS_LABEL, VISIT_STATUS_BADGE_VARIANT } from "@/constants/constants"
 import usePaginatedQuery from "@/hooks/use-paginated-query"
+import { useAppSelector } from "@/store/hook"
+import { UserType, Designation } from "@/types/api.types"
+
+import { useNavigate } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -31,6 +37,7 @@ import DataTable from "@/components/data-table"
 import DeleteConfirmDialog from "@/components/delete-confirm-dialog"
 import Pagination from "@/components/pagination"
 import PatientModal from "./patient-modal"
+import VisitModal from "@/pages/visits/visit-modal"
 
 const Patients = () => {
   const [search, setSearch] = useState("")
@@ -43,6 +50,20 @@ const Patients = () => {
 
   const [deleteTarget, setDeleteTarget] = useState<Patient | null>(null)
   const [deleteOpen, setDeleteOpen] = useState(false)
+
+  const [visitTarget, setVisitTarget] = useState<Patient | null>(null)
+  const [visitOpen, setVisitOpen] = useState(false)
+
+  const navigate = useNavigate()
+  const currentUser = useAppSelector((state) => state.userData)
+  const canCreateVisit =
+    currentUser.userType === UserType.Admin ||
+    currentUser.userType === UserType.Doctor ||
+    (currentUser.userType === UserType.Staff &&
+      currentUser.designation === Designation.Receptionist)
+  const canViewDetail =
+    currentUser.userType === UserType.Admin ||
+    currentUser.userType === UserType.Doctor
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 400)
@@ -118,7 +139,50 @@ const Patients = () => {
           ? BLOOD_GROUP_LABEL[patient.bloodGroup] ?? patient.bloodGroup
           : <span className="text-border">—</span>}
       </span>,
+      patient.activeVisitStatus &&
+      (patient.activeVisitStatus === VisitStatus.Waiting ||
+        patient.activeVisitStatus === VisitStatus.InConsultation) ? (
+        <Badge
+          variant={VISIT_STATUS_BADGE_VARIANT[patient.activeVisitStatus]}
+          className="capitalize"
+        >
+          {VISIT_STATUS_LABEL[patient.activeVisitStatus]}
+        </Badge>
+      ) : (
+        <span className="text-border">—</span>
+      ),
       <div className="flex items-center justify-end gap-1">
+        {canViewDetail && (
+          <button
+            onClick={() => navigate(`/patients/${patient._id}`)}
+            title="View patient details"
+            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          >
+            <Eye className="size-3.5" />
+          </button>
+        )}
+        {canCreateVisit && (
+          <button
+            onClick={() => {
+              setVisitTarget(patient)
+              setVisitOpen(true)
+            }}
+            title={
+              patient.activeVisitStatus === VisitStatus.Waiting
+                ? "Patient is already in queue"
+                : patient.activeVisitStatus === VisitStatus.InConsultation
+                  ? "Patient is already in consultation"
+                  : "Move to visit queue"
+            }
+            disabled={
+              patient.activeVisitStatus === VisitStatus.Waiting ||
+              patient.activeVisitStatus === VisitStatus.InConsultation
+            }
+            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <CalendarPlus className="size-3.5" />
+          </button>
+        )}
         <button
           onClick={() => openEdit(patient)}
           title="Edit patient"
@@ -238,6 +302,16 @@ const Patients = () => {
           setEditTarget(null)
         }}
         editTarget={editTarget}
+      />
+
+      {/* Move to Visit Modal */}
+      <VisitModal
+        open={visitOpen}
+        onClose={() => {
+          setVisitOpen(false)
+          setVisitTarget(null)
+        }}
+        patient={visitTarget}
       />
 
       {/* Delete Confirmation */}

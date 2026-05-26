@@ -1,6 +1,6 @@
-import { LayoutDashboard, Users, UserRound } from "lucide-react"
+import { LayoutDashboard, Users, UserRound, CalendarCheck } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
-import { UserType, Designation, Gender, BloodGroup } from "@/types/api.types"
+import { UserType, Designation, Gender, BloodGroup, VisitStatus } from "@/types/api.types"
 import type { IUserSessionData } from "@/store/slices/user-data-slice"
 
 export const ALL_NAV_ITEMS: {
@@ -27,6 +27,16 @@ export const ALL_NAV_ITEMS: {
       (user.userType === UserType.Staff &&
         user.designation === Designation.Receptionist),
   },
+  {
+    label: "Visits",
+    path: "/visits",
+    icon: CalendarCheck,
+    canAccess: (user) =>
+      user.userType === UserType.Admin ||
+      user.userType === UserType.Doctor ||
+      (user.userType === UserType.Staff &&
+        user.designation === Designation.Receptionist),
+  },
 ]
 
 export const BASE_URL = import.meta.env.VITE_BASE_URL
@@ -45,6 +55,7 @@ export const API_ROUTES = {
   UPDATE_HOSPITAL: "hospital",
   USERS: "users",
   PATIENTS: "patients",
+  VISITS: "visits",
 }
 
 export const NAVIGATION_ROUTES = {
@@ -57,6 +68,7 @@ export const NAVIGATION_ROUTES = {
   RESET_PASSWORD: "/reset-password",
   USERS: "/users",
   PATIENTS: "/patients",
+  VISITS: "/visits",
 }
 
 export const USER_TYPE_OPTIONS = [
@@ -90,6 +102,7 @@ export const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/users": "Team",
   "/patients": "Patients",
+  "/visits": "Visits",
   "/profile": "Profile",
 }
 
@@ -145,5 +158,46 @@ export const PATIENTS_TABLE_COLUMNS = [
   { name: "Phone" },
   { name: "Gender" },
   { name: "Blood Group" },
+  { name: "Queue" },
+  { name: "Actions", className: "text-right" },
+]
+
+// ── Visit constants ──────────────────────────────────────
+
+export const VISIT_STATUS_OPTIONS = [
+  { value: VisitStatus.Waiting, label: "Waiting" },
+  { value: VisitStatus.InConsultation, label: "In Consultation" },
+  { value: VisitStatus.Completed, label: "Completed" },
+  { value: VisitStatus.Cancelled, label: "Cancelled" },
+] as const
+
+export const VISIT_STATUS_LABEL: Record<string, string> = Object.fromEntries(
+  VISIT_STATUS_OPTIONS.map(({ value, label }) => [value, label])
+)
+
+export const VISIT_STATUS_BADGE_VARIANT: Record<
+  string,
+  "default" | "secondary" | "destructive" | "outline" | "success" | "warning"
+> = {
+  [VisitStatus.Waiting]: "warning",
+  [VisitStatus.InConsultation]: "default",
+  [VisitStatus.Completed]: "success",
+  [VisitStatus.Cancelled]: "secondary",
+}
+
+export const VISIT_HISTORY_COLUMNS = [
+  { name: "Visit #" },
+  { name: "Date" },
+  { name: "Symptoms" },
+  { name: "Diagnosis" },
+  { name: "Status" },
+]
+
+export const VISITS_TABLE_COLUMNS = [
+  { name: "Token" },
+  { name: "Visit #" },
+  { name: "Patient" },
+  { name: "Symptoms" },
+  { name: "Status" },
   { name: "Actions", className: "text-right" },
 ]

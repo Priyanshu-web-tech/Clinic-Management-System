@@ -3,11 +3,13 @@ const {
   gender: genderConst,
   bloodGroup: bloodGroupConst,
   designation : designationConst,
+  visitStatus: visitStatusConst,
 } = require("../constant/constant");
 
 const designationValues = Object.values(designationConst);
 const genderValues = Object.values(genderConst);
 const bloodGroupValues = Object.values(bloodGroupConst);
+const visitStatusValues = Object.values(visitStatusConst);
 
 const passwordSchema = Joi.string()
   .regex(
@@ -247,6 +249,33 @@ const updatePatient = Joi.object({
     .default([]),
 });
 
+const createVisit = Joi.object({
+  patientId: Joi.string().required().messages({
+    "any.required": "Patient is required.",
+    "string.empty": "Patient is required.",
+  }),
+  symptoms: Joi.string().trim().optional().allow(""),
+});
+
+const updateVisit = Joi.object({
+  symptoms: Joi.string().trim().optional().allow(""),
+  diagnosis: Joi.string().trim().optional().allow(""),
+  followUpDate: Joi.date().iso().optional().allow(null),
+  status: Joi.string()
+    .valid(...visitStatusValues)
+    .optional(),
+});
+
+const updateVisitStatus = Joi.object({
+  status: Joi.string()
+    .valid(...visitStatusValues)
+    .required()
+    .messages({
+      "any.only": `Status must be one of: ${visitStatusValues.join(", ")}.`,
+      "any.required": "Status is required.",
+    }),
+});
+
 module.exports = {
   login,
   register,
@@ -260,4 +289,7 @@ module.exports = {
   updateUser,
   createPatient,
   updatePatient,
+  createVisit,
+  updateVisit,
+  updateVisitStatus,
 };

@@ -19,7 +19,7 @@ const authorizeRoles = (...allowedRoles) => {
   };
 };
 
-const authorizePatientAccess = (req, res, next) => {
+const authorizeResourceAccess = (req, res, next) => {
   const { userType, designation } = req.data;
 
   const allowed =
@@ -41,5 +41,5 @@ const authorizePatientAccess = (req, res, next) => {
 
 module.exports = {
   authorizeRoles,
-  authorizePatientAccess,
+  authorizeResourceAccess,
 };

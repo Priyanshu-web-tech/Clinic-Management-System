@@ -1,6 +1,7 @@
 const httpStatus = require("http-status").status;
 const patientRepository = require("../repositories/patientRepository");
-const { userType: userTypeConst } = require("../constant/constant");
+const Visit = require("../models/visit");
+const { userType: userTypeConst, visitStatus: visitStatusConst } = require("../constant/constant");
 
 const getPatients = async (req) => {
   try {
@@ -23,12 +24,28 @@ const getPatients = async (req) => {
       pageSize: parseInt(pageSize) || 10,
     });
 
+    const patientIds = patients.map((p) => p._id);
+    const activeVisits = await Visit.find({
+      patient: { $in: patientIds },
+      status: { $in: [visitStatusConst.WAITING, visitStatusConst.IN_CONSULTATION] },
+    }).select("patient status");
+
+    const activeVisitMap = {};
+    activeVisits.forEach((v) => {
+      activeVisitMap[String(v.patient)] = v.status;
+    });
+
+    const patientsWithStatus = patients.map((p) => ({
+      ...p.toObject(),
+      activeVisitStatus: activeVisitMap[String(p._id)] ?? null,
+    }));
+
     const limit = parseInt(pageSize) || 10;
 
     return {
       error: false,
       data: {
-        data: patients,
+        data: patientsWithStatus,
         total,
         page: parseInt(page) || 1,
         pageSize: limit,
@@ -217,4 +234,48 @@ const deletePatient = async (req) => {
   }
 };
 
-module.exports = { getPatients, createPatient, updatePatient, deletePatient };
+const getPatientById = async (req) => {
+  try {
+    const { id } = req.params;
+    const currentUser = req.data;
+
+    const patient = await patientRepository.findPatientById(id);
+    if (!patient || !patient.isActive) {
+      return {
+        error: true,
+        data: {},
+        msgCode: "PATIENT_NOT_FOUND",
+        status: httpStatus.NOT_FOUND,
+      };
+    }
+
+    if (
+      currentUser.userType !== userTypeConst.ADMIN &&
+      String(patient.hospital) !== String(currentUser.hospital?._id)
+    ) {
+      return {
+        error: true,
+        data: {},
+        msgCode: "FORBIDDEN",
+        status: httpStatus.FORBIDDEN,
+      };
+    }
+
+    return {
+      error: false,
+      data: { patient },
+      msgCode: "PATIENT_FETCHED",
+      status: httpStatus.OK,
+    };
+  } catch (err) {
+    console.log(err);
+    return {
+      error: true,
+      data: {},
+      msgCode: "INTERNAL_SERVER_ERROR",
+      status: httpStatus.INTERNAL_SERVER_ERROR,
+    };
+  }
+};
+
+module.exports = { getPatients, getPatientById, createPatient, updatePatient, deletePatient };

@@ -11,6 +11,9 @@ const Dashboard = lazy(() => import("@/pages/dashboard/dashboard"))
 const Profile = lazy(() => import("@/pages/profile/profile"))
 const Users = lazy(() => import("@/pages/users/users"))
 const Patients = lazy(() => import("@/pages/patients/patients"))
+const PatientDetail = lazy(() => import("@/pages/patients/patient-detail"))
+const Visits = lazy(() => import("@/pages/visits/visits"))
+const VisitDetail = lazy(() => import("@/pages/visits/visit-detail"))
 const ForgotPassword = lazy(
   () => import("@/pages/forgot-password/forgot-password")
 )
@@ -50,6 +53,9 @@ const AppRoutes = () => {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="users" element={<Users />} />
           <Route path="patients" element={<Patients />} />
+          <Route path="patients/:id" element={<PatientDetail />} />
+          <Route path="visits" element={<Visits />} />
+          <Route path="visits/:id" element={<VisitDetail />} />
           <Route path="profile" element={<Profile />} />
         </Route>
       </Route>

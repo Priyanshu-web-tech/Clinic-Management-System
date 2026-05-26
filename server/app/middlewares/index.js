@@ -7,7 +7,7 @@ const {
   generateOtpToken,
   generateVerifyToken,
 } = require("./jwt");
-const { authorizeRoles, authorizePatientAccess } = require("./rbac");
+const { authorizeRoles, authorizeResourceAccess } = require("./rbac");
 
 module.exports = {
   validate,
@@ -18,5 +18,5 @@ module.exports = {
   generateOtpToken,
   generateVerifyToken,
   authorizeRoles,
-  authorizePatientAccess,
+  authorizeResourceAccess,
 };

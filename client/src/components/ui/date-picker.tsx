@@ -36,6 +36,7 @@ interface DatePickerProps {
   onBlur?: () => void
   disabled?: boolean
   maxDate?: Date
+  clearable?: boolean
 }
 
 function DatePicker({
@@ -46,6 +47,7 @@ function DatePicker({
   onBlur,
   disabled,
   maxDate = new Date(),
+  clearable = true,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false)
   const [headerMode, setHeaderMode] = React.useState<HeaderMode>("calendar")
@@ -114,7 +116,7 @@ function DatePicker({
           <span className="flex-1">
             {selected ? format(selected, "dd MMM yyyy") : placeholder}
           </span>
-          {selected && (
+          {selected && clearable && (
             <X
               className="size-3 shrink-0 text-muted-foreground hover:text-foreground"
               onClick={handleClear}

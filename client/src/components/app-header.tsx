@@ -4,11 +4,16 @@ import { useLocation, useNavigate } from "react-router-dom"
 
 import { useAppSelector } from "@/store/hook"
 import { getInitials } from "@/utils/helpers"
+import { NAVIGATION_ROUTES, USER_TYPE_LABEL } from "@/constants/constants"
+import { buildCrumbs } from "@/utils/breadcrumbs"
 import {
-  NAVIGATION_ROUTES,
-  PAGE_TITLES,
-  USER_TYPE_LABEL,
-} from "@/constants/constants"
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 
 interface AppHeaderProps {
   onMenuOpen: () => void
@@ -20,7 +25,7 @@ const AppHeader = ({ onMenuOpen, onLogout }: AppHeaderProps) => {
   const location = useLocation()
   const user = useAppSelector((state) => state.userData)
   const initials = getInitials(user.firstName, user.lastName)
-  const pageTitle = PAGE_TITLES[location.pathname] ?? "DocMate"
+  const crumbs = buildCrumbs(location.pathname)
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-card px-4">
@@ -31,7 +36,26 @@ const AppHeader = ({ onMenuOpen, onLogout }: AppHeaderProps) => {
         >
           <Menu className="size-4" />
         </button>
-        <h1 className="text-sm font-semibold text-foreground">{pageTitle}</h1>
+
+        <Breadcrumb>
+          <BreadcrumbList>
+            {crumbs.map((crumb, i) => (
+              <BreadcrumbItem key={i}>
+                {i > 0 && <BreadcrumbSeparator />}
+                {crumb.href ? (
+                  <BreadcrumbLink
+                    href={crumb.href}
+                    onClick={(e) => { e.preventDefault(); navigate(crumb.href!) }}
+                  >
+                    {crumb.label}
+                  </BreadcrumbLink>
+                ) : (
+                  <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                )}
+              </BreadcrumbItem>
+            ))}
+          </BreadcrumbList>
+        </Breadcrumb>
       </div>
 
       <div className="flex items-center gap-2.5">

@@ -30,4 +30,11 @@ const bloodGroup = {
   O_NEG: "O-",
 };
 
-module.exports = { userType, otpType, designation, gender, bloodGroup };
+const visitStatus = {
+  WAITING: "waiting",
+  IN_CONSULTATION: "in_consultation",
+  COMPLETED: "completed",
+  CANCELLED: "cancelled",
+};
+
+module.exports = { userType, otpType, designation, gender, bloodGroup, visitStatus };

@@ -1,9 +1,9 @@
 const { success, error } = require("../response/index");
-const patientService = require("../services/patientService");
+const visitService = require("../services/visitService");
 
-const getPatients = async (req, res) => {
+const getVisits = async (req, res) => {
   try {
-    const result = await patientService.getPatients(req);
+    const result = await visitService.getVisits(req);
     if (result.error) throw result;
     return success(
       req,
@@ -21,9 +21,9 @@ const getPatients = async (req, res) => {
   }
 };
 
-const createPatient = async (req, res) => {
+const createVisit = async (req, res) => {
   try {
-    const result = await patientService.createPatient(req);
+    const result = await visitService.createVisit(req);
     if (result.error) throw result;
     return success(
       req,
@@ -41,9 +41,9 @@ const createPatient = async (req, res) => {
   }
 };
 
-const updatePatient = async (req, res) => {
+const updateVisitStatus = async (req, res) => {
   try {
-    const result = await patientService.updatePatient(req);
+    const result = await visitService.updateVisitStatus(req);
     if (result.error) throw result;
     return success(
       req,
@@ -61,9 +61,9 @@ const updatePatient = async (req, res) => {
   }
 };
 
-const deletePatient = async (req, res) => {
+const getVisitById = async (req, res) => {
   try {
-    const result = await patientService.deletePatient(req);
+    const result = await visitService.getVisitById(req);
     if (result.error) throw result;
     return success(
       req,
@@ -81,9 +81,9 @@ const deletePatient = async (req, res) => {
   }
 };
 
-const getPatientById = async (req, res) => {
+const updateVisit = async (req, res) => {
   try {
-    const result = await patientService.getPatientById(req);
+    const result = await visitService.updateVisit(req);
     if (result.error) throw result;
     return success(
       req,
@@ -101,4 +101,4 @@ const getPatientById = async (req, res) => {
   }
 };
 
-module.exports = { getPatients, getPatientById, createPatient, updatePatient, deletePatient };
+module.exports = { getVisits, createVisit, updateVisitStatus, getVisitById, updateVisit };

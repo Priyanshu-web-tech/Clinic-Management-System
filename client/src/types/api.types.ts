@@ -205,6 +205,7 @@ export interface Patient {
   allergies: string[]
   chronicDiseases: string[]
   isActive: boolean
+  activeVisitStatus: VisitStatus | null
   createdAt: string
   updatedAt: string
 }
@@ -244,3 +245,82 @@ export interface UpdatePatientRequest {
 export interface PatientMutationResponse {
   patient: Patient
 }
+
+// ── Visit Management ──────────────────────────────────────
+
+export const VisitStatus = {
+  Waiting: "waiting",
+  InConsultation: "in_consultation",
+  Completed: "completed",
+  Cancelled: "cancelled",
+} as const
+export type VisitStatus = (typeof VisitStatus)[keyof typeof VisitStatus]
+
+export interface Visit {
+  _id: string
+  hospital: string
+  patient: {
+    _id: string
+    firstName: string
+    lastName: string
+    patientCode: string
+    phone?: string
+    gender?: Gender
+    dateOfBirth?: string | null
+    bloodGroup?: BloodGroup | null
+    allergies?: string[]
+    chronicDiseases?: string[]
+  }
+  doctor: {
+    _id: string
+    firstName: string
+    lastName: string
+  }
+  visitNumber: string
+  status: VisitStatus
+  tokenNumber: number
+  symptoms: string
+  diagnosis: string
+  followUpDate: string | null
+  closedAt: string | null
+  createdBy: {
+    _id: string
+    firstName: string
+    lastName: string
+  }
+  createdAt: string
+  updatedAt: string
+}
+
+export interface GetVisitsRequest {
+  page?: number
+  pageSize?: number
+  search?: string
+  status?: VisitStatus | "active" | ""
+  date?: string
+  doctorId?: string
+  patientId?: string
+}
+
+export type GetVisitsResponse = PaginatedResponse<Visit>
+
+export interface CreateVisitRequest {
+  patientId: string
+  symptoms?: string
+}
+
+export interface UpdateVisitStatusRequest {
+  status: VisitStatus
+}
+
+export interface UpdateVisitRequest {
+  symptoms?: string
+  diagnosis?: string
+  followUpDate?: string | null
+  status?: VisitStatus
+}
+
+export interface VisitMutationResponse {
+  visit: Visit
+}
+

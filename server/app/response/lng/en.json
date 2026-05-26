@@ -40,5 +40,11 @@
   "USER_NOT_FOUND": "User not found.",
   "USER_ALREADY_EXISTS": "A user with this email already exists.",
   "CANNOT_DELETE_SELF": "You cannot deactivate your own account.",
-  "FORBIDDEN_USER_TYPE": "You are not allowed to create a user of this role."
+  "FORBIDDEN_USER_TYPE": "You are not allowed to create a user of this role.",
+  "ACCESS_DENIED": "You do not have permission to perform this action.",
+  "PATIENTS_FETCHED": "Patients fetched successfully.",
+  "PATIENT_CREATED": "Patient added successfully.",
+  "PATIENT_UPDATED": "Patient updated successfully.",
+  "PATIENT_DELETED": "Patient removed successfully.",
+  "PATIENT_NOT_FOUND": "Patient not found."
 }

@@ -14,7 +14,7 @@ const AppSidebar = ({ mobileOpen }: AppSidebarProps) => {
   const user = useAppSelector((state) => state.userData)
 
   const navItems = ALL_NAV_ITEMS.filter(
-    (item) => !item.roles || item.roles.includes(user.userType)
+    (item) => !item.canAccess || item.canAccess(user)
   )
 
   return (

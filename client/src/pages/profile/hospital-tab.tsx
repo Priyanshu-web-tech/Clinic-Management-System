@@ -2,6 +2,7 @@ import * as Yup from "yup"
 import { useFormik } from "formik"
 import { toast } from "sonner"
 
+import { requiredFieldValidation, optionalStringValidation } from "@/utils/validations"
 import {
   useGetMeQuery,
   useUpdateHospitalMutation,
@@ -26,8 +27,8 @@ const HospitalTab = () => {
       address: hospital?.address ?? "",
     },
     validationSchema: Yup.object({
-      name: Yup.string().trim().required("Hospital name is required"),
-      address: Yup.string().optional(),
+      name: requiredFieldValidation("Hospital name"),
+      address: optionalStringValidation,
     }),
     onSubmit: async (values) => {
       try {

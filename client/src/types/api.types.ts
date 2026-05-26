@@ -11,6 +11,25 @@ export const Designation = {
 } as const
 export type Designation = (typeof Designation)[keyof typeof Designation]
 
+export const Gender = {
+  Male: "male",
+  Female: "female",
+  Other: "other",
+} as const
+export type Gender = (typeof Gender)[keyof typeof Gender]
+
+export const BloodGroup = {
+  APos: "A+",
+  ANeg: "A-",
+  BPos: "B+",
+  BNeg: "B-",
+  ABPos: "AB+",
+  ABNeg: "AB-",
+  OPos: "O+",
+  ONeg: "O-",
+} as const
+export type BloodGroup = (typeof BloodGroup)[keyof typeof BloodGroup]
+
 export interface LoginRequest {
   email: string
   password: string
@@ -32,6 +51,7 @@ export interface AuthUser {
   firstName: string
   lastName: string
   userType: UserType
+  designation?: Designation | null
 }
 
 export interface AuthResponse {
@@ -100,6 +120,7 @@ export interface UpdateProfileResponse {
     firstName: string
     lastName: string
     userType: UserType
+    designation?: Designation | null
     phone: string
     createdAt: string
     updatedAt: string
@@ -167,4 +188,59 @@ export interface UpdateUserRequest {
 
 export interface UserMutationResponse {
   user: StaffUser
+}
+
+// ── Patient Management ──────────────────────────────────────
+
+export interface Patient {
+  _id: string
+  hospital: string
+  patientCode: string
+  firstName: string
+  lastName: string
+  gender: Gender
+  dateOfBirth: string | null
+  phone: string
+  bloodGroup: BloodGroup | null
+  allergies: string[]
+  chronicDiseases: string[]
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface GetPatientsRequest {
+  page?: number
+  pageSize?: number
+  search?: string
+  gender?: Gender | ""
+  bloodGroup?: BloodGroup | ""
+}
+
+export type GetPatientsResponse = PaginatedResponse<Patient>
+
+export interface CreatePatientRequest {
+  firstName: string
+  lastName?: string
+  phone: string
+  gender: Gender
+  dateOfBirth?: string | null
+  bloodGroup?: BloodGroup | null | ""
+  allergies?: string[]
+  chronicDiseases?: string[]
+}
+
+export interface UpdatePatientRequest {
+  firstName: string
+  lastName?: string
+  phone: string
+  gender: Gender
+  dateOfBirth?: string | null
+  bloodGroup?: BloodGroup | null | ""
+  allergies?: string[]
+  chronicDiseases?: string[]
+}
+
+export interface PatientMutationResponse {
+  patient: Patient
 }

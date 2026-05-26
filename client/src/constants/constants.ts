@@ -1,19 +1,31 @@
-import { LayoutDashboard, Users } from "lucide-react"
+import { LayoutDashboard, Users, UserRound } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
-import { UserType, Designation } from "@/types/api.types"
+import { UserType, Designation, Gender, BloodGroup } from "@/types/api.types"
+import type { IUserSessionData } from "@/store/slices/user-data-slice"
 
 export const ALL_NAV_ITEMS: {
   label: string
   path: string
   icon: LucideIcon
-  roles?: UserType[]
+  canAccess?: (user: IUserSessionData) => boolean
 }[] = [
   { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
   {
     label: "Team",
     path: "/users",
     icon: Users,
-    roles: [UserType.Doctor, UserType.Admin],
+    canAccess: (user) =>
+      user.userType === UserType.Admin || user.userType === UserType.Doctor,
+  },
+  {
+    label: "Patients",
+    path: "/patients",
+    icon: UserRound,
+    canAccess: (user) =>
+      user.userType === UserType.Admin ||
+      user.userType === UserType.Doctor ||
+      (user.userType === UserType.Staff &&
+        user.designation === Designation.Receptionist),
   },
 ]
 
@@ -32,6 +44,7 @@ export const API_ROUTES = {
   LOGOUT: "auth/logout",
   UPDATE_HOSPITAL: "hospital",
   USERS: "users",
+  PATIENTS: "patients",
 }
 
 export const NAVIGATION_ROUTES = {
@@ -43,6 +56,7 @@ export const NAVIGATION_ROUTES = {
   VERIFY_OTP: "/verify-otp",
   RESET_PASSWORD: "/reset-password",
   USERS: "/users",
+  PATIENTS: "/patients",
 }
 
 export const USER_TYPE_OPTIONS = [
@@ -76,6 +90,7 @@ export const USERS_TABLE_COLUMNS = [
 export const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/users": "Team",
+  "/patients": "Patients",
   "/profile": "Profile",
 }
 
@@ -97,3 +112,40 @@ export const DESIGNATION_BADGE_VARIANT: Record<
   [Designation.Receptionist]: "success",
   [Designation.Chemist]: "warning",
 }
+
+// ── Patient constants ──────────────────────────────────────
+
+export const GENDER_OPTIONS = [
+  { value: Gender.Male, label: "Male" },
+  { value: Gender.Female, label: "Female" },
+  { value: Gender.Other, label: "Other" },
+] as const
+
+export const GENDER_LABEL: Record<string, string> = Object.fromEntries(
+  GENDER_OPTIONS.map(({ value, label }) => [value, label])
+)
+
+export const BLOOD_GROUP_OPTIONS = [
+  { value: BloodGroup.APos, label: "A+" },
+  { value: BloodGroup.ANeg, label: "A−" },
+  { value: BloodGroup.BPos, label: "B+" },
+  { value: BloodGroup.BNeg, label: "B−" },
+  { value: BloodGroup.ABPos, label: "AB+" },
+  { value: BloodGroup.ABNeg, label: "AB−" },
+  { value: BloodGroup.OPos, label: "O+" },
+  { value: BloodGroup.ONeg, label: "O−" },
+] as const
+
+export const BLOOD_GROUP_LABEL: Record<string, string> = Object.fromEntries(
+  BLOOD_GROUP_OPTIONS.map(({ value, label }) => [value, label])
+)
+
+export const PATIENTS_TABLE_COLUMNS = [
+  { name: "Patient Code" },
+  { name: "Name" },
+  { name: "Phone" },
+  { name: "Gender" },
+  { name: "Blood Group" },
+  { name: "Status" },
+  { name: "Actions", className: "text-right" },
+]

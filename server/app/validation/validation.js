@@ -1,4 +1,13 @@
 const Joi = require("joi");
+const {
+  gender: genderConst,
+  bloodGroup: bloodGroupConst,
+  designation : designationConst,
+} = require("../constant/constant");
+
+const designationValues = Object.values(designationConst);
+const genderValues = Object.values(genderConst);
+const bloodGroupValues = Object.values(bloodGroupConst);
 
 const passwordSchema = Joi.string()
   .regex(
@@ -117,8 +126,6 @@ const changePassword = Joi.object({
     }),
 });
 
-const designationValues = ["receptionist", "chemist"];
-
 const createUser = Joi.object({
   firstName: Joi.string().trim().required().messages({
     "any.required": "First name is required.",
@@ -170,6 +177,76 @@ const updateUser = Joi.object({
     }),
 });
 
+const createPatient = Joi.object({
+  firstName: Joi.string().trim().required().messages({
+    "any.required": "First name is required.",
+  }),
+  lastName: Joi.string().trim().optional().allow(""),
+  phone: Joi.string()
+    .pattern(/^\d{10}$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Phone number must be exactly 10 digits.",
+      "any.required": "Phone is required.",
+      "string.empty": "Phone is required.",
+    }),
+  gender: Joi.string()
+    .valid(...genderValues)
+    .required()
+    .messages({
+      "any.only": `Gender must be one of: ${genderValues.join(", ")}.`,
+      "any.required": "Gender is required.",
+    }),
+  dateOfBirth: Joi.date().iso().required().messages({
+    "any.required": "Date of birth is required.",
+    "date.base": "Please enter a valid date.",
+  }),
+  bloodGroup: Joi.string()
+    .valid(...bloodGroupValues)
+    .optional()
+    .allow(null, ""),
+  allergies: Joi.array().items(Joi.string().trim()).optional().default([]),
+  chronicDiseases: Joi.array()
+    .items(Joi.string().trim())
+    .optional()
+    .default([]),
+});
+
+const updatePatient = Joi.object({
+  firstName: Joi.string().trim().required().messages({
+    "any.required": "First name is required.",
+  }),
+  lastName: Joi.string().trim().optional().allow(""),
+  phone: Joi.string()
+    .pattern(/^\d{10}$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Phone number must be exactly 10 digits.",
+      "any.required": "Phone is required.",
+      "string.empty": "Phone is required.",
+    }),
+  gender: Joi.string()
+    .valid(...genderValues)
+    .required()
+    .messages({
+      "any.only": `Gender must be one of: ${genderValues.join(", ")}.`,
+      "any.required": "Gender is required.",
+    }),
+  dateOfBirth: Joi.date().iso().required().messages({
+    "any.required": "Date of birth is required.",
+    "date.base": "Please enter a valid date.",
+  }),
+  bloodGroup: Joi.string()
+    .valid(...bloodGroupValues)
+    .optional()
+    .allow(null, ""),
+  allergies: Joi.array().items(Joi.string().trim()).optional().default([]),
+  chronicDiseases: Joi.array()
+    .items(Joi.string().trim())
+    .optional()
+    .default([]),
+});
+
 module.exports = {
   login,
   register,
@@ -181,4 +258,6 @@ module.exports = {
   updateHospital,
   createUser,
   updateUser,
+  createPatient,
+  updatePatient,
 };

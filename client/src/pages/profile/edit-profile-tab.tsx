@@ -2,6 +2,7 @@ import * as Yup from "yup"
 import { useFormik } from "formik"
 import { toast } from "sonner"
 
+import { requiredFieldValidation, phoneValidation } from "@/utils/validations"
 import {
   useGetMeQuery,
   useUpdateProfileMutation,
@@ -30,11 +31,9 @@ const EditProfileTab = () => {
       phone: meData?.result?.phone ?? "",
     },
     validationSchema: Yup.object({
-      firstName: Yup.string().trim().required("First name is required"),
-      lastName: Yup.string().trim().required("Last name is required"),
-      phone: Yup.string()
-        .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
-        .optional(),
+      firstName: requiredFieldValidation("First name"),
+      lastName: requiredFieldValidation("Last name"),
+      phone: phoneValidation,
     }),
     onSubmit: async (values) => {
       try {
@@ -48,6 +47,7 @@ const EditProfileTab = () => {
               firstName: updated.firstName,
               lastName: updated.lastName,
               userType: updated.userType,
+              designation: updated.designation ?? null,
               createdAt: updated.createdAt,
               updatedAt: updated.updatedAt,
             })

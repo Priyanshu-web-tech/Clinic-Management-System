@@ -39,6 +39,7 @@ const Login = () => {
               firstName: user.firstName,
               lastName: user.lastName,
               userType: user.userType,
+              designation: user.designation ?? null,
               createdAt: "",
               updatedAt: "",
             })

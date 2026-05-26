@@ -10,6 +10,7 @@ const Register = lazy(() => import("@/pages/register/register"))
 const Dashboard = lazy(() => import("@/pages/dashboard/dashboard"))
 const Profile = lazy(() => import("@/pages/profile/profile"))
 const Users = lazy(() => import("@/pages/users/users"))
+const Patients = lazy(() => import("@/pages/patients/patients"))
 const ForgotPassword = lazy(
   () => import("@/pages/forgot-password/forgot-password")
 )
@@ -48,6 +49,7 @@ const AppRoutes = () => {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="users" element={<Users />} />
+          <Route path="patients" element={<Patients />} />
           <Route path="profile" element={<Profile />} />
         </Route>
       </Route>

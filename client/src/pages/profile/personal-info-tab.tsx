@@ -1,4 +1,5 @@
 import { useEffect } from "react"
+import { format } from "date-fns"
 
 import { useGetMeQuery } from "@/store/api/auth-api-slice"
 import { setUserData } from "@/store/slices/user-data-slice"
@@ -84,11 +85,7 @@ const PersonalInfoTab = () => {
         )}
         <ProfileRow
           label="Member since"
-          value={new Date(profile.createdAt).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
+          value={format(new Date(profile.createdAt), "d MMMM, yyyy")}
         />
       </div>
     </div>

@@ -17,6 +17,8 @@ import {
   requiredFieldValidation,
   registerPasswordValidation,
   confirmPasswordValidation,
+  phoneValidation,
+  optionalStringValidation,
 } from "@/utils/validations"
 import type { RegisterFormValues } from "./register.types"
 
@@ -43,10 +45,8 @@ const Register = () => {
       firstName: requiredFieldValidation("First name"),
       lastName: requiredFieldValidation("Last name"),
       email: emailValidation,
-      phone: Yup.string()
-        .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
-        .optional(),
-      address: Yup.string().optional(),
+      phone: phoneValidation,
+      address: optionalStringValidation,
       password: registerPasswordValidation,
       confirmPassword: confirmPasswordValidation("password"),
     }),
@@ -71,6 +71,7 @@ const Register = () => {
               firstName: user.firstName,
               lastName: user.lastName,
               userType: user.userType,
+              designation: user.designation ?? null,
               createdAt: "",
               updatedAt: "",
             })

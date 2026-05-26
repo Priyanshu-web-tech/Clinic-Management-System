@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit"
 import type { PayloadAction } from "@reduxjs/toolkit"
-import { UserType } from "@/types/api.types"
+import { UserType, type Designation } from "@/types/api.types"
 
 export interface IUserSessionData {
   _id: string
@@ -8,6 +8,7 @@ export interface IUserSessionData {
   firstName: string
   lastName: string
   email: string
+  designation?: Designation | null
   createdAt: string
   updatedAt: string
   isSignedIn?: boolean
@@ -19,6 +20,7 @@ const initialState: IUserSessionData = {
   firstName: "",
   lastName: "",
   email: "",
+  designation: null,
   createdAt: "",
   updatedAt: "",
   isSignedIn: false,

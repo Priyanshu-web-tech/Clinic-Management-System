@@ -5,6 +5,7 @@ import { toast } from "sonner"
 import {
   emailValidation,
   requiredFieldValidation,
+  optionalStringValidation,
   phoneValidation,
   designationValidation,
 } from "@/utils/validations"
@@ -35,7 +36,7 @@ import {
 
 const addUserSchema = Yup.object({
   firstName: requiredFieldValidation("First name"),
-  lastName: requiredFieldValidation("Last name"),
+  lastName: optionalStringValidation,
   email: emailValidation,
   phone: phoneValidation,
   designation: designationValidation,
@@ -43,7 +44,7 @@ const addUserSchema = Yup.object({
 
 const editUserSchema = Yup.object({
   firstName: requiredFieldValidation("First name"),
-  lastName: requiredFieldValidation("Last name"),
+  lastName: optionalStringValidation,
   phone: phoneValidation,
   designation: designationValidation,
 })
@@ -140,7 +141,7 @@ const UserModal = ({ open, onClose, editTarget }: UserModalProps) => {
 
             {/* Last Name */}
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="lastName" className="text-xs">Last Name <span className="text-destructive">*</span></Label>
+              <Label htmlFor="lastName" className="text-xs">Last Name</Label>
               <Input
                 id="lastName"
                 name="lastName"
@@ -185,10 +186,15 @@ const UserModal = ({ open, onClose, editTarget }: UserModalProps) => {
               <Input
                 id="phone"
                 name="phone"
+                type="text"
+                inputMode="numeric"
                 placeholder="9876543210"
                 className="h-8 text-xs"
                 value={formik.values.phone}
-                onChange={formik.handleChange}
+                onChange={(e) => {
+                  const digits = e.target.value.replace(/\D/g, "").slice(0, 10)
+                  formik.setFieldValue("phone", digits)
+                }}
                 onBlur={formik.handleBlur}
                 aria-invalid={!!(formik.touched.phone && formik.errors.phone)}
               />

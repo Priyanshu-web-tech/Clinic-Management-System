@@ -43,7 +43,7 @@ const Register = () => {
     validationSchema: Yup.object({
       hospitalName: requiredFieldValidation("Hospital name"),
       firstName: requiredFieldValidation("First name"),
-      lastName: requiredFieldValidation("Last name"),
+      lastName: optionalStringValidation,
       email: emailValidation,
       phone: phoneValidation,
       address: optionalStringValidation,
@@ -143,7 +143,7 @@ const Register = () => {
             </div>
             <div className="flex-1 space-y-1">
               <label htmlFor="lastName" className="text-xs font-medium text-foreground">
-                Last name <span className="text-destructive">*</span>
+                Last name
               </label>
               <Input
                 id="lastName"

@@ -124,9 +124,6 @@ const Users = () => {
           <span className="text-muted-foreground">—</span>
         )}
       </Badge>,
-      <Badge variant={user.isActive ? "success" : "secondary"}>
-        {user.isActive ? "Active" : "Inactive"}
-      </Badge>,
       <div className="flex items-center justify-end gap-1">
         <button
           onClick={() => openEdit(user)}

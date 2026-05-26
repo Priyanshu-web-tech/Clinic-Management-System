@@ -83,7 +83,6 @@ export const USERS_TABLE_COLUMNS = [
   { name: "Email" },
   { name: "Phone" },
   { name: "Designation" },
-  { name: "Status" },
   { name: "Actions", className: "text-right" },
 ]
 
@@ -146,6 +145,5 @@ export const PATIENTS_TABLE_COLUMNS = [
   { name: "Phone" },
   { name: "Gender" },
   { name: "Blood Group" },
-  { name: "Status" },
   { name: "Actions", className: "text-right" },
 ]

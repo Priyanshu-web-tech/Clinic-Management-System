@@ -175,10 +175,15 @@ const PatientModal = ({ open, onClose, editTarget }: PatientModalProps) => {
               <Input
                 id="phone"
                 name="phone"
+                type="text"
+                inputMode="numeric"
                 placeholder="9876543210"
                 className="h-8 text-xs"
                 value={formik.values.phone}
-                onChange={formik.handleChange}
+                onChange={(e) => {
+                  const digits = e.target.value.replace(/\D/g, "").slice(0, 10)
+                  formik.setFieldValue("phone", digits)
+                }}
                 onBlur={formik.handleBlur}
                 aria-invalid={!!(formik.touched.phone && formik.errors.phone)}
               />

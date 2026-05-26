@@ -118,9 +118,6 @@ const Patients = () => {
           ? BLOOD_GROUP_LABEL[patient.bloodGroup] ?? patient.bloodGroup
           : <span className="text-border">—</span>}
       </span>,
-      <Badge variant={patient.isActive ? "success" : "secondary"}>
-        {patient.isActive ? "Active" : "Inactive"}
-      </Badge>,
       <div className="flex items-center justify-end gap-1">
         <button
           onClick={() => openEdit(patient)}

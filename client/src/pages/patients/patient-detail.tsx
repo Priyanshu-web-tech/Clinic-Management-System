@@ -33,9 +33,8 @@ const PrescriptionDetail = ({
     )
   }
   return (
-    <div className="mt-2 overflow-hidden rounded-md border border-border bg-muted/20">
-      {/* Desktop column header */}
-      <div className="hidden grid-cols-[1fr_110px_90px_80px] border-b border-border px-3 py-1.5 text-[10px] font-medium tracking-wide text-muted-foreground uppercase md:grid">
+    <div className="mt-2 overflow-x-auto rounded-md border border-border bg-muted/20">
+      <div className="grid min-w-96 grid-cols-[1fr_110px_90px_80px] border-b border-border px-3 py-1.5 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
         <span>Medicine</span>
         <span>Frequency</span>
         <span>Timing</span>
@@ -47,33 +46,20 @@ const PrescriptionDetail = ({
           .filter((s) => m.frequency[s] > 0)
           .map((s) => `${s.charAt(0).toUpperCase()}:${m.frequency[s]}`)
         return (
-          <div key={i} className="border-b border-border last:border-b-0">
-            {/* Mobile card */}
-            <div className="px-3 py-2.5 text-xs md:hidden">
-              <p className="font-medium">{m.medicineName}</p>
-              <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-muted-foreground">
-                <span>{slots.join(" · ") || "—"}</span>
-                <span>·</span>
-                <span>{MEDICINE_TIMING_LABEL[m.timing]}</span>
-                <span>·</span>
-                <span className="whitespace-nowrap">
-                  {m.durationValue} {DURATION_UNIT_LABEL[m.durationUnit]}
-                </span>
-              </div>
-            </div>
-            {/* Desktop grid row */}
-            <div className="hidden grid-cols-[1fr_110px_90px_80px] items-center px-3 py-2 text-xs md:grid">
-              <span className="font-medium">{m.medicineName}</span>
-              <span className="text-muted-foreground">
-                {slots.join(" · ") || "—"}
-              </span>
-              <span className="text-muted-foreground">
-                {MEDICINE_TIMING_LABEL[m.timing]}
-              </span>
-              <span className="whitespace-nowrap text-muted-foreground">
-                {m.durationValue} {DURATION_UNIT_LABEL[m.durationUnit]}
-              </span>
-            </div>
+          <div
+            key={i}
+            className="grid min-w-96 grid-cols-[1fr_110px_90px_80px] items-center border-b border-border px-3 py-2 text-xs last:border-b-0"
+          >
+            <span className="font-medium">{m.medicineName}</span>
+            <span className="text-muted-foreground">
+              {slots.join(" · ") || "—"}
+            </span>
+            <span className="text-muted-foreground">
+              {MEDICINE_TIMING_LABEL[m.timing]}
+            </span>
+            <span className="whitespace-nowrap text-muted-foreground">
+              {m.durationValue} {DURATION_UNIT_LABEL[m.durationUnit]}
+            </span>
           </div>
         )
       })}
@@ -88,7 +74,7 @@ const VisitRow = ({ visit }: { visit: Visit }) => {
     <div className="border-b border-border last:border-b-0">
       <button
         type="button"
-        className="grid w-full grid-cols-[16px_80px_100px_1fr_1fr_100px] items-center gap-3 px-3 py-2.5 text-left text-xs transition-colors hover:bg-accent/30"
+        className="grid min-w-130 w-full grid-cols-[16px_80px_100px_1fr_1fr_100px] items-center gap-3 px-3 py-2.5 text-left text-xs transition-colors hover:bg-accent/30"
         onClick={() => setExpanded((v) => !v)}
       >
         <span className="text-muted-foreground">
@@ -194,9 +180,9 @@ const PatientDetail = () => {
               </p>
             </div>
 
-            <div className="overflow-y-auto md:max-h-80">
+            <div className="overflow-x-auto overflow-y-auto md:max-h-80">
               {/* Header */}
-              <div className="grid grid-cols-[16px_80px_100px_1fr_1fr_100px] gap-3 border-b border-border bg-muted/40 px-3 py-2 text-xs font-medium text-muted-foreground">
+              <div className="grid min-w-130 grid-cols-[16px_80px_100px_1fr_1fr_100px] gap-3 border-b border-border bg-muted/40 px-3 py-2 text-xs font-medium text-muted-foreground">
                 <span />
                 <span>Visit #</span>
                 <span>Date</span>

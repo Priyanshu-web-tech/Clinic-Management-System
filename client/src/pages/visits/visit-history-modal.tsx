@@ -42,7 +42,7 @@ const HistoryVisitRow = ({
     <div className="border-b border-border last:border-b-0">
       <button
         type="button"
-        className="grid w-full grid-cols-[16px_80px_100px_1fr_1fr_100px] items-center gap-3 px-3 py-2.5 text-left text-xs transition-colors hover:bg-accent/30"
+        className="grid min-w-130 w-full grid-cols-[16px_80px_100px_1fr_1fr_100px] items-center gap-3 px-3 py-2.5 text-left text-xs transition-colors hover:bg-accent/30"
         onClick={() => setExpanded((v) => !v)}
       >
         <span className="text-muted-foreground">
@@ -81,8 +81,8 @@ const HistoryVisitRow = ({
             Prescription
           </div>
           {hasPrescription ? (
-            <div className="overflow-hidden rounded-md border border-border bg-muted/20">
-              <div className="grid grid-cols-[1fr_110px_90px_80px] border-b border-border px-3 py-1.5 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+            <div className="overflow-x-auto rounded-md border border-border bg-muted/20">
+              <div className="grid min-w-96 grid-cols-[1fr_110px_90px_80px] border-b border-border px-3 py-1.5 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
                 <span>Medicine</span>
                 <span>Frequency</span>
                 <span>Timing</span>
@@ -95,7 +95,7 @@ const HistoryVisitRow = ({
                 return (
                   <div
                     key={i}
-                    className="grid grid-cols-[1fr_110px_90px_80px] items-center border-b border-border px-3 py-2 text-xs last:border-b-0"
+                    className="grid min-w-96 grid-cols-[1fr_110px_90px_80px] items-center border-b border-border px-3 py-2 text-xs last:border-b-0"
                   >
                     <span className="font-medium">{m.medicineName}</span>
                     <span className="text-muted-foreground">
@@ -168,7 +168,7 @@ const VisitHistoryModal = ({
         ) : (
           <>
             <div className="mt-4 max-h-[60vh] overflow-auto rounded-md border border-border">
-              <div className="grid grid-cols-[16px_80px_100px_1fr_1fr_100px] gap-3 border-b border-border bg-muted/40 px-3 py-2 text-xs font-medium text-muted-foreground">
+              <div className="grid min-w-130 grid-cols-[16px_80px_100px_1fr_1fr_100px] gap-3 border-b border-border bg-muted/40 px-3 py-2 text-xs font-medium text-muted-foreground">
                 <span />
                 <span>Visit #</span>
                 <span>Date</span>

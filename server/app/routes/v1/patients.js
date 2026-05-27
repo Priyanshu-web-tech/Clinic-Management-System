@@ -4,8 +4,10 @@ const controller = require("../../controllers/patientController");
 const {
   validate,
   verifyAuthToken,
-  authorizeResourceAccess,
+  authorizeAccess,
 } = require("../../middlewares/index");
+const { designation: designationConst } = require("../../constant/constant");
+const authorizeResourceAccess = authorizeAccess(designationConst.RECEPTIONIST);
 
 /**
  * @swagger

@@ -1,7 +1,8 @@
 const router = require("express").Router();
 const controller = require("../../controllers/prescriptionController");
-const { verifyAuthToken } = require("../../middlewares/index");
-const { authorizePrescriptionAccess } = require("../../middlewares/rbac");
+const { verifyAuthToken, authorizeAccess } = require("../../middlewares/index");
+const { designation: designationConst } = require("../../constant/constant");
+const authorizePrescriptionAccess = authorizeAccess(designationConst.CHEMIST);
 
 /**
  * @swagger

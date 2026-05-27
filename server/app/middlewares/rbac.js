@@ -19,48 +19,29 @@ const authorizeRoles = (...allowedRoles) => {
   };
 };
 
-const authorizeResourceAccess = (req, res, next) => {
-  const { userType, designation } = req.data;
+const authorizeAccess = (...allowedDesignations) => {
+  return (req, res, next) => {
+    const { userType, designation } = req.data;
 
-  const allowed =
-    userType === userTypeConst.ADMIN ||
-    userType === userTypeConst.DOCTOR ||
-    (userType === userTypeConst.STAFF && designation === designationConst.RECEPTIONIST);
+    const allowed =
+      userType === userTypeConst.ADMIN ||
+      userType === userTypeConst.DOCTOR ||
+      (userType === userTypeConst.STAFF && allowedDesignations.includes(designation));
 
-  if (!allowed) {
-    return response.error(
-      req,
-      res,
-      { msgCode: "ACCESS_DENIED" },
-      httpStatus.FORBIDDEN
-    );
-  }
+    if (!allowed) {
+      return response.error(
+        req,
+        res,
+        { msgCode: "ACCESS_DENIED" },
+        httpStatus.FORBIDDEN
+      );
+    }
 
-  next();
-};
-
-const authorizePrescriptionAccess = (req, res, next) => {
-  const { userType, designation } = req.data;
-
-  const allowed =
-    userType === userTypeConst.ADMIN ||
-    userType === userTypeConst.DOCTOR ||
-    (userType === userTypeConst.STAFF && designation === designationConst.CHEMIST);
-
-  if (!allowed) {
-    return response.error(
-      req,
-      res,
-      { msgCode: "ACCESS_DENIED" },
-      httpStatus.FORBIDDEN
-    );
-  }
-
-  next();
+    next();
+  };
 };
 
 module.exports = {
   authorizeRoles,
-  authorizeResourceAccess,
-  authorizePrescriptionAccess,
+  authorizeAccess,
 };

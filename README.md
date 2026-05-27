@@ -7,84 +7,112 @@ DocMate is a comprehensive SaaS Clinic Management System designed to streamline 
 ## Demo
 
 https://clinic-management-sys.vercel.app/
+
 ## Run Locally
 
 Clone the project
 
 ```bash
-  git clone https://github.com/Priyanshu-web-tech/Clinic-Management-System.git
+git clone https://github.com/Priyanshu-web-tech/Clinic-Management-System.git
 ```
 
 Go to the project directory
 
 ```bash
-  cd Clinic-Management-System
+cd Clinic-Management-System
 ```
+
 ### Backend Setup
 
-Go to the Backend directory
+Go to the server directory
 
 ```bash
-  cd Backend
+cd server
 ```
 
 Install dependencies
 
 ```bash
-  npm install
+npm install
 ```
 
-Create .env file & add the following in it:
+Generate RSA key pair (required for JWT RS256 signing)
 
 ```bash
-MONGO_URI= your mongodb database uri
-PORT=3000//most used
-JWT_KEY= your JWT key
-CLIENT_ORIGIN=http://localhost:5173 (Change port number as applicable)
+openssl genrsa -out private.key 2048
+openssl rsa -in private.key -pubout -out public.key
 ```
+
+Create a `.env` file by copying the sample and filling in your values
+
+```bash
+cp .sampleEnv .env
+```
+
+| Variable | Description |
+|---|---|
+| `MONGODB_URI` | MongoDB connection string |
+| `PORT` | Port the server listens on (default `3000`) |
+| `NODE_ENV` | `development` or `production` |
+| `COOKIE_SECRET` | Random secret used to sign cookies |
+| `TOKEN_EXPIRES_IN` | Access token lifetime (e.g. `1d`) |
+| `REFRESH_TOKEN_EXPIRES_IN` | Refresh token lifetime (e.g. `7d`) |
+| `SECRET_KEY` | Additional secret key for signing |
+| `JWT_ALGO` | JWT algorithm — must be `RS256` |
+| `JWT_ISSUER` | JWT issuer claim (e.g. `DOCMATE`) |
+| `ROUND` | bcrypt salt rounds (e.g. `10`) |
+| `EMAIL_USER` | Email address used to send OTPs |
+| `EMAIL_PASS` | App password for the email account |
+| `OTP_EXPIRES_IN` | OTP validity window (e.g. `15m`) |
+| `OTP_DIGIT` | Number of OTP digits (e.g. `6`) |
+| `OTP_BYPASS` | Set `true` in dev to skip real OTP sending |
+| `ALLOWED_ORIGINS` | Comma-separated list of allowed CORS origins |
+| `SERVER_REDIRECT_URI` | Base URI used for server-side redirects |
 
 Start the server
 
 ```bash
-  npm run dev
+npm run dev
 ```
+
 ### Frontend Setup
 
-Go to the Frontend directory
+Go to the client directory
 
 ```bash
-  cd Frontend
+cd client
 ```
 
 Install dependencies
 
 ```bash
-  npm install
+npm install
 ```
 
-Create .env file & add the following in it:
+Create a `.env` file and add the following
 
 ```bash
-VITE_BASE_URL=http://localhost:3000 (Change port number as applicable)
+VITE_BASE_URL=http://localhost:3000/api/v1/
 ```
 
-Start the server
+Start the client
 
 ```bash
-  npm run dev
+npm run dev
 ```
 
 
 ## Tech Stack
 
-**Client:** React, Redux Tool Kit, TailwindCSS
+**Client:** React, Redux Toolkit, TailwindCSS
 
 **Server:** Node, Express
 
-**Database:** MongoDB with ORM-Mongoose
+**Database:** MongoDB with Mongoose
+
+**Auth:** JWT (RS256), HTTP-only cookies, OTP via email
 
 
 ## Screenshots
 
 ![App Screenshot](https://ik.imagekit.io/pz4meracm/Screenshot%20from%202024-05-25%2013-24-42.png?updatedAt=1716623704155)
-

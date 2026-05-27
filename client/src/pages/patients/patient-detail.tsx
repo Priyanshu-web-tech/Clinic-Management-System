@@ -26,7 +26,7 @@ const PrescriptionDetail = ({ prescription }: { prescription: Prescription | und
   }
   return (
     <div className="mt-2 overflow-hidden rounded-md border border-border bg-muted/20">
-      <div className="grid grid-cols-[1fr_auto_auto_auto] gap-3 border-b border-border px-3 py-1.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+      <div className="grid grid-cols-[1fr_110px_90px_80px] border-b border-border px-3 py-1.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
         <span>Medicine</span>
         <span>Frequency</span>
         <span>Timing</span>
@@ -39,7 +39,7 @@ const PrescriptionDetail = ({ prescription }: { prescription: Prescription | und
         return (
           <div
             key={i}
-            className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-3 border-b border-border px-3 py-2 text-xs last:border-b-0"
+            className="grid grid-cols-[1fr_110px_90px_80px] items-center border-b border-border px-3 py-2 text-xs last:border-b-0"
           >
             <span className="font-medium">{m.medicineName}</span>
             <span className="text-muted-foreground">{slots.join(" · ") || "—"}</span>

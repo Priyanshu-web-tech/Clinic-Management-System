@@ -47,7 +47,7 @@ const HistoryVisitRow = ({
   visit,
   prescription,
 }: {
-  visit: { _id: string; createdAt: string; status: string; symptoms: string; diagnosis: string }
+  visit: { _id: string; visitNumber: string; createdAt: string; status: string; symptoms: string; diagnosis: string }
   prescription: Prescription | undefined
 }) => {
   const [expanded, setExpanded] = useState(false)
@@ -57,29 +57,37 @@ const HistoryVisitRow = ({
     <div className="border-b border-border last:border-b-0">
       <button
         type="button"
-        className="grid w-full grid-cols-[14px_90px_110px_1fr_1fr] items-start gap-3 px-3 py-2.5 text-left text-xs transition-colors hover:bg-accent/30"
+        className="grid w-full grid-cols-[16px_80px_100px_1fr_1fr_100px] items-center gap-3 px-3 py-2.5 text-left text-xs transition-colors hover:bg-accent/30"
         onClick={() => setExpanded((v) => !v)}
       >
-        <span className="mt-0.5 text-muted-foreground">
-          {expanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
+        <span className="text-muted-foreground">
+          {expanded ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
         </span>
+        <span className="font-mono text-muted-foreground">{visit.visitNumber}</span>
         <span className="text-muted-foreground">{format(parseISO(visit.createdAt), "dd MMM yyyy")}</span>
+        <span className="truncate text-muted-foreground">{visit.symptoms || <span className="text-border">—</span>}</span>
+        <span className="truncate text-muted-foreground">{visit.diagnosis || <span className="text-border">—</span>}</span>
         <span>
           <Badge variant={VISIT_STATUS_BADGE_VARIANT[visit.status] ?? "outline"} className="capitalize">
             {VISIT_STATUS_LABEL[visit.status] ?? visit.status}
           </Badge>
         </span>
-        <span className="truncate text-muted-foreground">{visit.symptoms || <span className="text-border">—</span>}</span>
-        <span className="truncate text-muted-foreground">{visit.diagnosis || <span className="text-border">—</span>}</span>
       </button>
 
       {expanded && (
         <div className="bg-muted/20 px-4 pb-3">
-          <div className="flex items-center gap-1.5 py-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-            <Pill className="size-3" /> Prescription
+          <div className="flex items-center gap-1.5 py-2 text-xs font-medium text-muted-foreground">
+            <Pill className="size-3" />
+            Prescription
           </div>
           {hasPrescription ? (
-            <div className="overflow-hidden rounded-md border border-border">
+            <div className="overflow-hidden rounded-md border border-border bg-muted/20">
+              <div className="grid grid-cols-[1fr_110px_90px_80px] border-b border-border px-3 py-1.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                <span>Medicine</span>
+                <span>Frequency</span>
+                <span>Timing</span>
+                <span>Duration</span>
+              </div>
               {prescription.medicines.map((m, i) => {
                 const slots = (["morning", "afternoon", "night"] as const)
                   .filter((s) => m.frequency[s] > 0)
@@ -87,7 +95,7 @@ const HistoryVisitRow = ({
                 return (
                   <div
                     key={i}
-                    className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-3 border-b border-border px-3 py-2 text-xs last:border-b-0"
+                    className="grid grid-cols-[1fr_110px_90px_80px] items-center border-b border-border px-3 py-2 text-xs last:border-b-0"
                   >
                     <span className="font-medium">{m.medicineName}</span>
                     <span className="text-muted-foreground">{slots.join(" · ") || "—"}</span>
@@ -100,7 +108,7 @@ const HistoryVisitRow = ({
               })}
             </div>
           ) : (
-            <p className="text-xs text-muted-foreground">No prescription for this visit.</p>
+            <p className="py-2 text-xs text-muted-foreground">No prescription for this visit.</p>
           )}
         </div>
       )}
@@ -227,11 +235,11 @@ const ReadonlyMedicineRow = ({ medicine }: { medicine: PrescriptionMedicineInput
     .map((s) => `${s.charAt(0).toUpperCase()}:${medicine.frequency[s]}`)
 
   return (
-    <div className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-3 px-3 py-2 text-xs border-b border-border last:border-b-0">
+    <div className="grid grid-cols-[1fr_110px_90px_80px] items-center border-b border-border px-3 py-2 text-xs last:border-b-0">
       <span className="font-medium">{medicine.medicineName}</span>
       <span className="text-muted-foreground">{freqParts.join(" · ") || "—"}</span>
       <span className="text-muted-foreground">{MEDICINE_TIMING_LABEL[medicine.timing]}</span>
-      <span className="text-muted-foreground whitespace-nowrap">
+      <span className="whitespace-nowrap text-muted-foreground">
         {medicine.durationValue} {DURATION_UNIT_LABEL[medicine.durationUnit]}
       </span>
     </div>
@@ -541,32 +549,41 @@ const VisitDetail = () => {
             </div>
 
             {medicines.length > 0 ? (
-              <div className="flex flex-col gap-1.5">
-                {/* Column headers */}
-                <div className={`grid ${COL} gap-2 px-3 py-1 text-[10px] font-medium text-muted-foreground`}>
-                  <span>Medicine</span>
-                  <span>M</span>
-                  <span>A</span>
-                  <span>N</span>
-                  <span>Timing</span>
-                  <span>Duration</span>
-                  <span />
-                </div>
-                {medicines.map((med, idx) =>
-                  isConsultation ? (
+              isConsultation ? (
+                <div className="flex flex-col gap-1.5">
+                  <div className={`grid ${COL} gap-2 px-3 py-1 text-[10px] font-medium text-muted-foreground`}>
+                    <span>Medicine</span>
+                    <span>M</span>
+                    <span>A</span>
+                    <span>N</span>
+                    <span>Timing</span>
+                    <span>Duration</span>
+                    <span />
+                  </div>
+                  {medicines.map((med, idx) => (
                     <MedicineRow
                       key={idx}
                       medicine={med}
                       index={idx}
                       onChange={updateMedicine}
                       onRemove={removeMedicine}
-                      disabled={!isConsultation}
+                      disabled={false}
                     />
-                  ) : (
+                  ))}
+                </div>
+              ) : (
+                <div className="overflow-hidden rounded-md border border-border bg-muted/20">
+                  <div className="grid grid-cols-[1fr_110px_90px_80px] border-b border-border px-3 py-1.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                    <span>Medicine</span>
+                    <span>Frequency</span>
+                    <span>Timing</span>
+                    <span>Duration</span>
+                  </div>
+                  {medicines.map((med, idx) => (
                     <ReadonlyMedicineRow key={idx} medicine={med} />
-                  ),
-                )}
-              </div>
+                  ))}
+                </div>
+              )
             ) : (
               <p className="text-xs text-muted-foreground">
                 {isConsultation ? "No medicines added. Click 'Add Medicine' to start." : "No prescription for this visit."}
@@ -605,12 +622,13 @@ const VisitDetail = () => {
             <DialogTitle>Previous Visits — {visit.patient.firstName} {visit.patient.lastName}</DialogTitle>
           </DialogHeader>
           <div className="mt-4 max-h-[60vh] overflow-auto rounded-md border border-border">
-            <div className="grid grid-cols-[14px_90px_110px_1fr_1fr] gap-3 border-b border-border bg-muted/40 px-3 py-2 text-xs font-medium text-muted-foreground">
+            <div className="grid grid-cols-[16px_80px_100px_1fr_1fr_100px] gap-3 border-b border-border bg-muted/40 px-3 py-2 text-xs font-medium text-muted-foreground">
               <span />
+              <span>Visit #</span>
               <span>Date</span>
-              <span>Status</span>
               <span>Symptoms</span>
               <span>Diagnosis</span>
+              <span>Status</span>
             </div>
             {previousVisits.map((v) => (
               <HistoryVisitRow

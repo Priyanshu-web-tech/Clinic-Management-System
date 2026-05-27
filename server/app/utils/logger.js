@@ -34,11 +34,13 @@ const loggerToConsole = new Proxy({}, {
     }
 });
 
-const loggerToFile = new Proxy({}, {
-    get: (_, level) => (message) => {
-        loggerFile[level](`${new Date().toISOString()} ${message}`);
-    }
-});
+const loggerToFile = writeLogsToFile
+    ? new Proxy({}, {
+        get: (_, level) => (message) => {
+            loggerFile[level](`${new Date().toISOString()} ${message}`);
+        }
+    })
+    : new Proxy({}, { get: () => () => {} });
 
 const logger = new Proxy({}, {
     get: (_, level) => (() => {

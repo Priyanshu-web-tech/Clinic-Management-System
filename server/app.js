@@ -55,38 +55,70 @@ app.use(morgan(morganFormat));
 // Health check route
 app.get("/health", (req, res) => res.send("Health check OK"));
 
-// Swagger documentation — strip CSP so swagger-ui inline scripts/styles work
+// Swagger documentation
 app.use("/api-docs", (req, res, next) => {
   res.removeHeader("Content-Security-Policy");
   next();
 });
-app.use(
-  "/api-docs",
-  swaggerUi.serve,
-  swaggerUi.setup(swaggerDocs, {
-    customCssUrl: "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui.min.css",
-    customJs: [
-      "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui-bundle.min.js",
-      "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui-standalone-preset.min.js",
-    ],
-    swaggerOptions: {
-      withCredentials: true,
-      requestInterceptor: (req) => {
-        // eslint-disable-next-line no-undef
-        const authToken = document.cookie
-          .split("; ")
-          .find((row) => row.startsWith("auth-token="))
-          ?.split("=")[1];
 
-        if (authToken) {
-          req.headers["Authorization"] = `Bearer ${authToken}`;
-        }
-
-        return req;
+if (env === "production") {
+  // On Vercel, express.static can't serve node_modules files — use CDN-only HTML
+  app.get("/api-docs/swagger.json", (req, res) => res.json(swaggerDocs));
+  app.get("/api-docs", (req, res) => {
+    res.setHeader("Content-Type", "text/html");
+    res.send(`<!DOCTYPE html>
+<html>
+  <head>
+    <title>API Docs</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui.min.css">
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui-bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui-standalone-preset.min.js"></script>
+    <script>
+      window.onload = function() {
+        SwaggerUIBundle({
+          url: "/api-docs/swagger.json",
+          dom_id: "#swagger-ui",
+          presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+          layout: "StandaloneLayout",
+          withCredentials: true,
+          requestInterceptor: function(req) {
+            var authToken = document.cookie.split("; ")
+              .find(function(r){ return r.startsWith("auth-token="); });
+            if (authToken) req.headers["Authorization"] = "Bearer " + authToken.split("=")[1];
+            return req;
+          }
+        });
+      };
+    </script>
+  </body>
+</html>`);
+  });
+} else {
+  // Local dev — use swagger-ui-express with built-in assets
+  app.use(
+    "/api-docs",
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerDocs, {
+      swaggerOptions: {
+        withCredentials: true,
+        requestInterceptor: (req) => {
+          // eslint-disable-next-line no-undef
+          const authToken = document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("auth-token="))
+            ?.split("=")[1];
+          if (authToken) req.headers["Authorization"] = `Bearer ${authToken}`;
+          return req;
+        },
       },
-    },
-  }),
-);
+    }),
+  );
+}
 
 app.use("/api", require("./app/routes/index"));
 

@@ -8,6 +8,10 @@ DocMate is a comprehensive SaaS Clinic Management System designed to streamline 
 
 https://clinic-management-sys.vercel.app/
 
+## API Documentation (Swagger)
+
+https://clinic-management-system-5x88.onrender.com/api-docs/
+
 ## Run Locally
 
 Clone the project
@@ -115,4 +119,4 @@ npm run dev
 
 ## Screenshots
 
-![App Screenshot](https://ik.imagekit.io/pz4meracm/Screenshot%20from%202024-05-25%2013-24-42.png?updatedAt=1716623704155)
+![App Screenshot](https://ik.imagekit.io/pz4meracm/Screenshot%20from%202024-05-25%2013-24-42.png)

@@ -2,18 +2,31 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 const app = require("./app");
 
-mongoose  
+// Cache the connection promise so warm serverless invocations reuse the connection
+const dbPromise = mongoose
   .connect(process.env.MONGODB_URI)
-  .then(() => {
-    console.info("Connected to MongoDB");
-    app.listen(process.env.PORT, () => {
-      console.info(`Server up successfully - port: ${process.env.PORT}`);
-    });
-  })
+  .then(() => console.info("Connected to MongoDB"))
   .catch((err) => {
     console.error("MongoDB connection failed:", err.message);
-    process.exit(1);
+    throw err;
   });
+
+// Serverless handler — waits for DB then delegates to Express
+const handler = async (req, res) => {
+  await dbPromise;
+  return app(req, res);
+};
+
+// Local dev: only call app.listen() when run directly (not imported by Vercel)
+if (require.main === module) {
+  dbPromise
+    .then(() => {
+      app.listen(process.env.PORT, () => {
+        console.info(`Server up successfully - port: ${process.env.PORT}`);
+      });
+    })
+    .catch(() => process.exit(1));
+}
 
 process.on("unhandledRejection", (err) =>
   console.error("Unhandled rejection:", err.message)
@@ -32,3 +45,5 @@ process.on("SIGINT", () => {
     process.exit(0);
   });
 });
+
+module.exports = handler;

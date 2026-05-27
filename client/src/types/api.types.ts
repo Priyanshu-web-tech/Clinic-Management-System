@@ -201,6 +201,7 @@ export interface Patient {
   gender: Gender
   dateOfBirth: string | null
   phone: string
+  email?: string | null
   bloodGroup: BloodGroup | null
   allergies: string[]
   chronicDiseases: string[]
@@ -224,6 +225,7 @@ export interface CreatePatientRequest {
   firstName: string
   lastName?: string
   phone: string
+  email?: string | null
   gender: Gender
   dateOfBirth?: string | null
   bloodGroup?: BloodGroup | null | ""
@@ -235,6 +237,7 @@ export interface UpdatePatientRequest {
   firstName: string
   lastName?: string
   phone: string
+  email?: string | null
   gender: Gender
   dateOfBirth?: string | null
   bloodGroup?: BloodGroup | null | ""

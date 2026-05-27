@@ -38,7 +38,7 @@ const findPrescriptions = async ({ filter, page, pageSize }) => {
   const prescriptions = result.data;
 
   await Prescription.populate(prescriptions, [
-    { path: "patient", select: "firstName lastName patientCode" },
+    { path: "patient", select: "firstName lastName patientCode phone email" },
     { path: "doctor", select: "firstName lastName" },
     { path: "visit", select: "visitNumber tokenNumber status createdAt" },
   ]);

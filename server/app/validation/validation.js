@@ -203,6 +203,9 @@ const createPatient = Joi.object({
     "any.required": "Date of birth is required.",
     "date.base": "Please enter a valid date.",
   }),
+  email: Joi.string().email().optional().allow(null, "").messages({
+    "string.email": "Invalid email address.",
+  }),
   bloodGroup: Joi.string()
     .valid(...bloodGroupValues)
     .optional()
@@ -237,6 +240,9 @@ const updatePatient = Joi.object({
   dateOfBirth: Joi.date().iso().required().messages({
     "any.required": "Date of birth is required.",
     "date.base": "Please enter a valid date.",
+  }),
+  email: Joi.string().email().optional().allow(null, "").messages({
+    "string.email": "Invalid email address.",
   }),
   bloodGroup: Joi.string()
     .valid(...bloodGroupValues)

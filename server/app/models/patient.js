@@ -43,6 +43,13 @@ const patientSchema = new mongoose.Schema(
       index: true,
     },
 
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      default: null,
+    },
+
     bloodGroup: {
       type: String,
       enum: [...Object.values(bloodGroupConst), null],

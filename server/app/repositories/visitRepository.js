@@ -109,7 +109,7 @@ const findVisits = async ({
   const total = result.count[0]?.total ?? 0;
 
   await Visit.populate(result.data, [
-    { path: "patient", select: "firstName lastName patientCode" },
+    { path: "patient", select: "firstName lastName patientCode phone email" },
     { path: "doctor", select: "firstName lastName" },
     { path: "createdBy", select: "firstName lastName" },
   ]);
@@ -121,7 +121,7 @@ const findVisitById = async (id) => {
   const visit = await Visit.findById(id)
     .populate(
       "patient",
-      "firstName lastName patientCode phone gender dateOfBirth bloodGroup allergies chronicDiseases",
+      "firstName lastName patientCode phone email gender dateOfBirth bloodGroup allergies chronicDiseases",
     )
     .populate("doctor", "firstName lastName")
     .populate("createdBy", "firstName lastName")
@@ -186,7 +186,7 @@ const createVisit = async (data) => {
 const updateVisitById = async (id, data, session = null) => {
   const opts = { new: true, ...(session ? { session } : {}) };
   return await Visit.findByIdAndUpdate(id, { $set: data }, opts)
-    .populate("patient", "firstName lastName patientCode")
+    .populate("patient", "firstName lastName patientCode phone email")
     .populate("doctor", "firstName lastName");
 };
 

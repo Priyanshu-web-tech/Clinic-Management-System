@@ -10,6 +10,7 @@ interface PatientInfoCardProps {
     lastName: string
     patientCode: string
     phone?: string
+    email?: string | null
     gender?: Gender
     dateOfBirth?: string | null
     bloodGroup?: BloodGroup | null
@@ -56,6 +57,12 @@ const PatientInfoCard = ({ patient, onViewHistory }: PatientInfoCardProps) => {
           <div>
             <p className="text-muted-foreground">Phone</p>
             <p className="font-medium">{patient.phone}</p>
+          </div>
+        )}
+        {patient.email && (
+          <div>
+            <p className="text-muted-foreground">Email</p>
+            <p className="font-medium">{patient.email}</p>
           </div>
         )}
         {patient.gender && (

@@ -73,3 +73,8 @@ export const bloodGroupValidation = Yup.string().optional().nullable()
 export const stringArrayValidation = Yup.array().of(Yup.string()).optional()
 
 export const nullableStringValidation = Yup.string().nullable().optional()
+
+export const optionalEmailValidation = Yup.string()
+  .email("Invalid email address")
+  .optional()
+  .nullable()

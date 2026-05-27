@@ -10,6 +10,7 @@ import {
   optionalStringValidation,
   bloodGroupValidation,
   stringArrayValidation,
+  optionalEmailValidation,
 } from "@/utils/validations"
 import {
   useCreatePatientMutation,
@@ -65,6 +66,7 @@ const PatientModal = ({ open, onClose, editTarget }: PatientModalProps) => {
       firstName: editTarget?.firstName ?? "",
       lastName: editTarget?.lastName ?? "",
       phone: editTarget?.phone ?? "",
+      email: editTarget?.email ?? "",
       gender: (editTarget?.gender ?? "") as Gender | "",
       dateOfBirth: editTarget?.dateOfBirth
         ? editTarget.dateOfBirth.substring(0, 10)
@@ -77,6 +79,7 @@ const PatientModal = ({ open, onClose, editTarget }: PatientModalProps) => {
       firstName: requiredFieldValidation("First name"),
       lastName: optionalStringValidation,
       phone: requiredPhoneValidation,
+      email: optionalEmailValidation,
       gender: genderValidation,
       dateOfBirth: dateOfBirthValidation,
       bloodGroup: bloodGroupValidation,
@@ -89,6 +92,7 @@ const PatientModal = ({ open, onClose, editTarget }: PatientModalProps) => {
           firstName: values.firstName,
           lastName: values.lastName,
           phone: values.phone,
+          email: values.email || null,
           gender: values.gender as Gender,
           dateOfBirth: values.dateOfBirth || null,
           bloodGroup: (values.bloodGroup as BloodGroup) || null,
@@ -220,6 +224,27 @@ const PatientModal = ({ open, onClose, editTarget }: PatientModalProps) => {
                 <p className="text-[11px] text-destructive">{formik.errors.gender}</p>
               )}
             </div>
+          </div>
+
+          {/* Email */}
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="email" className="text-xs">
+              Email
+            </Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="patient@example.com"
+              className="h-8 text-xs"
+              value={formik.values.email}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              aria-invalid={!!(formik.touched.email && formik.errors.email)}
+            />
+            {formik.touched.email && formik.errors.email && (
+              <p className="text-[11px] text-destructive">{formik.errors.email}</p>
+            )}
           </div>
 
           {/* DOB + Blood group row */}

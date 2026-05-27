@@ -9,6 +9,15 @@ const swaggerOptions = {
       version: "1.0.0",
       description: "APIs",
     },
+    tags: [
+      { name: "Authentication" },
+      { name: "Dashboard" },
+      { name: "Hospital" },
+      { name: "Patients" },
+      { name: "Prescriptions" },
+      { name: "Users" },
+      { name: "Visits" },
+    ],
     servers: [
       {
         url: "http://localhost:3000/api",

@@ -122,7 +122,11 @@ const PatientDetail = () => {
   const { id } = useParams<{ id: string }>()
 
   const { data: patientRes, isLoading: isPatientLoading } =
-    useGetPatientByIdQuery(id!)
+    useGetPatientByIdQuery(id!, {
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+    })
+
   const {
     items: visits,
     page: visitsPage,

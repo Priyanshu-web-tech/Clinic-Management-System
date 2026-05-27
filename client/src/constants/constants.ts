@@ -66,6 +66,7 @@ export const API_ROUTES = {
   PATIENTS: "patients",
   VISITS: "visits",
   PRESCRIPTIONS: "prescriptions",
+  DASHBOARD_STATS: "dashboard/stats",
 }
 
 export const NAVIGATION_ROUTES = {

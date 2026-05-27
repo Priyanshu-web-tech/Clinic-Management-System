@@ -57,7 +57,6 @@ const EMPTY_MEDICINE: PrescriptionMedicineInput = {
 // Shared grid template: medicine name | M | A | N | timing | duration | delete
 const COL = "grid-cols-[1fr_45px_45px_45px_130px_165px_28px]"
 
-
 const MedicineRow = ({
   medicine,
   index,
@@ -192,7 +191,11 @@ const VisitDetail = () => {
   const [cancelOpen, setCancelOpen] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
 
-  const { data, isLoading } = useGetVisitByIdQuery(id!, { skip: !id })
+  const { data, isLoading } = useGetVisitByIdQuery(id!, {
+    refetchOnMountOrArgChange: true,
+    refetchOnFocus: true,
+    skip: !id,
+  })
   const visit = data?.result?.visit
 
   const [updateVisit, { isLoading: isSaving }] = useUpdateVisitMutation()

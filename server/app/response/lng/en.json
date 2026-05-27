@@ -64,5 +64,6 @@
   "PRESCRIPTIONS_FETCHED": "Prescriptions fetched successfully.",
   "PRESCRIPTION_FETCHED": "Prescription fetched successfully.",
   "PRESCRIPTION_NOT_FOUND": "Prescription not found.",
-  "MEDICINE_FREQUENCY_REQUIRED": "Each medicine must have at least one frequency slot selected (morning, afternoon, or night)."
+  "MEDICINE_FREQUENCY_REQUIRED": "Each medicine must have at least one frequency slot selected (morning, afternoon, or night).",
+  "STATS_FETCHED": "Dashboard stats fetched successfully."
 }

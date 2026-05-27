@@ -1,4 +1,4 @@
-import { differenceInDays, differenceInMonths, differenceInYears, parseISO } from "date-fns"
+import { differenceInDays, differenceInMonths, differenceInYears, parseISO, format } from "date-fns"
 
 export const formatAge = (dob: string): string => {
   const date = parseISO(dob)
@@ -19,6 +19,15 @@ export const formatTime = (seconds: number): string => {
   const s = seconds % 60
   return `${m}:${s.toString().padStart(2, "0")}`
 }
+
+export const getGreeting = (): string => {
+  const h = new Date().getHours()
+  if (h < 12) return "Good morning"
+  if (h < 17) return "Good afternoon"
+  return "Good evening"
+}
+
+export const formatTodayDate = (): string => format(new Date(), "EEEE, MMMM d, yyyy")
 
 export const getStoredOtpSecondsLeft = (cooldownSecs: number): number => {
   const raw = localStorage.getItem("otpSentAt")

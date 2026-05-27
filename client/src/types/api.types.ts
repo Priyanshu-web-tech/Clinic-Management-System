@@ -382,3 +382,17 @@ export interface GetPrescriptionsRequest {
 
 export type GetPrescriptionsResponse = PaginatedResponse<Prescription>
 
+// ── Dashboard ──────────────────────────────────────
+
+export interface DashboardStats {
+  todayVisits: number
+  waitingVisits: number
+  inConsultationVisits: number
+  completedVisits: number
+  cancelledVisits: number
+  totalPatients: number
+  todayPrescriptions: number
+  totalPrescriptions: number
+  totalStaff: number
+}
+

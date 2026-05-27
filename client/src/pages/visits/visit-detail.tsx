@@ -330,7 +330,7 @@ const VisitDetail = () => {
 
       const validMedicines = medicines.filter((m) => m.medicineName.trim())
       try {
-        await updateVisit({
+        const res = await updateVisit({
           id,
           symptoms: values.symptoms,
           diagnosis: values.diagnosis,
@@ -338,7 +338,7 @@ const VisitDetail = () => {
           status: VS.Completed,
           medicines: validMedicines,
         }).unwrap()
-        toast.success("Visit completed successfully.")
+        toast.success(res.message ?? "Visit completed successfully.")
         navigate("/visits")
       } catch (err: unknown) {
         const message =
@@ -352,8 +352,8 @@ const VisitDetail = () => {
   const handleCancel = async () => {
     if (!id) return
     try {
-      await updateStatus({ id, status: VS.Cancelled }).unwrap()
-      toast.success("Visit cancelled.")
+      const res = await updateStatus({ id, status: VS.Cancelled }).unwrap()
+      toast.success(res.message ?? "Visit cancelled.")
       navigate("/visits")
     } catch (err: unknown) {
       const message =

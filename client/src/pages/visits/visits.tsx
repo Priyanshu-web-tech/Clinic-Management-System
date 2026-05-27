@@ -81,8 +81,8 @@ const Visits = () => {
   const handleCancelConfirm = async () => {
     if (!cancelTarget) return
     try {
-      await updateStatus({ id: cancelTarget._id, status: VS.Cancelled }).unwrap()
-      toast.success("Visit cancelled.")
+      const res = await updateStatus({ id: cancelTarget._id, status: VS.Cancelled }).unwrap()
+      toast.success(res.message ?? "Visit cancelled.")
     } catch (err: unknown) {
       const message =
         (err as { data?: { message?: string } })?.data?.message ??

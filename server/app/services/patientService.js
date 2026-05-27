@@ -215,6 +215,21 @@ const deletePatient = async (req) => {
       };
     }
 
+    const activeVisit = await Visit.findOne({
+      patient: id,
+      hospital: target.hospital,
+      status: { $in: [visitStatusConst.WAITING, visitStatusConst.IN_CONSULTATION] },
+    });
+
+    if (activeVisit) {
+      return {
+        error: true,
+        data: {},
+        msgCode: "PATIENT_HAS_ACTIVE_VISIT",
+        status: httpStatus.CONFLICT,
+      };
+    }
+
     await patientRepository.updatePatientById(id, { isActive: false });
 
     return {

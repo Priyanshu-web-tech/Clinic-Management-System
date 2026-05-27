@@ -89,10 +89,13 @@ const Users = () => {
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return
     try {
-      await deleteUser(deleteTarget._id).unwrap()
-      toast.success("Member removed successfully.")
-    } catch {
-      toast.error("Failed to remove member.")
+      const res = await deleteUser(deleteTarget._id).unwrap()
+      toast.success(res.message ?? "Member removed successfully.")
+    } catch (err: unknown) {
+      const message =
+        (err as { data?: { message?: string } })?.data?.message ??
+        "Failed to remove member."
+      toast.error(message)
     } finally {
       setDeleteOpen(false)
       setDeleteTarget(null)

@@ -25,7 +25,7 @@ const ForgotPassword = () => {
         if (response?.success) {
           localStorage.setItem("otp_email", values.email)
           localStorage.setItem("otpSentAt", Date.now().toString())
-          toast.success("OTP sent! Check your email.")
+          toast.success(response.message ?? "OTP sent! Check your email.")
           navigate(NAVIGATION_ROUTES.VERIFY_OTP)
         } else {
           toast.error(response?.message ?? "Failed to send OTP.")

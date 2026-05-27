@@ -48,7 +48,7 @@ const VerifyOtp = () => {
     try {
       const response = await verifyOtp({ otp }).unwrap()
       if (response?.success) {
-        toast.success("OTP verified successfully.")
+        toast.success(response.message ?? "OTP verified successfully.")
         navigate(NAVIGATION_ROUTES.RESET_PASSWORD)
       } else {
         toast.error(response?.message ?? "OTP verification failed.")
@@ -76,7 +76,7 @@ const VerifyOtp = () => {
         localStorage.setItem("otpSentAt", Date.now().toString())
         setSecondsLeft(OTP_COOLDOWN_SECS)
         setOtp("")
-        toast.success("OTP resent! Check your email.")
+        toast.success(response.message ?? "OTP resent! Check your email.")
       } else {
         toast.error(response?.message ?? "Failed to resend OTP.")
       }

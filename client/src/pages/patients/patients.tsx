@@ -107,10 +107,13 @@ const Patients = () => {
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return
     try {
-      await deletePatient(deleteTarget._id).unwrap()
-      toast.success("Patient removed successfully.")
-    } catch {
-      toast.error("Failed to remove patient.")
+      const res = await deletePatient(deleteTarget._id).unwrap()
+      toast.success(res.message ?? "Patient removed successfully.")
+    } catch (err: unknown) {
+      const message =
+        (err as { data?: { message?: string } })?.data?.message ??
+        "Failed to remove patient."
+      toast.error(message)
     } finally {
       setDeleteOpen(false)
       setDeleteTarget(null)

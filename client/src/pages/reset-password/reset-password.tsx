@@ -30,7 +30,7 @@ const ResetPassword = () => {
       try {
         const response = await resetPassword(values).unwrap()
         if (response?.success) {
-          toast.success("Password reset successfully. Please sign in.")
+          toast.success(response.message ?? "Password reset successfully. Please sign in.")
           navigate(NAVIGATION_ROUTES.LOGIN)
         } else {
           toast.error(response?.message ?? "Failed to reset password.")

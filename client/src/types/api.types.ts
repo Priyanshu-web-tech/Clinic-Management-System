@@ -283,6 +283,7 @@ export interface Visit {
   diagnosis: string
   followUpDate: string | null
   closedAt: string | null
+  prescription: { _id: string; medicines: PrescriptionMedicine[] } | null
   createdBy: {
     _id: string
     firstName: string
@@ -318,9 +319,63 @@ export interface UpdateVisitRequest {
   diagnosis?: string
   followUpDate?: string | null
   status?: VisitStatus
+  medicines?: PrescriptionMedicineInput[]
 }
 
 export interface VisitMutationResponse {
   visit: Visit
 }
+
+// ── Prescription Management ──────────────────────────────────────
+
+export const DurationUnit = {
+  Days: "days",
+  Weeks: "weeks",
+  Months: "months",
+} as const
+export type DurationUnit = (typeof DurationUnit)[keyof typeof DurationUnit]
+
+export const MedicineTiming = {
+  BeforeFood: "before_food",
+  AfterFood: "after_food",
+  WithFood: "with_food",
+  Anytime: "anytime",
+} as const
+export type MedicineTiming = (typeof MedicineTiming)[keyof typeof MedicineTiming]
+
+export interface PrescriptionMedicineInput {
+  medicineName: string
+  durationValue: number
+  durationUnit: DurationUnit
+  frequency: { morning: number; afternoon: number; night: number }
+  timing: MedicineTiming
+}
+
+export interface PrescriptionMedicine extends PrescriptionMedicineInput {
+  _id: string
+  prescription: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Prescription {
+  _id: string
+  hospital: string
+  visit: string | { _id: string; visitNumber: string; tokenNumber: number; status: VisitStatus; createdAt: string }
+  patient: { _id: string; firstName: string; lastName: string; patientCode: string }
+  doctor: { _id: string; firstName: string; lastName: string }
+  medicines: PrescriptionMedicine[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface GetPrescriptionsRequest {
+  page?: number
+  pageSize?: number
+  date?: string
+  search?: string
+  patientId?: string
+}
+
+export type GetPrescriptionsResponse = PaginatedResponse<Prescription>
 

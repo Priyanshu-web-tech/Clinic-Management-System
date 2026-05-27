@@ -58,5 +58,9 @@
   "DOCTOR_NOT_FOUND": "Doctor not found.",
   "DOCTORS_FETCHED": "Doctors fetched successfully.",
   "VISIT_FETCHED": "Visit fetched successfully.",
-  "DOCTOR_ALREADY_IN_CONSULTATION": "You are already in consultation with another patient."
+  "DOCTOR_ALREADY_IN_CONSULTATION": "You are already in consultation with another patient.",
+  "PRESCRIPTIONS_FETCHED": "Prescriptions fetched successfully.",
+  "PRESCRIPTION_FETCHED": "Prescription fetched successfully.",
+  "PRESCRIPTION_NOT_FOUND": "Prescription not found.",
+  "MEDICINE_FREQUENCY_REQUIRED": "Each medicine must have at least one frequency slot selected (morning, afternoon, or night)."
 }

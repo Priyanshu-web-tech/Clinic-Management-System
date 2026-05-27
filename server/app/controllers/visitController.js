@@ -90,6 +90,7 @@ const updateVisit = async (req, res) => {
       res,
       { msgCode: result.msgCode, data: result.data },
       result.status,
+      result.transaction,
     );
   } catch (err) {
     return error(
@@ -97,6 +98,7 @@ const updateVisit = async (req, res) => {
       res,
       { msgCode: err.msgCode, data: err.data || {} },
       err.status,
+      err.transaction,
     );
   }
 };

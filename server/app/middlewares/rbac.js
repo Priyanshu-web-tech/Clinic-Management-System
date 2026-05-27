@@ -39,7 +39,28 @@ const authorizeResourceAccess = (req, res, next) => {
   next();
 };
 
+const authorizePrescriptionAccess = (req, res, next) => {
+  const { userType, designation } = req.data;
+
+  const allowed =
+    userType === userTypeConst.ADMIN ||
+    userType === userTypeConst.DOCTOR ||
+    (userType === userTypeConst.STAFF && designation === designationConst.CHEMIST);
+
+  if (!allowed) {
+    return response.error(
+      req,
+      res,
+      { msgCode: "ACCESS_DENIED" },
+      httpStatus.FORBIDDEN
+    );
+  }
+
+  next();
+};
+
 module.exports = {
   authorizeRoles,
   authorizeResourceAccess,
+  authorizePrescriptionAccess,
 };

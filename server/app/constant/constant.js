@@ -37,4 +37,17 @@ const visitStatus = {
   CANCELLED: "cancelled",
 };
 
-module.exports = { userType, otpType, designation, gender, bloodGroup, visitStatus };
+const durationUnit = {
+  DAYS: "days",
+  WEEKS: "weeks",
+  MONTHS: "months",
+};
+
+const medicineTiming = {
+  BEFORE_FOOD: "before_food",
+  AFTER_FOOD: "after_food",
+  WITH_FOOD: "with_food",
+  ANYTIME: "anytime",
+};
+
+module.exports = { userType, otpType, designation, gender, bloodGroup, visitStatus, durationUnit, medicineTiming };

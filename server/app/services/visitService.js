@@ -1,6 +1,8 @@
 const httpStatus = require("http-status").status;
 const mongoose = require("mongoose");
+const { db } = require("../models/index");
 const visitRepository = require("../repositories/visitRepository");
+const prescriptionRepository = require("../repositories/prescriptionRepository");
 const User = require("../models/user");
 const {
   userType: userTypeConst,
@@ -9,7 +11,8 @@ const {
 
 const getVisits = async (req) => {
   try {
-    const { page, pageSize, status, date, doctorId, patientId, search } = req.query;
+    const { page, pageSize, status, date, doctorId, patientId, search } =
+      req.query;
     const currentUser = req.data;
 
     const hospitalId = currentUser.hospital?._id;
@@ -33,7 +36,9 @@ const getVisits = async (req) => {
     }
 
     if (status === "active") {
-      filter.status = { $in: [visitStatusConst.WAITING, visitStatusConst.IN_CONSULTATION] };
+      filter.status = {
+        $in: [visitStatusConst.WAITING, visitStatusConst.IN_CONSULTATION],
+      };
     } else if (status) {
       filter.status = status;
     }
@@ -295,9 +300,10 @@ const getVisitById = async (req) => {
 };
 
 const updateVisit = async (req) => {
+  const transaction = await db.transaction();
   try {
     const { id } = req.params;
-    const { symptoms, diagnosis, followUpDate, status } = req.body;
+    const { symptoms, diagnosis, followUpDate, status, medicines } = req.body;
     const currentUser = req.data;
 
     const visit = await visitRepository.findVisitById(id);
@@ -307,6 +313,7 @@ const updateVisit = async (req) => {
         data: {},
         msgCode: "VISIT_NOT_FOUND",
         status: httpStatus.NOT_FOUND,
+        transaction,
       };
     }
 
@@ -316,6 +323,7 @@ const updateVisit = async (req) => {
         data: {},
         msgCode: "FORBIDDEN",
         status: httpStatus.FORBIDDEN,
+        transaction,
       };
     }
 
@@ -328,19 +336,27 @@ const updateVisit = async (req) => {
         data: {},
         msgCode: "FORBIDDEN",
         status: httpStatus.FORBIDDEN,
+        transaction,
       };
     }
 
     const updateData = {
       symptoms: symptoms ?? visit.symptoms,
       diagnosis: diagnosis ?? visit.diagnosis,
-      followUpDate: followUpDate !== undefined ? followUpDate : visit.followUpDate,
+      followUpDate:
+        followUpDate !== undefined ? followUpDate : visit.followUpDate,
     };
 
     if (status) {
       const validTransitions = {
-        [visitStatusConst.WAITING]: [visitStatusConst.IN_CONSULTATION, visitStatusConst.CANCELLED],
-        [visitStatusConst.IN_CONSULTATION]: [visitStatusConst.COMPLETED, visitStatusConst.CANCELLED],
+        [visitStatusConst.WAITING]: [
+          visitStatusConst.IN_CONSULTATION,
+          visitStatusConst.CANCELLED,
+        ],
+        [visitStatusConst.IN_CONSULTATION]: [
+          visitStatusConst.COMPLETED,
+          visitStatusConst.CANCELLED,
+        ],
       };
 
       if (!validTransitions[visit.status]?.includes(status)) {
@@ -349,22 +365,72 @@ const updateVisit = async (req) => {
           data: {},
           msgCode: "INVALID_STATUS_TRANSITION",
           status: httpStatus.BAD_REQUEST,
+          transaction,
         };
       }
 
       updateData.status = status;
-      if (status === visitStatusConst.COMPLETED || status === visitStatusConst.CANCELLED) {
+      if (
+        status === visitStatusConst.COMPLETED ||
+        status === visitStatusConst.CANCELLED
+      ) {
         updateData.closedAt = new Date();
       }
     }
 
-    const updated = await visitRepository.updateVisitById(id, updateData);
+    const savePrescription =
+      status === visitStatusConst.COMPLETED &&
+      medicines &&
+      medicines.length > 0;
+
+    if (savePrescription) {
+      const invalidMedicine = medicines.find(
+        (m) =>
+          !m.frequency ||
+          (m.frequency.morning === 0 &&
+            m.frequency.afternoon === 0 &&
+            m.frequency.night === 0),
+      );
+      if (invalidMedicine) {
+        return {
+          error: true,
+          data: {},
+          msgCode: "MEDICINE_FREQUENCY_REQUIRED",
+          status: httpStatus.BAD_REQUEST,
+          transaction,
+        };
+      }
+    }
+
+    const updated = await visitRepository.updateVisitById(
+      id,
+      updateData,
+      transaction,
+    );
+
+    if (savePrescription) {
+      const prescription = await prescriptionRepository.upsertPrescription(
+        {
+          hospital: visit.hospital,
+          visit: visit._id,
+          patient: visit.patient._id,
+          doctor: visit.doctor._id,
+        },
+        transaction,
+      );
+      await prescriptionRepository.replaceMedicines(
+        prescription._id,
+        medicines,
+        transaction,
+      );
+    }
 
     return {
       error: false,
       data: { visit: updated },
       msgCode: "VISIT_UPDATED",
       status: httpStatus.OK,
+      transaction,
     };
   } catch (err) {
     console.log(err);
@@ -373,8 +439,15 @@ const updateVisit = async (req) => {
       data: {},
       msgCode: "INTERNAL_SERVER_ERROR",
       status: httpStatus.INTERNAL_SERVER_ERROR,
+      transaction,
     };
   }
 };
 
-module.exports = { getVisits, createVisit, updateVisitStatus, getVisitById, updateVisit };
+module.exports = {
+  getVisits,
+  createVisit,
+  updateVisitStatus,
+  getVisitById,
+  updateVisit,
+};

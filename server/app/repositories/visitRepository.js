@@ -1,5 +1,7 @@
 const Visit = require("../models/visit");
 const Patient = require("../models/patient");
+const Prescription = require("../models/prescription");
+const PrescriptionMedicine = require("../models/prescriptionmedicine");
 
 const findVisits = async ({ filter, search, page, pageSize, sortByDate = false }) => {
   if (search) {
@@ -66,10 +68,23 @@ const findVisits = async ({ filter, search, page, pageSize, sortByDate = false }
 };
 
 const findVisitById = async (id) => {
-  return await Visit.findById(id)
+  const visit = await Visit.findById(id)
     .populate("patient", "firstName lastName patientCode phone gender dateOfBirth bloodGroup allergies chronicDiseases")
     .populate("doctor", "firstName lastName")
-    .populate("createdBy", "firstName lastName");
+    .populate("createdBy", "firstName lastName")
+    .lean();
+
+  if (!visit) return null;
+
+  const prescription = await Prescription.findOne({ visit: id }).lean();
+  if (prescription) {
+    const medicines = await PrescriptionMedicine.find({ prescription: prescription._id }).lean();
+    visit.prescription = { ...prescription, medicines };
+  } else {
+    visit.prescription = null;
+  }
+
+  return visit;
 };
 
 const findActiveConsultationByDoctor = async (doctorId, excludeVisitId = null) => {
@@ -110,8 +125,9 @@ const createVisit = async (data) => {
   return result[0];
 };
 
-const updateVisitById = async (id, data) => {
-  return await Visit.findByIdAndUpdate(id, { $set: data }, { new: true })
+const updateVisitById = async (id, data, session = null) => {
+  const opts = { new: true, ...(session ? { session } : {}) };
+  return await Visit.findByIdAndUpdate(id, { $set: data }, opts)
     .populate("patient", "firstName lastName patientCode")
     .populate("doctor", "firstName lastName");
 };

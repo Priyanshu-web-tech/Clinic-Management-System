@@ -2,6 +2,7 @@ import { lazy } from "react"
 import { Navigate, Route, Routes, Outlet } from "react-router-dom"
 
 import { useAppSelector } from "@/store/hook"
+import { UserType, Designation } from "@/types/api.types"
 
 const Layout = lazy(() => import("@/components/layout"))
 const AuthLayout = lazy(() => import("@/components/auth-layout"))
@@ -14,6 +15,7 @@ const Patients = lazy(() => import("@/pages/patients/patients"))
 const PatientDetail = lazy(() => import("@/pages/patients/patient-detail"))
 const Visits = lazy(() => import("@/pages/visits/visits"))
 const VisitDetail = lazy(() => import("@/pages/visits/visit-detail"))
+const Prescriptions = lazy(() => import("@/pages/prescriptions/prescriptions"))
 const ForgotPassword = lazy(
   () => import("@/pages/forgot-password/forgot-password")
 )
@@ -30,6 +32,23 @@ const PrivateRoute = () => {
 const PublicRoute = () => {
   const isSignedIn = useAppSelector((state) => state.userData.isSignedIn)
   return !isSignedIn ? <Outlet /> : <Navigate to="/" replace />
+}
+
+const RoleRoute = ({
+  roles,
+  designations,
+}: {
+  roles: UserType[]
+  designations?: Designation[]
+}) => {
+  const user = useAppSelector((state) => state.userData)
+  const allowed =
+    roles.includes(user.userType) ||
+    (!!designations?.length &&
+      user.userType === UserType.Staff &&
+      !!user.designation &&
+      designations.includes(user.designation))
+  return allowed ? <Outlet /> : <Navigate to="/dashboard" replace />
 }
 
 const AppRoutes = () => {
@@ -51,12 +70,38 @@ const AppRoutes = () => {
         <Route element={<Layout />}>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
-          <Route path="users" element={<Users />} />
-          <Route path="patients" element={<Patients />} />
-          <Route path="patients/:id" element={<PatientDetail />} />
-          <Route path="visits" element={<Visits />} />
-          <Route path="visits/:id" element={<VisitDetail />} />
           <Route path="profile" element={<Profile />} />
+
+          <Route
+            element={<RoleRoute roles={[UserType.Admin, UserType.Doctor]} />}
+          >
+            <Route path="users" element={<Users />} />
+          </Route>
+
+          <Route
+            element={
+              <RoleRoute
+                roles={[UserType.Admin, UserType.Doctor]}
+                designations={[Designation.Receptionist]}
+              />
+            }
+          >
+            <Route path="patients" element={<Patients />} />
+            <Route path="patients/:id" element={<PatientDetail />} />
+            <Route path="visits" element={<Visits />} />
+            <Route path="visits/:id" element={<VisitDetail />} />
+          </Route>
+
+          <Route
+            element={
+              <RoleRoute
+                roles={[UserType.Admin]}
+                designations={[Designation.Chemist]}
+              />
+            }
+          >
+            <Route path="prescriptions" element={<Prescriptions />} />
+          </Route>
         </Route>
       </Route>
 

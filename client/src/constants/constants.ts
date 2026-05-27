@@ -1,6 +1,6 @@
-import { LayoutDashboard, Users, UserRound, CalendarCheck } from "lucide-react"
+import { LayoutDashboard, Users, UserRound, CalendarCheck, ClipboardList } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
-import { UserType, Designation, Gender, BloodGroup, VisitStatus } from "@/types/api.types"
+import { UserType, Designation, Gender, BloodGroup, VisitStatus, DurationUnit, MedicineTiming } from "@/types/api.types"
 import type { IUserSessionData } from "@/store/slices/user-data-slice"
 
 export const ALL_NAV_ITEMS: {
@@ -37,6 +37,15 @@ export const ALL_NAV_ITEMS: {
       (user.userType === UserType.Staff &&
         user.designation === Designation.Receptionist),
   },
+  {
+    label: "Prescriptions",
+    path: "/prescriptions",
+    icon: ClipboardList,
+    canAccess: (user) =>
+      user.userType === UserType.Admin ||
+      (user.userType === UserType.Staff &&
+        user.designation === Designation.Chemist),
+  },
 ]
 
 export const BASE_URL = import.meta.env.VITE_BASE_URL
@@ -56,6 +65,7 @@ export const API_ROUTES = {
   USERS: "users",
   PATIENTS: "patients",
   VISITS: "visits",
+  PRESCRIPTIONS: "prescriptions",
 }
 
 export const NAVIGATION_ROUTES = {
@@ -69,6 +79,7 @@ export const NAVIGATION_ROUTES = {
   USERS: "/users",
   PATIENTS: "/patients",
   VISITS: "/visits",
+  PRESCRIPTIONS: "/prescriptions",
 }
 
 export const USER_TYPE_OPTIONS = [
@@ -103,6 +114,7 @@ export const PAGE_TITLES: Record<string, string> = {
   "/users": "Team",
   "/patients": "Patients",
   "/visits": "Visits",
+  "/prescriptions": "Prescriptions",
   "/profile": "Profile",
 }
 
@@ -201,3 +213,35 @@ export const VISITS_TABLE_COLUMNS = [
   { name: "Status" },
   { name: "Actions", className: "text-right" },
 ]
+
+// ── Prescription constants ──────────────────────────────────────
+
+export const DURATION_UNIT_OPTIONS = [
+  { value: DurationUnit.Days, label: "Days" },
+  { value: DurationUnit.Weeks, label: "Weeks" },
+  { value: DurationUnit.Months, label: "Months" },
+] as const
+
+export const DURATION_UNIT_LABEL: Record<string, string> = Object.fromEntries(
+  DURATION_UNIT_OPTIONS.map(({ value, label }) => [value, label])
+)
+
+export const MEDICINE_TIMING_OPTIONS = [
+  { value: MedicineTiming.Anytime, label: "Anytime" },
+  { value: MedicineTiming.BeforeFood, label: "Before Food" },
+  { value: MedicineTiming.AfterFood, label: "After Food" },
+  { value: MedicineTiming.WithFood, label: "With Food" },
+] as const
+
+export const MEDICINE_TIMING_LABEL: Record<string, string> = Object.fromEntries(
+  MEDICINE_TIMING_OPTIONS.map(({ value, label }) => [value, label])
+)
+
+export const PRESCRIPTIONS_TABLE_COLUMNS = [
+  { name: "Date" },
+  { name: "Patient" },
+  { name: "Doctor" },
+  { name: "Visit #" },
+  { name: "Medicines" },
+]
+

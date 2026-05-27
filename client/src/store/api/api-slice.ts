@@ -70,6 +70,6 @@ const dynamicBaseQuery: BaseQueryFn<
 
 export const apiSlice = createApi({
   baseQuery: dynamicBaseQuery,
-  tagTypes: ["Users", "Patients", "Visits"],
+  tagTypes: ["Users", "Patients", "Visits", "Prescriptions"],
   endpoints: () => ({}),
 })

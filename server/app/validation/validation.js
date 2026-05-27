@@ -4,12 +4,16 @@ const {
   bloodGroup: bloodGroupConst,
   designation : designationConst,
   visitStatus: visitStatusConst,
+  durationUnit: durationUnitConst,
+  medicineTiming: medicineTimingConst,
 } = require("../constant/constant");
 
 const designationValues = Object.values(designationConst);
 const genderValues = Object.values(genderConst);
 const bloodGroupValues = Object.values(bloodGroupConst);
 const visitStatusValues = Object.values(visitStatusConst);
+const durationUnitValues = Object.values(durationUnitConst);
+const medicineTimingValues = Object.values(medicineTimingConst);
 
 const passwordSchema = Joi.string()
   .regex(
@@ -249,6 +253,23 @@ const updatePatient = Joi.object({
     .default([]),
 });
 
+const prescriptionMedicineItem = Joi.object({
+  medicineName: Joi.string().trim().required().messages({
+    "any.required": "Medicine name is required.",
+    "string.empty": "Medicine name is required.",
+  }),
+  durationValue: Joi.number().min(1).default(1),
+  durationUnit: Joi.string().valid(...durationUnitValues).default(durationUnitConst.DAYS),
+  frequency: Joi.object({
+    morning: Joi.number().min(0).default(0),
+    afternoon: Joi.number().min(0).default(0),
+    night: Joi.number().min(0).default(0),
+  }).required().messages({
+    "any.required": "Frequency is required.",
+  }),
+  timing: Joi.string().valid(...medicineTimingValues).default(medicineTimingConst.ANYTIME),
+});
+
 const createVisit = Joi.object({
   patientId: Joi.string().required().messages({
     "any.required": "Patient is required.",
@@ -264,6 +285,7 @@ const updateVisit = Joi.object({
   status: Joi.string()
     .valid(...visitStatusValues)
     .optional(),
+  medicines: Joi.array().items(prescriptionMedicineItem).optional(),
 });
 
 const updateVisitStatus = Joi.object({

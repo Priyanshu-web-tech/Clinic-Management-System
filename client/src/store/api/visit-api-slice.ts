@@ -56,7 +56,7 @@ export const visitApi = apiSlice.injectEndpoints({
         method: "PUT",
         body,
       }),
-      invalidatesTags: (_result, _error, { id }) => ["Visits", { type: "Visits", id }, "Patients"],
+      invalidatesTags: (_result, _error, { id }) => ["Visits", { type: "Visits", id }, "Patients", "Prescriptions"],
     }),
   }),
   overrideExisting: false,

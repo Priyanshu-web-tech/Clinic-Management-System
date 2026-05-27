@@ -1,0 +1,94 @@
+import * as Yup from "yup"
+import { useFormik } from "formik"
+import { Link, useNavigate } from "react-router-dom"
+import { toast } from "sonner"
+
+import { useForgotPasswordMutation } from "@/store/api/auth-api-slice"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Spinner } from "@/components/ui/spinner"
+import { NAVIGATION_ROUTES } from "@/constants/constants"
+import { emailValidation } from "@/utils/validations"
+import type { ForgotPasswordFormValues } from "./forgot-password.types"
+
+const ForgotPassword = () => {
+  const navigate = useNavigate()
+  const [forgotPassword, { isLoading }] = useForgotPasswordMutation()
+
+  const formik = useFormik<ForgotPasswordFormValues>({
+    initialValues: { email: "" },
+    validationSchema: Yup.object({ email: emailValidation }),
+    onSubmit: async (values) => {
+      try {
+        const response = await forgotPassword(values).unwrap()
+        if (response?.success) {
+          localStorage.setItem("otp_email", values.email)
+          localStorage.setItem("otpSentAt", Date.now().toString())
+          toast.success(response.message ?? "OTP sent! Check your email.")
+          navigate(NAVIGATION_ROUTES.VERIFY_OTP)
+        } else {
+          toast.error(response?.message ?? "Failed to send OTP.")
+        }
+      } catch (err: unknown) {
+        const message =
+          (err as { data?: { message?: string } })?.data?.message ??
+          "Failed to send OTP. Please try again."
+        toast.error(message)
+      }
+    },
+  })
+
+  return (
+    <div className="w-full max-w-sm rounded-xl border border-border bg-card shadow-sm flex flex-col max-h-[calc(100vh-3rem)]">
+
+      {/* Header */}
+      <div className="px-8 pt-8 pb-4 shrink-0">
+        <h1 className="text-xl font-semibold text-foreground">Forgot password</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Enter your email and we&apos;ll send you a one-time password.
+        </p>
+      </div>
+
+      <form onSubmit={formik.handleSubmit} className="flex flex-col flex-1 min-h-0">
+
+        {/* Scrollable fields */}
+        <div className="flex-1 overflow-y-auto px-8 space-y-4">
+          <div className="space-y-1 pb-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="you@example.com"
+              value={formik.values.email}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              aria-invalid={!!(formik.touched.email && formik.errors.email)}
+            />
+            {formik.touched.email && formik.errors.email && (
+              <p className="text-xs text-destructive">{formik.errors.email}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-8 pt-4 pb-8 shrink-0">
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading && <Spinner className="mr-2" />}
+            Send OTP
+          </Button>
+          <p className="mt-5 text-center text-xs text-muted-foreground">
+            Remember your password?{" "}
+            <Link to={NAVIGATION_ROUTES.LOGIN} className="font-medium text-primary hover:underline">
+              Sign in
+            </Link>
+          </p>
+        </div>
+
+      </form>
+    </div>
+  )
+}
+
+export default ForgotPassword

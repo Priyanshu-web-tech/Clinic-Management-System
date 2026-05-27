@@ -1,0 +1,53 @@
+const userType = {
+  ADMIN: "admin",
+  DOCTOR: "doctor",
+  STAFF: "staff",
+};
+
+const designation = {
+  RECEPTIONIST: "receptionist",
+  CHEMIST: "chemist",
+};
+
+const otpType = {
+  RESET_PASSWORD: "reset_password",
+};
+
+const gender = {
+  MALE: "male",
+  FEMALE: "female",
+  OTHER: "other",
+};
+
+const bloodGroup = {
+  A_POS: "A+",
+  A_NEG: "A-",
+  B_POS: "B+",
+  B_NEG: "B-",
+  AB_POS: "AB+",
+  AB_NEG: "AB-",
+  O_POS: "O+",
+  O_NEG: "O-",
+};
+
+const visitStatus = {
+  WAITING: "waiting",
+  IN_CONSULTATION: "in_consultation",
+  COMPLETED: "completed",
+  CANCELLED: "cancelled",
+};
+
+const durationUnit = {
+  DAYS: "days",
+  WEEKS: "weeks",
+  MONTHS: "months",
+};
+
+const medicineTiming = {
+  BEFORE_FOOD: "before_food",
+  AFTER_FOOD: "after_food",
+  WITH_FOOD: "with_food",
+  ANYTIME: "anytime",
+};
+
+module.exports = { userType, otpType, designation, gender, bloodGroup, visitStatus, durationUnit, medicineTiming };

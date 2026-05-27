@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your Prescription - DocMate</title>
+    <style>
+      body, table, td, p { margin: 0; padding: 0; }
+      body { background-color: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #18181b; }
+      @media only screen and (max-width: 600px) {
+        .outer-pad { padding: 0 !important; }
+        .body-pad { padding: 24px 20px !important; }
+        .header-pad { padding: 20px 24px !important; }
+        .info-cell { display: block !important; width: 100% !important; box-sizing: border-box; }
+        .info-row-b { display: block !important; }
+        .med-timing { display: none !important; }
+        .wrapper { border-radius: 0 !important; border-left: none !important; border-right: none !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="outer-pad" style="padding: 32px 16px; background-color: #f4f4f5;">
+      <table class="wrapper" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 620px; margin: 0 auto; background: #ffffff; border-radius: 12px; border: 1px solid #e4e4e7;">
+
+        <!-- Header -->
+        <tr>
+          <td class="header-pad" style="background-color: #18181b; padding: 24px 36px; border-radius: 12px 12px 0 0;">
+            <table cellpadding="0" cellspacing="0" border="0" width="100%">
+              <tr>
+                <td style="color: #ffffff; font-size: 22px; font-weight: 700; letter-spacing: -0.3px;">DocMate</td>
+                <td align="right" style="vertical-align: middle;">
+                  <p style="color: #a1a1aa; font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 2px;">Visit</p>
+                  <p style="color: #ffffff; font-size: 13px; font-weight: 600; font-family: monospace;">{{visitNumber}}</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td class="body-pad" style="padding: 32px 36px;">
+
+            <!-- Greeting -->
+            <p style="font-size: 16px; font-weight: 600; color: #18181b; margin-bottom: 6px;">Hi {{patientName}},</p>
+            <p style="font-size: 13px; color: #71717a; line-height: 1.6; margin-bottom: 28px;">Your consultation at DocMate has been completed. Below is a summary of your visit and prescription details for your reference.</p>
+
+            <!-- Section label: Visit Details -->
+            <p style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #71717a; margin-bottom: 12px;">Visit Details</p>
+            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #f4f4f5; border-radius: 8px; border: 1px solid #e4e4e7; margin-bottom: 24px;">
+              <tr>
+                <td class="info-cell" style="padding: 16px 18px; width: 50%; vertical-align: top;">
+                  <p style="font-size: 11px; color: #a1a1aa; margin-bottom: 3px;">Patient ID</p>
+                  <p style="font-size: 14px; font-weight: 700; color: #18181b;">{{patientCode}}</p>
+                </td>
+                <td class="info-cell" style="padding: 16px 18px; width: 50%; vertical-align: top;">
+                  <p style="font-size: 11px; color: #a1a1aa; margin-bottom: 3px;">Visit Date</p>
+                  <p style="font-size: 14px; font-weight: 700; color: #18181b;">{{visitDate}}</p>
+                </td>
+              </tr>
+              <tr class="info-row-b">
+                <td class="info-cell" style="padding: 0 18px 16px; width: 50%; vertical-align: top;">
+                  <p style="font-size: 11px; color: #a1a1aa; margin-bottom: 3px;">Consulting Doctor</p>
+                  <p style="font-size: 14px; font-weight: 700; color: #18181b;">Dr. {{doctorName}}</p>
+                </td>
+                <td class="info-cell" style="padding: 0 18px 16px; width: 50%; vertical-align: top;">
+                  <p style="font-size: 11px; color: #a1a1aa; margin-bottom: 3px;">Token No.</p>
+                  <p style="font-size: 14px; font-weight: 700; color: #18181b;">#{{tokenNumber}}</p>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Symptoms -->
+            <p style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #71717a; margin-bottom: 10px;">Symptoms</p>
+            <p style="background: #f4f4f5; border: 1px solid #e4e4e7; border-radius: 8px; padding: 13px 16px; font-size: 13px; color: {{symptomsColor}}; font-style: {{symptomsStyle}}; line-height: 1.6; margin-bottom: 22px;">{{symptoms}}</p>
+
+            <!-- Diagnosis -->
+            <p style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #71717a; margin-bottom: 10px;">Diagnosis</p>
+            <p style="background: #f4f4f5; border: 1px solid #e4e4e7; border-radius: 8px; padding: 13px 16px; font-size: 13px; color: {{diagnosisColor}}; font-style: {{diagnosisStyle}}; line-height: 1.6; margin-bottom: 22px;">{{diagnosis}}</p>
+
+            <!-- Prescription -->
+            <p style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #71717a; margin-bottom: 12px;">Prescription</p>
+            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-radius: 8px; border: 1px solid #e4e4e7; border-collapse: collapse; margin-bottom: 24px;">
+              <thead>
+                <tr style="background-color: #18181b;">
+                  <th style="color: #ffffff; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; padding: 10px 14px; text-align: left;">Medicine</th>
+                  <th style="color: #ffffff; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; padding: 10px 14px; text-align: left;">Freq&nbsp;(M–A–N)</th>
+                  <th style="color: #ffffff; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; padding: 10px 14px; text-align: left;">Duration</th>
+                  <th class="med-timing" style="color: #ffffff; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; padding: 10px 14px; text-align: left;">Timing</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{medicinesRows}}
+              </tbody>
+            </table>
+
+            <!-- Follow-up (conditionally injected) -->
+            {{followUpSection}}
+
+            <!-- Divider -->
+            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 24px 0 0;">
+              <tr><td style="border-top: 1px solid #e4e4e7; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+            </table>
+            <p style="font-size: 12px; color: #a1a1aa; line-height: 1.7; margin-top: 20px;">This is an auto-generated prescription summary from DocMate. Please carry this summary to your next visit. For any queries, contact your doctor directly.</p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background-color: #fafafa; padding: 18px 36px; text-align: center; border-top: 1px solid #e4e4e7; border-radius: 0 0 12px 12px;">
+            <p style="font-size: 11px; color: #a1a1aa;">&copy; 2026 DocMate. All rights reserved.</p>
+          </td>
+        </tr>
+
+      </table>
+    </div>
+  </body>
+</html>

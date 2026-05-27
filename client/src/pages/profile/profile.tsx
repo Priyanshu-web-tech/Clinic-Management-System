@@ -6,6 +6,7 @@ import PersonalInfoTab from "./personal-info-tab"
 import EditProfileTab from "./edit-profile-tab"
 import HospitalTab from "./hospital-tab"
 import PasswordTab from "./password-tab"
+import SettingsTab from "./settings-tab"
 
 const Profile = () => {
   const userType = useAppSelector((state) => state.userData.userType)
@@ -20,6 +21,7 @@ const Profile = () => {
             <TabsTrigger value="edit">Edit profile</TabsTrigger>
             {isDoctor && <TabsTrigger value="hospital">Hospital</TabsTrigger>}
             <TabsTrigger value="password">Password</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="info">
@@ -38,6 +40,10 @@ const Profile = () => {
 
           <TabsContent value="password">
             <PasswordTab />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <SettingsTab />
           </TabsContent>
         </Tabs>
       </div>

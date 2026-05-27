@@ -1,12 +1,16 @@
 const { env } = require("process");
-module.exports = {
-  development: {
-    allowedOrigins: [
+
+const allowedOrigins = env.ALLOWED_ORIGINS
+  ? env.ALLOWED_ORIGINS.split(",").map((o) => o.trim())
+  : [
       "http://localhost:5173",
       "http://localhost:5174",
       "http://localhost:3000",
-      "https://clinic-management-system-api.vercel.app",
-    ],
-    serverRedirectURI: "https://clinic-management-system-api.vercel.app",
+    ];
+
+module.exports = {
+  development: {
+    allowedOrigins,
+    serverRedirectURI: env.SERVER_REDIRECT_URI || "http://localhost:3000",
   },
 };

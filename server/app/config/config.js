@@ -13,4 +13,8 @@ module.exports = {
     allowedOrigins,
     serverRedirectURI: env.SERVER_REDIRECT_URI || "http://localhost:3000",
   },
+  production: {
+    allowedOrigins,
+    serverRedirectURI: env.SERVER_REDIRECT_URI || "http://localhost:3000",
+  },
 };

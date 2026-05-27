@@ -2,7 +2,7 @@ const { createLogger: createWinstonLogger, transports, format } = require('winst
 require('winston-daily-rotate-file');
 
 const appName = 'Doc Mate';
-const writeLogsToFile = true;
+const writeLogsToFile = process.env.NODE_ENV !== 'production';
 
 const loggerConsole = createWinstonLogger({
     transports: [

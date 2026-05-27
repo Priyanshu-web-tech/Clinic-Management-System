@@ -34,6 +34,7 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Spinner } from "@/components/ui/spinner"
 import { DatePicker } from "@/components/ui/date-picker"
+import { FreqToggle } from "@/components/ui/freq-toggle"
 import {
   Select,
   SelectContent,
@@ -55,6 +56,7 @@ const EMPTY_MEDICINE: PrescriptionMedicineInput = {
 
 // Shared grid template: medicine name | M | A | N | timing | duration | delete
 const COL = "grid-cols-[1fr_45px_45px_45px_130px_165px_28px]"
+
 
 const MedicineRow = ({
   medicine,
@@ -89,15 +91,11 @@ const MedicineRow = ({
       />
 
       {(["morning", "afternoon", "night"] as const).map((slot) => (
-        <input
+        <FreqToggle
           key={slot}
-          type="number"
-          disabled={disabled}
           value={medicine.frequency[slot]}
-          min={0}
-          step={0.5}
-          onChange={(e) => setFreq(slot, parseFloat(e.target.value) || 0)}
-          className="w-full rounded-sm border border-input bg-background px-1 py-1 text-center text-xs focus:ring-1 focus:ring-ring focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+          disabled={disabled}
+          onChange={(v) => setFreq(slot, v)}
         />
       ))}
 

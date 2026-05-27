@@ -5,6 +5,7 @@ const SEGMENT_LABEL: Record<string, string> = {
   users: "Team",
   patients: "Patients",
   visits: "Visits",
+  prescriptions: "Prescriptions",
   profile: "Profile",
 }
 

@@ -15,10 +15,12 @@ import {
   BLOOD_GROUP_LABEL,
   MEDICINE_TIMING_LABEL,
   DURATION_UNIT_LABEL,
+  PAGE_SIZE,
 } from "@/constants/constants"
 
 import { Badge } from "@/components/ui/badge"
 import { Spinner } from "@/components/ui/spinner"
+import Pagination from "@/components/pagination"
 
 const PrescriptionDetail = ({ prescription }: { prescription: Prescription | undefined }) => {
   if (!prescription || prescription.medicines.length === 0) {
@@ -99,10 +101,11 @@ const VisitRow = ({
 
 const PatientDetail = () => {
   const { id } = useParams<{ id: string }>()
+  const [visitsPage, setVisitsPage] = useState(1)
 
   const { data: patientRes, isLoading: isPatientLoading } = useGetPatientByIdQuery(id!)
   const { data: visitsRes, isLoading: isVisitsLoading } = useGetVisitsQuery(
-    { patientId: id, pageSize: 50 },
+    { patientId: id, page: visitsPage, pageSize: PAGE_SIZE },
     { skip: !id },
   )
   const { data: prescriptionsRes } = useGetPrescriptionsQuery(
@@ -112,6 +115,8 @@ const PatientDetail = () => {
 
   const patient = patientRes?.result?.patient
   const visits: Visit[] = visitsRes?.result?.data ?? []
+  const visitTotal = visitsRes?.result?.total ?? 0
+  const visitTotalPages = visitsRes?.result?.totalPages ?? 1
 
   const prescriptionByVisit = (prescriptionsRes?.result?.data ?? []).reduce<Record<string, Prescription>>(
     (acc, p) => {
@@ -221,6 +226,14 @@ const PatientDetail = () => {
           )}
         </div>
       </div>
+
+      <Pagination
+        page={visitsPage}
+        totalPages={visitTotalPages}
+        total={visitTotal}
+        pageSize={PAGE_SIZE}
+        onPageChange={setVisitsPage}
+      />
     </div>
   )
 }

@@ -7,6 +7,7 @@ const findVisits = async ({ filter, search, page, pageSize, sortByDate = false }
   if (search) {
     const regex = new RegExp(search, "i");
     const matchingPatients = await Patient.find({
+      isActive: true,
       $or: [{ firstName: regex }, { lastName: regex }, { patientCode: regex }],
     }).select("_id");
     filter.patient = { $in: matchingPatients.map((p) => p._id) };
@@ -23,7 +24,19 @@ const findVisits = async ({ filter, search, page, pageSize, sortByDate = false }
         },
       };
 
-  const pipeline = [{ $match: filter }];
+  const pipeline = [
+    { $match: filter },
+    {
+      $lookup: {
+        from: "patients",
+        localField: "patient",
+        foreignField: "_id",
+        pipeline: [{ $match: { isActive: true } }],
+        as: "_activePatient",
+      },
+    },
+    { $match: { "_activePatient.0": { $exists: true } } },
+  ];
 
   if (!sortByDate) {
     pipeline.push({

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useFormik } from "formik"
 import * as Yup from "yup"
@@ -21,6 +21,7 @@ import {
   MEDICINE_TIMING_OPTIONS,
   MEDICINE_TIMING_LABEL,
   DURATION_UNIT_LABEL,
+  PAGE_SIZE,
 } from "@/constants/constants"
 
 import { Button } from "@/components/ui/button"
@@ -42,6 +43,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import DeleteConfirmDialog from "@/components/delete-confirm-dialog"
+import Pagination from "@/components/pagination"
 
 const HistoryVisitRow = ({
   visit,
@@ -250,14 +252,23 @@ const VisitDetail = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
+  const [cancelOpen, setCancelOpen] = useState(false)
+  const [historyOpen, setHistoryOpen] = useState(false)
+  const [historyPage, setHistoryPage] = useState(1)
+
+  useEffect(() => {
+    if (!historyOpen) setHistoryPage(1)
+  }, [historyOpen])
+
   const { data, isLoading } = useGetVisitByIdQuery(id!, { skip: !id })
   const visit = data?.result?.visit
 
   const { data: historyData } = useGetVisitsQuery(
-    { patientId: visit?.patient._id, pageSize: 50 },
+    { patientId: visit?.patient._id, page: historyPage, pageSize: PAGE_SIZE },
     { skip: !visit?.patient._id },
   )
   const previousVisits = (historyData?.result?.data ?? []).filter((v) => v._id !== id)
+  const historyTotalPages = Math.ceil(((historyData?.result?.total ?? 1) - 1) / PAGE_SIZE) || 1
 
   const { data: prescriptionsData } = useGetPrescriptionsQuery(
     { patientId: visit?.patient._id, pageSize: 100 },
@@ -274,9 +285,6 @@ const VisitDetail = () => {
 
   const [updateVisit, { isLoading: isSaving }] = useUpdateVisitMutation()
   const [updateStatus, { isLoading: isCancelling }] = useUpdateVisitStatusMutation()
-
-  const [cancelOpen, setCancelOpen] = useState(false)
-  const [historyOpen, setHistoryOpen] = useState(false)
   const [medicines, setMedicines] = useState<PrescriptionMedicineInput[]>([])
   const [medicinesInitialized, setMedicinesInitialized] = useState(false)
 
@@ -638,6 +646,13 @@ const VisitDetail = () => {
               />
             ))}
           </div>
+          <Pagination
+            page={historyPage}
+            totalPages={historyTotalPages}
+            total={(historyData?.result?.total ?? 1) - 1}
+            pageSize={PAGE_SIZE}
+            onPageChange={setHistoryPage}
+          />
         </DialogContent>
       </Dialog>
 

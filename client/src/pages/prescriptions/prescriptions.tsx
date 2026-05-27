@@ -1,19 +1,23 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { format, parseISO } from "date-fns"
-import { ChevronDown, ChevronRight, Search } from "lucide-react"
+import { ChevronDown, ChevronRight, ClipboardList, Search } from "lucide-react"
 
 import { useGetPrescriptionsQuery } from "@/store/api/prescription-api-slice"
-import { MEDICINE_TIMING_LABEL, DURATION_UNIT_LABEL } from "@/constants/constants"
+import { MEDICINE_TIMING_LABEL, DURATION_UNIT_LABEL, PAGE_SIZE } from "@/constants/constants"
 import type { Prescription } from "@/types/api.types"
+import usePaginatedQuery from "@/hooks/use-paginated-query"
 
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { DatePicker } from "@/components/ui/date-picker"
 import { Badge } from "@/components/ui/badge"
+import Pagination from "@/components/pagination"
+
+const todayString = () => new Date().toISOString().substring(0, 10)
 
 const MedicineList = ({ medicines }: { medicines: Prescription["medicines"] }) => (
   <div className="mt-2 overflow-hidden rounded-md border border-border bg-muted/20">
-    <div className="grid grid-cols-[1fr_auto_auto_auto] gap-3 border-b border-border px-3 py-1.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+    <div className="grid grid-cols-[1fr_110px_90px_80px] border-b border-border px-3 py-1.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
       <span>Medicine</span>
       <span>Frequency</span>
       <span>Timing</span>
@@ -26,7 +30,7 @@ const MedicineList = ({ medicines }: { medicines: Prescription["medicines"] }) =
       return (
         <div
           key={i}
-          className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-3 border-b border-border px-3 py-2 text-xs last:border-b-0"
+          className="grid grid-cols-[1fr_110px_90px_80px] items-center border-b border-border px-3 py-2 text-xs last:border-b-0"
         >
           <span className="font-medium">{m.medicineName}</span>
           <span className="text-muted-foreground">{slots.join(" · ") || "—"}</span>
@@ -56,17 +60,14 @@ const PrescriptionCard = ({ prescription }: { prescription: Prescription }) => {
         </div>
         <div className="flex flex-1 flex-wrap items-center gap-x-6 gap-y-1 text-xs">
           <div>
-            <p className="text-muted-foreground">Patient</p>
+            <p className="text-muted-foreground">Patient Name</p>
             <p className="font-semibold text-sm">
               {prescription.patient.firstName} {prescription.patient.lastName}
             </p>
-            <p className="font-mono text-muted-foreground">{prescription.patient.patientCode}</p>
           </div>
           <div>
-            <p className="text-muted-foreground">Doctor</p>
-            <p className="font-medium">
-              Dr. {prescription.doctor.firstName} {prescription.doctor.lastName}
-            </p>
+            <p className="text-muted-foreground">Patient Code</p>
+            <p className="font-mono font-medium">{prescription.patient.patientCode}</p>
           </div>
           {visit && (
             <div>
@@ -75,8 +76,8 @@ const PrescriptionCard = ({ prescription }: { prescription: Prescription }) => {
             </div>
           )}
           <div>
-            <p className="text-muted-foreground">Date</p>
-            <p className="font-medium">{format(parseISO(prescription.createdAt), "dd MMM yyyy, hh:mm a")}</p>
+            <p className="text-muted-foreground">Time</p>
+            <p className="font-medium">{format(parseISO(prescription.createdAt), "hh:mm a")}</p>
           </div>
           <Badge variant="outline" className="ml-auto shrink-0 text-[10px]">
             {prescription.medicines.length} {prescription.medicines.length === 1 ? "medicine" : "medicines"}
@@ -99,52 +100,62 @@ const PrescriptionCard = ({ prescription }: { prescription: Prescription }) => {
 const Prescriptions = () => {
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [date, setDate] = useState<string | null>(null)
-  const [searchTimer, setSearchTimer] = useState<ReturnType<typeof setTimeout> | null>(null)
+  const [date, setDate] = useState(todayString())
 
-  const handleSearchChange = (value: string) => {
-    setSearch(value)
-    if (searchTimer) clearTimeout(searchTimer)
-    const t = setTimeout(() => setDebouncedSearch(value), 400)
-    setSearchTimer(t)
-  }
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 400)
+    return () => clearTimeout(timer)
+  }, [search])
 
-  const { data, isLoading } = useGetPrescriptionsQuery({
-    search: debouncedSearch || undefined,
-    date: date || undefined,
-    pageSize: 50,
-  })
-
-  const prescriptions = data?.result?.data ?? []
+  const {
+    items: prescriptions,
+    page,
+    setPage,
+    total,
+    totalPages,
+    isLoading,
+  } = usePaginatedQuery<Prescription, { search?: string; date: string }>(
+    useGetPrescriptionsQuery,
+    { search: debouncedSearch || undefined, date },
+    PAGE_SIZE
+  )
 
   return (
-    <div className="flex h-full flex-col gap-5 p-6">
+    <div className="flex h-full flex-col p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
+            <ClipboardList className="size-4 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-base font-semibold text-foreground">Prescriptions</h2>
+            <p className="text-xs text-muted-foreground">
+              {total} {total === 1 ? "prescription" : "prescriptions"} today
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-48">
-          <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+      <div className="mt-5 flex flex-wrap items-center gap-2">
+        <div className="relative max-w-sm min-w-48 flex-1">
+          <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
-            value={search}
-            onChange={(e) => handleSearchChange(e.target.value)}
+            className="h-8 pl-8 text-xs"
             placeholder="Search patient…"
-            className="h-9 pl-8 text-xs"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <DatePicker
-          value={date}
-          onChange={(val) => setDate(val)}
-          placeholder="Filter by date"
-          maxDate={new Date(9999, 11, 31)}
-        />
-        {date && (
-          <button
-            type="button"
-            onClick={() => setDate(null)}
-            className="text-xs text-muted-foreground hover:text-foreground"
-          >
-            Clear date
-          </button>
-        )}
+        <div className="w-40">
+          <DatePicker
+            value={date}
+            onChange={(val) => setDate(val ?? todayString())}
+            maxDate={new Date(9999, 11, 31)}
+            clearable={false}
+          />
+        </div>
       </div>
 
       {/* List */}
@@ -157,17 +168,20 @@ const Prescriptions = () => {
           No prescriptions found.
         </div>
       ) : (
-        <div className="flex flex-col gap-3 overflow-auto">
+        <div className="mt-5 flex min-h-0 flex-1 flex-col gap-3 overflow-auto">
           {prescriptions.map((p) => (
             <PrescriptionCard key={p._id} prescription={p} />
           ))}
-          {data?.result?.total !== undefined && data.result.total > 50 && (
-            <p className="text-center text-xs text-muted-foreground">
-              Showing first 50 of {data.result.total} prescriptions.
-            </p>
-          )}
         </div>
       )}
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        pageSize={PAGE_SIZE}
+        onPageChange={setPage}
+      />
     </div>
   )
 }

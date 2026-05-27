@@ -12,16 +12,35 @@ const findPrescriptions = async ({ filter, page, pageSize }) => {
   const limit = pageSize || 20;
   const skip = ((page || 1) - 1) * limit;
 
-  const [prescriptions, total] = await Promise.all([
-    Prescription.find(filter)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .populate("patient", "firstName lastName patientCode")
-      .populate("doctor", "firstName lastName")
-      .populate("visit", "visitNumber tokenNumber status createdAt")
-      .lean(),
-    Prescription.countDocuments(filter),
+  const results = await Prescription.aggregate([
+    { $match: filter },
+    {
+      $lookup: {
+        from: "patients",
+        localField: "patient",
+        foreignField: "_id",
+        pipeline: [{ $match: { isActive: true } }],
+        as: "_activePatient",
+      },
+    },
+    { $match: { "_activePatient.0": { $exists: true } } },
+    { $sort: { createdAt: -1 } },
+    {
+      $facet: {
+        data: [{ $skip: skip }, { $limit: limit }],
+        count: [{ $count: "total" }],
+      },
+    },
+  ]);
+
+  const result = results[0] || { data: [], count: [] };
+  const total = result.count[0]?.total ?? 0;
+  const prescriptions = result.data;
+
+  await Prescription.populate(prescriptions, [
+    { path: "patient", select: "firstName lastName patientCode" },
+    { path: "doctor", select: "firstName lastName" },
+    { path: "visit", select: "visitNumber tokenNumber status createdAt" },
   ]);
 
   const prescriptionIds = prescriptions.map((p) => p._id);
@@ -36,12 +55,12 @@ const findPrescriptions = async ({ filter, page, pageSize }) => {
     return acc;
   }, {});
 
-  const result = prescriptions.map((p) => ({
+  const withMedicines = prescriptions.map((p) => ({
     ...p,
     medicines: medicinesMap[String(p._id)] || [],
   }));
 
-  return { prescriptions: result, total };
+  return { prescriptions: withMedicines, total };
 };
 
 const upsertPrescription = async ({ hospital, visit, patient, doctor }, session = null) => {

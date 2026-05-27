@@ -38,6 +38,7 @@ const getPrescriptions = async (req) => {
       const Patient = require("../models/patient");
       const regex = new RegExp(search, "i");
       const matchingPatients = await Patient.find({
+        isActive: true,
         $or: [{ firstName: regex }, { lastName: regex }, { patientCode: regex }],
       }).select("_id");
       filter.patient = { $in: matchingPatients.map((p) => p._id) };

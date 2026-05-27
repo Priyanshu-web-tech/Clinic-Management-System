@@ -90,25 +90,57 @@ const createPatient = async (req) => {
       };
     }
 
-    const patientCode = await patientRepository.getNextPatientCode(hospitalId);
-
-    const newPatient = await patientRepository.createPatient({
-      hospital: hospitalId,
-      patientCode,
-      firstName,
-      lastName: lastName || "",
+    const existing = await patientRepository.findPatientByFingerprint(hospitalId, {
       phone,
-      gender,
+      firstName,
+      lastName,
       dateOfBirth,
-      bloodGroup: bloodGroup || null,
-      allergies: allergies || [],
-      chronicDiseases: chronicDiseases || [],
-      isActive: true,
     });
+
+    if (existing && existing.isActive) {
+      return {
+        error: true,
+        data: {},
+        msgCode: "PATIENT_ALREADY_EXISTS",
+        status: httpStatus.CONFLICT,
+      };
+    }
+
+    let savedPatient;
+
+    if (existing && !existing.isActive) {
+      // Reactivate soft-deleted patient, keep their patientCode and visit history
+      savedPatient = await patientRepository.updatePatientById(existing._id, {
+        firstName,
+        lastName: lastName || "",
+        phone,
+        gender,
+        dateOfBirth,
+        bloodGroup: bloodGroup || null,
+        allergies: allergies || [],
+        chronicDiseases: chronicDiseases || [],
+        isActive: true,
+      });
+    } else {
+      const patientCode = await patientRepository.getNextPatientCode(hospitalId);
+      savedPatient = await patientRepository.createPatient({
+        hospital: hospitalId,
+        patientCode,
+        firstName,
+        lastName: lastName || "",
+        phone,
+        gender,
+        dateOfBirth,
+        bloodGroup: bloodGroup || null,
+        allergies: allergies || [],
+        chronicDiseases: chronicDiseases || [],
+        isActive: true,
+      });
+    }
 
     return {
       error: false,
-      data: { patient: newPatient },
+      data: { patient: savedPatient },
       msgCode: "PATIENT_CREATED",
       status: httpStatus.CREATED,
     };
@@ -157,6 +189,21 @@ const updatePatient = async (req) => {
         data: {},
         msgCode: "FORBIDDEN",
         status: httpStatus.FORBIDDEN,
+      };
+    }
+
+    const duplicate = await patientRepository.findPatientByFingerprint(
+      target.hospital,
+      { phone, firstName, lastName, dateOfBirth },
+      id,
+    );
+
+    if (duplicate && duplicate.isActive) {
+      return {
+        error: true,
+        data: {},
+        msgCode: "PATIENT_ALREADY_EXISTS",
+        status: httpStatus.CONFLICT,
       };
     }
 

@@ -49,6 +49,7 @@
   "PATIENT_UPDATED": "Patient updated successfully.",
   "PATIENT_DELETED": "Patient removed successfully.",
   "PATIENT_NOT_FOUND": "Patient not found.",
+  "PATIENT_ALREADY_EXISTS": "A patient with the same name, phone, and date of birth already exists.",
   "PATIENT_HAS_ACTIVE_VISIT": "Cannot delete patient: they are currently in the queue.",
   "VISITS_FETCHED": "Visits fetched successfully.",
   "VISIT_CREATED": "Patient moved to queue successfully.",

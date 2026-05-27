@@ -1,5 +1,7 @@
 const Patient = require("../models/patient");
 
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 const findPatients = async ({ filter, search, page, pageSize }) => {
   const limit = pageSize || 10;
   const skip = ((page || 1) - 1) * limit;
@@ -46,6 +48,22 @@ const findPatientByPhone = async (phone, hospitalId, excludeId = null) => {
   return await Patient.findOne(query);
 };
 
+const findPatientByFingerprint = async (
+  hospitalId,
+  { phone, firstName, lastName, dateOfBirth },
+  excludeId = null,
+) => {
+  const query = {
+    hospital: hospitalId,
+    phone,
+    firstName: { $regex: new RegExp(`^${escapeRegex(firstName.trim())}$`, "i") },
+    lastName: { $regex: new RegExp(`^${escapeRegex((lastName || "").trim())}$`, "i") },
+    dateOfBirth: new Date(dateOfBirth),
+  };
+  if (excludeId) query._id = { $ne: excludeId };
+  return await Patient.findOne(query);
+};
+
 const getNextPatientCode = async (hospitalId) => {
   const count = await Patient.countDocuments({ hospital: hospitalId });
   return `P${String(count + 1).padStart(5, "0")}`;
@@ -64,6 +82,7 @@ module.exports = {
   findPatients,
   findPatientById,
   findPatientByPhone,
+  findPatientByFingerprint,
   getNextPatientCode,
   createPatient,
   updatePatientById,

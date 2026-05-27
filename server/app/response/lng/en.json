@@ -33,6 +33,7 @@
   "LOGOUT_SUCCESSFUL": "Logged out successfully.",
   "HOSPITAL_UPDATED": "Hospital details updated successfully.",
   "HOSPITAL_NOT_FOUND": "Hospital not found.",
+  "HOSPITAL_ALREADY_EXISTS": "A hospital with this name already exists.",
   "USERS_FETCHED": "Users fetched successfully.",
   "USER_CREATED": "Member added. Login credentials have been sent to their email.",
   "USER_UPDATED": "Member updated successfully.",

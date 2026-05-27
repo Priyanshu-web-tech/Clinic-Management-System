@@ -209,6 +209,15 @@ const registerUser = async (body, res) => {
     };
   } catch (err) {
     console.log(err);
+    if (err.code === 11000 && err.keyPattern?.name) {
+      return {
+        error: true,
+        data: {},
+        msgCode: "HOSPITAL_ALREADY_EXISTS",
+        status: httpStatus.CONFLICT,
+        transaction,
+      };
+    }
     return {
       error: true,
       data: err,

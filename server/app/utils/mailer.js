@@ -5,6 +5,7 @@ const path = require("path");
 const emailTypeSubject = {
   FORGET_PASSWORD: "Reset Your DocMate Password",
   WELCOME_USER: "Welcome to DocMate - Your Account Credentials",
+  VISIT_SUMMARY: "Your DocMate Prescription Summary",
 };
 
 const transporter = nodemailer.createTransport({
@@ -23,6 +24,10 @@ const templateMap = {
   [emailTypeSubject.WELCOME_USER]: path.join(
     __dirname,
     "../emails/templates/welcomeUser.html"
+  ),
+  [emailTypeSubject.VISIT_SUMMARY]: path.join(
+    __dirname,
+    "../emails/templates/prescriptionEmail.html"
   ),
 };
 

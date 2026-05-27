@@ -4,6 +4,7 @@ const { db } = require("../models/index");
 const visitRepository = require("../repositories/visitRepository");
 const prescriptionRepository = require("../repositories/prescriptionRepository");
 const User = require("../models/user");
+const { sendVisitSummaryEmail } = require("../utils/visitMailer");
 const {
   userType: userTypeConst,
   visitStatus: visitStatusConst,
@@ -422,6 +423,11 @@ const updateVisit = async (req) => {
         prescription._id,
         medicines,
         transaction,
+      );
+
+      sendVisitSummaryEmail(
+        { ...visit, diagnosis: updateData.diagnosis, symptoms: updateData.symptoms, followUpDate: updateData.followUpDate },
+        medicines,
       );
     }
 

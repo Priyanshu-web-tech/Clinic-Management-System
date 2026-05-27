@@ -23,7 +23,7 @@ app.use(
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'", "https://cdnjs.cloudflare.com"],
-        styleSrc: ["'self'", "https://cdnjs.cloudflare.com"],
+        styleSrc: ["'self'", "https://cdnjs.cloudflare.com", "'unsafe-inline'"],
       },
     },
     referrerPolicy: { policy: "no-referrer" },

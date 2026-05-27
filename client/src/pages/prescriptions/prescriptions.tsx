@@ -16,8 +16,8 @@ import Pagination from "@/components/pagination"
 const todayString = () => new Date().toISOString().substring(0, 10)
 
 const MedicineList = ({ medicines }: { medicines: Prescription["medicines"] }) => (
-  <div className="mt-2 overflow-hidden rounded-md border border-border bg-muted/20">
-    <div className="grid grid-cols-[1fr_110px_90px_80px] border-b border-border px-3 py-1.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+  <div className="mt-2 overflow-x-auto rounded-md border border-border bg-muted/20">
+    <div className="grid min-w-96 grid-cols-[1fr_110px_90px_80px] border-b border-border px-3 py-1.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
       <span>Medicine</span>
       <span>Frequency</span>
       <span>Timing</span>
@@ -30,7 +30,7 @@ const MedicineList = ({ medicines }: { medicines: Prescription["medicines"] }) =
       return (
         <div
           key={i}
-          className="grid grid-cols-[1fr_110px_90px_80px] items-center border-b border-border px-3 py-2 text-xs last:border-b-0"
+          className="grid min-w-96 grid-cols-[1fr_110px_90px_80px] items-center border-b border-border px-3 py-2 text-xs last:border-b-0"
         >
           <span className="font-medium">{m.medicineName}</span>
           <span className="text-muted-foreground">{slots.join(" · ") || "—"}</span>
@@ -138,17 +138,17 @@ const Prescriptions = () => {
       </div>
 
       {/* Filters */}
-      <div className="mt-5 flex flex-wrap items-center gap-2">
-        <div className="relative max-w-sm min-w-48 flex-1">
+      <div className="mt-4 flex flex-col gap-2 sm:mt-5 sm:flex-row sm:items-center">
+        <div className="relative flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
-            className="h-8 pl-8 text-xs"
+            className="h-8 w-full pl-8 text-xs"
             placeholder="Search patient…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div className="w-40">
+        <div className="w-full sm:w-40">
           <DatePicker
             value={date}
             onChange={(val) => setDate(val ?? todayString())}

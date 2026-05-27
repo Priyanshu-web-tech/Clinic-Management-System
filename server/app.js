@@ -22,8 +22,8 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "https://cdnjs.cloudflare.com"],
-        styleSrc: ["'self'", "https://cdnjs.cloudflare.com", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'"],
       },
     },
     referrerPolicy: { policy: "no-referrer" },
@@ -55,7 +55,11 @@ app.use(morgan(morganFormat));
 // Health check route
 app.get("/health", (req, res) => res.send("Health check OK"));
 
-// Swagger documentation
+// Swagger documentation — strip CSP so swagger-ui inline scripts/styles work
+app.use("/api-docs", (req, res, next) => {
+  res.removeHeader("Content-Security-Policy");
+  next();
+});
 app.use(
   "/api-docs",
   swaggerUi.serve,

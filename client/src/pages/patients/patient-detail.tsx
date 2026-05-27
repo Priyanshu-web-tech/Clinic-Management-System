@@ -34,31 +34,46 @@ const PrescriptionDetail = ({
   }
   return (
     <div className="mt-2 overflow-hidden rounded-md border border-border bg-muted/20">
-      <div className="grid grid-cols-[1fr_110px_90px_80px] border-b border-border px-3 py-1.5 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+      {/* Desktop column header */}
+      <div className="hidden grid-cols-[1fr_110px_90px_80px] border-b border-border px-3 py-1.5 text-[10px] font-medium tracking-wide text-muted-foreground uppercase md:grid">
         <span>Medicine</span>
         <span>Frequency</span>
         <span>Timing</span>
         <span>Duration</span>
       </div>
+
       {prescription.medicines.map((m, i) => {
         const slots = (["morning", "afternoon", "night"] as const)
           .filter((s) => m.frequency[s] > 0)
           .map((s) => `${s.charAt(0).toUpperCase()}:${m.frequency[s]}`)
         return (
-          <div
-            key={i}
-            className="grid grid-cols-[1fr_110px_90px_80px] items-center border-b border-border px-3 py-2 text-xs last:border-b-0"
-          >
-            <span className="font-medium">{m.medicineName}</span>
-            <span className="text-muted-foreground">
-              {slots.join(" · ") || "—"}
-            </span>
-            <span className="text-muted-foreground">
-              {MEDICINE_TIMING_LABEL[m.timing]}
-            </span>
-            <span className="whitespace-nowrap text-muted-foreground">
-              {m.durationValue} {DURATION_UNIT_LABEL[m.durationUnit]}
-            </span>
+          <div key={i} className="border-b border-border last:border-b-0">
+            {/* Mobile card */}
+            <div className="px-3 py-2.5 text-xs md:hidden">
+              <p className="font-medium">{m.medicineName}</p>
+              <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-muted-foreground">
+                <span>{slots.join(" · ") || "—"}</span>
+                <span>·</span>
+                <span>{MEDICINE_TIMING_LABEL[m.timing]}</span>
+                <span>·</span>
+                <span className="whitespace-nowrap">
+                  {m.durationValue} {DURATION_UNIT_LABEL[m.durationUnit]}
+                </span>
+              </div>
+            </div>
+            {/* Desktop grid row */}
+            <div className="hidden grid-cols-[1fr_110px_90px_80px] items-center px-3 py-2 text-xs md:grid">
+              <span className="font-medium">{m.medicineName}</span>
+              <span className="text-muted-foreground">
+                {slots.join(" · ") || "—"}
+              </span>
+              <span className="text-muted-foreground">
+                {MEDICINE_TIMING_LABEL[m.timing]}
+              </span>
+              <span className="whitespace-nowrap text-muted-foreground">
+                {m.durationValue} {DURATION_UNIT_LABEL[m.durationUnit]}
+              </span>
+            </div>
           </div>
         )
       })}
@@ -159,55 +174,59 @@ const PatientDetail = () => {
   }
 
   return (
-    <div className="flex h-full flex-col p-6">
-      <PatientInfoCard patient={patient} />
+    <div className="flex h-full flex-col p-4 sm:p-6">
+      {/* Scroll container: fixed height from flex-1, scrolls as a block — children size naturally (no flex-shrink) */}
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="flex flex-col gap-5">
+          <PatientInfoCard patient={patient} />
 
-      {/* Visit History */}
-      <div className="mt-6 flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border border-border bg-card">
-        <div className="shrink-0 border-b border-border px-4 py-3">
-          <div className="flex items-center gap-2">
-            <div className="flex size-7 items-center justify-center rounded-md bg-primary/10">
-              <History className="size-3.5 text-primary" />
+          {/* Visit History */}
+          <div className="flex flex-col overflow-hidden rounded-md border border-border bg-card">
+            <div className="border-b border-border px-4 py-3">
+              <div className="flex items-center gap-2">
+                <div className="flex size-7 items-center justify-center rounded-md bg-primary/10">
+                  <History className="size-3.5 text-primary" />
+                </div>
+                <h3 className="text-sm font-semibold">Visit History</h3>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Click a row to expand prescription details.
+              </p>
             </div>
-            <h3 className="text-sm font-semibold">Visit History</h3>
+
+            <div className="overflow-y-auto md:max-h-80">
+              {/* Header */}
+              <div className="grid grid-cols-[16px_80px_100px_1fr_1fr_100px] gap-3 border-b border-border bg-muted/40 px-3 py-2 text-xs font-medium text-muted-foreground">
+                <span />
+                <span>Visit #</span>
+                <span>Date</span>
+                <span>Symptoms</span>
+                <span>Diagnosis</span>
+                <span>Status</span>
+              </div>
+              {isVisitsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Spinner className="size-4" />
+                </div>
+              ) : visits.length === 0 ? (
+                <p className="py-8 text-center text-xs text-muted-foreground">
+                  No visits found for this patient.
+                </p>
+              ) : (
+                visits.map((visit) => <VisitRow key={visit._id} visit={visit} />)
+              )}
+            </div>
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Click a row to expand prescription details.
-          </p>
-        </div>
 
-        {/* Header */}
-        <div className="grid shrink-0 grid-cols-[16px_80px_100px_1fr_1fr_100px] gap-3 border-b border-border bg-muted/40 px-3 py-2 text-xs font-medium text-muted-foreground">
-          <span />
-          <span>Visit #</span>
-          <span>Date</span>
-          <span>Symptoms</span>
-          <span>Diagnosis</span>
-          <span>Status</span>
-        </div>
-
-        <div className="overflow-y-auto">
-          {isVisitsLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Spinner className="size-4" />
-            </div>
-          ) : visits.length === 0 ? (
-            <p className="py-8 text-center text-xs text-muted-foreground">
-              No visits found for this patient.
-            </p>
-          ) : (
-            visits.map((visit) => <VisitRow key={visit._id} visit={visit} />)
-          )}
+          <Pagination
+            page={visitsPage}
+            totalPages={visitTotalPages}
+            total={visitTotal}
+            pageSize={PAGE_SIZE}
+            onPageChange={setVisitsPage}
+          />
         </div>
       </div>
-
-      <Pagination
-        page={visitsPage}
-        totalPages={visitTotalPages}
-        total={visitTotal}
-        pageSize={PAGE_SIZE}
-        onPageChange={setVisitsPage}
-      />
     </div>
   )
 }

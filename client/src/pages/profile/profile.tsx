@@ -13,16 +13,18 @@ const Profile = () => {
   const isDoctor = userType === UserType.Doctor
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       <div className="w-full max-w-lg">
         <Tabs defaultValue="info">
-          <TabsList>
-            <TabsTrigger value="info">Personal info</TabsTrigger>
-            <TabsTrigger value="edit">Edit profile</TabsTrigger>
-            {isDoctor && <TabsTrigger value="hospital">Hospital</TabsTrigger>}
-            <TabsTrigger value="password">Password</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto pb-1">
+            <TabsList className="w-max">
+              <TabsTrigger value="info">Personal info</TabsTrigger>
+              <TabsTrigger value="edit">Edit profile</TabsTrigger>
+              {isDoctor && <TabsTrigger value="hospital">Hospital</TabsTrigger>}
+              <TabsTrigger value="password">Password</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="info">
             <PersonalInfoTab />

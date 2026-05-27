@@ -72,7 +72,7 @@ const PasswordTab = () => {
   })
 
   return (
-    <div className="max-w-sm space-y-5">
+    <div className="w-full max-w-sm space-y-5">
       <div>
         <p className="text-sm font-medium text-foreground">
           Change your password

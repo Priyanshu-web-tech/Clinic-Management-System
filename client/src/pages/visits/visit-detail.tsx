@@ -54,7 +54,7 @@ const EMPTY_MEDICINE: PrescriptionMedicineInput = {
   timing: MedicineTiming.Anytime,
 }
 
-// Shared grid template: medicine name | M | A | N | timing | duration | delete
+// Desktop grid template: medicine name | M | A | N | timing | duration | delete
 const COL = "grid-cols-[1fr_45px_45px_45px_130px_165px_28px]"
 
 const MedicineRow = ({
@@ -76,86 +76,181 @@ const MedicineRow = ({
   const setFreq = (slot: "morning" | "afternoon" | "night", value: number) =>
     set({ frequency: { ...medicine.frequency, [slot]: value } })
 
-  return (
-    <div
-      className={`grid ${COL} items-center gap-2 rounded-md border border-border bg-background px-3 py-2`}
+  const nameInput = (
+    <input
+      type="text"
+      disabled={disabled}
+      value={medicine.medicineName}
+      onChange={(e) => set({ medicineName: e.target.value })}
+      placeholder="Medicine name"
+      className="w-full min-w-0 rounded-sm border border-input bg-background px-2 py-1 text-xs placeholder:text-muted-foreground focus:ring-1 focus:ring-ring focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+    />
+  )
+
+  const freqToggles = (["morning", "afternoon", "night"] as const).map((slot) => (
+    <FreqToggle
+      key={slot}
+      value={medicine.frequency[slot]}
+      disabled={disabled}
+      onChange={(v) => setFreq(slot, v)}
+    />
+  ))
+
+  const timingSelect = (
+    <Select
+      value={medicine.timing}
+      onValueChange={(val) => set({ timing: val as MedicineTiming })}
+      disabled={disabled}
     >
+      <SelectTrigger className="h-7 w-full text-xs">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {MEDICINE_TIMING_OPTIONS.map((o) => (
+          <SelectItem key={o.value} value={o.value} className="text-xs">
+            {o.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  )
+
+  const durationInputs = (
+    <div className="flex items-center gap-1">
       <input
-        type="text"
+        type="number"
         disabled={disabled}
-        value={medicine.medicineName}
-        onChange={(e) => set({ medicineName: e.target.value })}
-        placeholder="Medicine name"
-        className="w-full min-w-0 rounded-sm border border-input bg-background px-2 py-1 text-xs placeholder:text-muted-foreground focus:ring-1 focus:ring-ring focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+        value={medicine.durationValue}
+        min={1}
+        onChange={(e) =>
+          set({ durationValue: Math.max(1, parseInt(e.target.value) || 1) })
+        }
+        className="w-11 rounded-sm border border-input bg-background px-1.5 py-1 text-xs focus:ring-1 focus:ring-ring focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
       />
-
-      {(["morning", "afternoon", "night"] as const).map((slot) => (
-        <FreqToggle
-          key={slot}
-          value={medicine.frequency[slot]}
-          disabled={disabled}
-          onChange={(v) => setFreq(slot, v)}
-        />
-      ))}
-
       <Select
-        value={medicine.timing}
-        onValueChange={(val) => set({ timing: val as MedicineTiming })}
+        value={medicine.durationUnit}
+        onValueChange={(val) => set({ durationUnit: val as DurationUnit })}
         disabled={disabled}
       >
-        <SelectTrigger className="h-7 w-full text-xs">
+        <SelectTrigger className="h-7 flex-1 text-xs">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {MEDICINE_TIMING_OPTIONS.map((o) => (
+          {DURATION_UNIT_OPTIONS.map((o) => (
             <SelectItem key={o.value} value={o.value} className="text-xs">
               {o.label}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
+    </div>
+  )
 
-      <div className="flex items-center gap-1">
-        <input
-          type="number"
-          disabled={disabled}
-          value={medicine.durationValue}
-          min={1}
-          onChange={(e) =>
-            set({ durationValue: Math.max(1, parseInt(e.target.value) || 1) })
-          }
-          className="w-11 rounded-sm border border-input bg-background px-1.5 py-1 text-xs focus:ring-1 focus:ring-ring focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-        />
-        <Select
-          value={medicine.durationUnit}
-          onValueChange={(val) => set({ durationUnit: val as DurationUnit })}
-          disabled={disabled}
-        >
-          <SelectTrigger className="h-7 flex-1 text-xs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {DURATION_UNIT_OPTIONS.map((o) => (
-              <SelectItem key={o.value} value={o.value} className="text-xs">
-                {o.label}
-              </SelectItem>
+  const deleteBtn = !disabled ? (
+    <button
+      type="button"
+      onClick={() => onRemove(index)}
+      className="flex items-center justify-center rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+    >
+      <Trash2 className="size-3.5" />
+    </button>
+  ) : <div />
+
+  return (
+    <>
+      {/* ── Mobile card (hidden on md+) ── */}
+      <div className="flex flex-col gap-2 rounded-md border border-border bg-background px-3 py-2 md:hidden">
+        <div className="flex items-center gap-2">
+          {nameInput}
+          {!disabled && (
+            <button
+              type="button"
+              onClick={() => onRemove(index)}
+              className="flex items-center justify-center rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+            >
+              <Trash2 className="size-3.5" />
+            </button>
+          )}
+        </div>
+        {/* M / A / N + Timing on one row — timing fills remaining space */}
+        <div className="flex items-end gap-2">
+          <div className="flex items-end gap-1.5">
+            {(["morning", "afternoon", "night"] as const).map((slot) => (
+              <div key={slot} className="flex flex-col items-center gap-0.5">
+                <span className="text-[10px] font-medium text-muted-foreground">
+                  {slot === "morning" ? "M" : slot === "afternoon" ? "A" : "N"}
+                </span>
+                <div className="w-11">
+                  <FreqToggle
+                    value={medicine.frequency[slot]}
+                    disabled={disabled}
+                    onChange={(v) => setFreq(slot, v)}
+                  />
+                </div>
+              </div>
             ))}
-          </SelectContent>
-        </Select>
+          </div>
+          <div className="flex-1">
+            <Select
+              value={medicine.timing}
+              onValueChange={(val) => set({ timing: val as MedicineTiming })}
+              disabled={disabled}
+            >
+              <SelectTrigger className="h-7 w-full text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {MEDICINE_TIMING_OPTIONS.map((o) => (
+                  <SelectItem key={o.value} value={o.value} className="text-xs">
+                    {o.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        {/* Duration — unit select fills remaining space */}
+        <div className="flex items-center gap-1">
+          <input
+            type="number"
+            disabled={disabled}
+            value={medicine.durationValue}
+            min={1}
+            onChange={(e) =>
+              set({ durationValue: Math.max(1, parseInt(e.target.value) || 1) })
+            }
+            className="w-11 rounded-sm border border-input bg-background px-1.5 py-1 text-xs focus:ring-1 focus:ring-ring focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+          />
+          <div className="flex-1">
+            <Select
+              value={medicine.durationUnit}
+              onValueChange={(val) => set({ durationUnit: val as DurationUnit })}
+              disabled={disabled}
+            >
+              <SelectTrigger className="h-7 w-full text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {DURATION_UNIT_OPTIONS.map((o) => (
+                  <SelectItem key={o.value} value={o.value} className="text-xs">
+                    {o.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </div>
 
-      {!disabled ? (
-        <button
-          type="button"
-          onClick={() => onRemove(index)}
-          className="flex items-center justify-center rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-        >
-          <Trash2 className="size-3.5" />
-        </button>
-      ) : (
-        <div />
-      )}
-    </div>
+      {/* ── Desktop grid (hidden below md) ── */}
+      <div className={`hidden md:grid ${COL} items-center gap-2 rounded-md border border-border bg-background px-3 py-2`}>
+        {nameInput}
+        {freqToggles}
+        {timingSelect}
+        {durationInputs}
+        {deleteBtn}
+      </div>
+    </>
   )
 }
 
@@ -169,17 +264,17 @@ const ReadonlyMedicineRow = ({
     .map((s) => `${s.charAt(0).toUpperCase()}:${medicine.frequency[s]}`)
 
   return (
-    <div className="grid grid-cols-[1fr_110px_90px_80px] items-center border-b border-border px-3 py-2 text-xs last:border-b-0">
-      <span className="font-medium">{medicine.medicineName}</span>
-      <span className="text-muted-foreground">
-        {freqParts.join(" · ") || "—"}
-      </span>
-      <span className="text-muted-foreground">
-        {MEDICINE_TIMING_LABEL[medicine.timing]}
-      </span>
-      <span className="whitespace-nowrap text-muted-foreground">
-        {medicine.durationValue} {DURATION_UNIT_LABEL[medicine.durationUnit]}
-      </span>
+    <div className="border-b border-border px-3 py-2.5 text-xs last:border-b-0">
+      <p className="font-medium">{medicine.medicineName}</p>
+      <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-muted-foreground">
+        <span>{freqParts.join(" · ") || "—"}</span>
+        <span>·</span>
+        <span>{MEDICINE_TIMING_LABEL[medicine.timing]}</span>
+        <span>·</span>
+        <span className="whitespace-nowrap">
+          {medicine.durationValue} {DURATION_UNIT_LABEL[medicine.durationUnit]}
+        </span>
+      </div>
     </div>
   )
 }
@@ -316,7 +411,7 @@ const VisitDetail = () => {
   }
 
   return (
-    <div className="flex h-full flex-col p-6">
+    <div className="flex h-full flex-col p-4 sm:p-6">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="flex flex-1 items-center gap-2.5">
@@ -435,9 +530,7 @@ const VisitDetail = () => {
             {medicines.length > 0 ? (
               isConsultation ? (
                 <div className="flex flex-col gap-1.5">
-                  <div
-                    className={`grid ${COL} gap-2 px-3 py-1 text-[10px] font-medium text-muted-foreground`}
-                  >
+                  <div className={`hidden md:grid ${COL} gap-2 px-3 py-1 text-[10px] font-medium text-muted-foreground`}>
                     <span>Medicine</span>
                     <span>M</span>
                     <span>A</span>
@@ -459,12 +552,6 @@ const VisitDetail = () => {
                 </div>
               ) : (
                 <div className="overflow-hidden rounded-md border border-border bg-muted/20">
-                  <div className="grid grid-cols-[1fr_110px_90px_80px] border-b border-border px-3 py-1.5 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
-                    <span>Medicine</span>
-                    <span>Frequency</span>
-                    <span>Timing</span>
-                    <span>Duration</span>
-                  </div>
                   {medicines.map((med, idx) => (
                     <ReadonlyMedicineRow key={idx} medicine={med} />
                   ))}

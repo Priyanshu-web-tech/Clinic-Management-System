@@ -48,7 +48,7 @@ const HospitalTab = () => {
   })
 
   return (
-    <div className="max-w-sm space-y-5">
+    <div className="w-full max-w-sm space-y-5">
       <div>
         <p className="text-sm font-medium text-foreground">Hospital details</p>
         <p className="mt-0.5 text-xs text-muted-foreground">

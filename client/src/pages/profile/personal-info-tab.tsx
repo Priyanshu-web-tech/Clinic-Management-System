@@ -9,9 +9,9 @@ import { USER_TYPE_LABEL, DESIGNATION_LABEL } from "@/constants/constants"
 import { UserType } from "@/types/api.types"
 
 const ProfileRow = ({ label, value }: { label: string; value: string }) => (
-  <div className="flex items-center justify-between">
-    <span className="text-xs text-muted-foreground">{label}</span>
-    <span className="text-sm font-medium text-foreground">{value}</span>
+  <div className="flex items-start justify-between gap-3">
+    <span className="shrink-0 text-xs text-muted-foreground">{label}</span>
+    <span className="min-w-0 break-all text-right text-sm font-medium text-foreground">{value}</span>
   </div>
 )
 

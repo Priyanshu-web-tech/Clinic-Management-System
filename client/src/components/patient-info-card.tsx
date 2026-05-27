@@ -24,25 +24,25 @@ const PatientInfoCard = ({ patient, onViewHistory }: PatientInfoCardProps) => {
   return (
     <div className="rounded-lg border border-border bg-card p-4">
       <div className="mb-3 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <div className="flex size-7 items-center justify-center rounded-md bg-primary/10">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="flex shrink-0 size-7 items-center justify-center rounded-md bg-primary/10">
             <UserRound className="size-3.5 text-primary" />
           </div>
-          <h3 className="text-sm font-semibold">Patient Info</h3>
+          <h3 className="whitespace-nowrap text-sm font-semibold">Patient Info</h3>
         </div>
         {onViewHistory && (
           <button
             type="button"
             onClick={onViewHistory}
-            className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            className="flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
             <History className="size-3.5" />
-            Visit History
+            <span className="whitespace-nowrap">Visit History</span>
           </button>
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-xs sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs sm:grid-cols-3 sm:gap-x-6">
         <div>
           <p className="text-muted-foreground">Name</p>
           <p className="font-medium">
@@ -60,9 +60,9 @@ const PatientInfoCard = ({ patient, onViewHistory }: PatientInfoCardProps) => {
           </div>
         )}
         {patient.email && (
-          <div>
+          <div className="min-w-0">
             <p className="text-muted-foreground">Email</p>
-            <p className="font-medium">{patient.email}</p>
+            <p className="break-all font-medium">{patient.email}</p>
           </div>
         )}
         {patient.gender && (

@@ -171,34 +171,32 @@ const Visits = () => {
   // ── Render ───────────────────────────────────────────────
 
   return (
-    <div className="flex h-full flex-col p-6">
+    <div className="flex h-full flex-col p-4 sm:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
-            <CalendarCheck className="size-4 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-base font-semibold text-foreground">Visits</h2>
-            <p className="text-xs text-muted-foreground">
-              {total} {total === 1 ? "visit" : "visits"} today
-            </p>
-          </div>
+      <div className="flex items-center gap-2.5">
+        <div className="flex shrink-0 size-8 items-center justify-center rounded-lg bg-primary/10">
+          <CalendarCheck className="size-4 text-primary" />
+        </div>
+        <div className="min-w-0">
+          <h2 className="text-base font-semibold text-foreground">Visits</h2>
+          <p className="text-xs text-muted-foreground">
+            {total} {total === 1 ? "visit" : "visits"} today
+          </p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="mt-5 flex flex-wrap items-center gap-2">
-        <div className="relative max-w-sm min-w-48 flex-1">
+      <div className="mt-4 flex flex-col gap-2 sm:mt-5 sm:flex-row sm:items-center">
+        <div className="relative flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
-            className="h-8 pl-8 text-xs"
+            className="h-8 w-full pl-8 text-xs"
             placeholder="Search by patient name or code…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div className="w-40">
+        <div className="w-full sm:w-40">
           <DatePicker
             value={date}
             onChange={(val) => setDate(val ?? todayString())}
@@ -206,7 +204,7 @@ const Visits = () => {
             clearable={false}
           />
         </div>
-        <div className="w-44">
+        <div className="w-full sm:w-44">
           <Select
             value={statusFilter || "all"}
             onValueChange={(v) =>

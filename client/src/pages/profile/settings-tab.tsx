@@ -25,7 +25,7 @@ const SettingsTab = () => {
             <button
               key={value}
               onClick={() => setTheme(value)}
-              className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 w-28 transition-colors cursor-pointer
+              className={`flex flex-1 flex-col items-center gap-2 rounded-lg border-2 p-3 sm:p-4 transition-colors cursor-pointer
                 ${
                   theme === value
                     ? "border-primary bg-primary/5"

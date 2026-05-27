@@ -3,7 +3,13 @@ const Patient = require("../models/patient");
 const Prescription = require("../models/prescription");
 const PrescriptionMedicine = require("../models/prescriptionmedicine");
 
-const findVisits = async ({ filter, search, page, pageSize, sortByDate = false }) => {
+const findVisits = async ({
+  filter,
+  search,
+  page,
+  pageSize,
+  sortByDate = false,
+}) => {
   if (search) {
     const regex = new RegExp(search, "i");
     const matchingPatients = await Patient.find({
@@ -62,7 +68,38 @@ const findVisits = async ({ filter, search, page, pageSize, sortByDate = false }
     ...pipeline,
     {
       $facet: {
-        data: [{ $skip: skip }, { $limit: limit }],
+        data: [
+          { $skip: skip },
+          { $limit: limit },
+          {
+            $lookup: {
+              from: "prescriptions",
+              let: { visitId: "$_id" },
+              pipeline: [
+                { $match: { $expr: { $eq: ["$visit", "$$visitId"] } } },
+                {
+                  $lookup: {
+                    from: "prescriptionmedicines",
+                    localField: "_id",
+                    foreignField: "prescription",
+                    as: "medicines",
+                  },
+                },
+              ],
+              as: "_prescriptions",
+            },
+          },
+          {
+            $addFields: {
+              prescription: {
+                $ifNull: [{ $arrayElemAt: ["$_prescriptions", 0] }, null],
+              },
+            },
+          },
+          {
+            $project: { _prescriptions: 0, _activePatient: 0, _statusOrder: 0 },
+          },
+        ],
         count: [{ $count: "total" }],
       },
     },
@@ -82,7 +119,10 @@ const findVisits = async ({ filter, search, page, pageSize, sortByDate = false }
 
 const findVisitById = async (id) => {
   const visit = await Visit.findById(id)
-    .populate("patient", "firstName lastName patientCode phone gender dateOfBirth bloodGroup allergies chronicDiseases")
+    .populate(
+      "patient",
+      "firstName lastName patientCode phone gender dateOfBirth bloodGroup allergies chronicDiseases",
+    )
     .populate("doctor", "firstName lastName")
     .populate("createdBy", "firstName lastName")
     .lean();
@@ -91,7 +131,9 @@ const findVisitById = async (id) => {
 
   const prescription = await Prescription.findOne({ visit: id }).lean();
   if (prescription) {
-    const medicines = await PrescriptionMedicine.find({ prescription: prescription._id }).lean();
+    const medicines = await PrescriptionMedicine.find({
+      prescription: prescription._id,
+    }).lean();
     visit.prescription = { ...prescription, medicines };
   } else {
     visit.prescription = null;
@@ -100,7 +142,10 @@ const findVisitById = async (id) => {
   return visit;
 };
 
-const findActiveConsultationByDoctor = async (doctorId, excludeVisitId = null) => {
+const findActiveConsultationByDoctor = async (
+  doctorId,
+  excludeVisitId = null,
+) => {
   const query = { doctor: doctorId, status: "in_consultation" };
   if (excludeVisitId) query._id = { $ne: excludeVisitId };
   return await Visit.findOne(query);

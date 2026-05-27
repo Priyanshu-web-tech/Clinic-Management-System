@@ -1,18 +1,15 @@
 import { useState } from "react"
 import { useParams } from "react-router-dom"
-import { UserRound, ChevronDown, ChevronRight, Pill } from "lucide-react"
+import { ChevronDown, ChevronRight, Pill, History } from "lucide-react"
 import { format, parseISO } from "date-fns"
 
 import { useGetPatientByIdQuery } from "@/store/api/patient-api-slice"
 import { useGetVisitsQuery } from "@/store/api/visit-api-slice"
-import { useGetPrescriptionsQuery } from "@/store/api/prescription-api-slice"
-import { formatAge } from "@/utils/helpers"
-import type { Visit, Prescription } from "@/types/api.types"
+import type { Visit, PrescriptionMedicine } from "@/types/api.types"
+import usePaginatedQuery from "@/hooks/use-paginated-query"
 import {
   VISIT_STATUS_LABEL,
   VISIT_STATUS_BADGE_VARIANT,
-  GENDER_LABEL,
-  BLOOD_GROUP_LABEL,
   MEDICINE_TIMING_LABEL,
   DURATION_UNIT_LABEL,
   PAGE_SIZE,
@@ -21,14 +18,23 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Spinner } from "@/components/ui/spinner"
 import Pagination from "@/components/pagination"
+import PatientInfoCard from "@/components/patient-info-card"
 
-const PrescriptionDetail = ({ prescription }: { prescription: Prescription | undefined }) => {
+const PrescriptionDetail = ({
+  prescription,
+}: {
+  prescription: { medicines: PrescriptionMedicine[] } | null | undefined
+}) => {
   if (!prescription || prescription.medicines.length === 0) {
-    return <p className="py-2 text-xs text-muted-foreground">No prescription for this visit.</p>
+    return (
+      <p className="py-2 text-xs text-muted-foreground">
+        No prescription for this visit.
+      </p>
+    )
   }
   return (
     <div className="mt-2 overflow-hidden rounded-md border border-border bg-muted/20">
-      <div className="grid grid-cols-[1fr_110px_90px_80px] border-b border-border px-3 py-1.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+      <div className="grid grid-cols-[1fr_110px_90px_80px] border-b border-border px-3 py-1.5 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
         <span>Medicine</span>
         <span>Frequency</span>
         <span>Timing</span>
@@ -44,8 +50,12 @@ const PrescriptionDetail = ({ prescription }: { prescription: Prescription | und
             className="grid grid-cols-[1fr_110px_90px_80px] items-center border-b border-border px-3 py-2 text-xs last:border-b-0"
           >
             <span className="font-medium">{m.medicineName}</span>
-            <span className="text-muted-foreground">{slots.join(" · ") || "—"}</span>
-            <span className="text-muted-foreground">{MEDICINE_TIMING_LABEL[m.timing]}</span>
+            <span className="text-muted-foreground">
+              {slots.join(" · ") || "—"}
+            </span>
+            <span className="text-muted-foreground">
+              {MEDICINE_TIMING_LABEL[m.timing]}
+            </span>
             <span className="whitespace-nowrap text-muted-foreground">
               {m.durationValue} {DURATION_UNIT_LABEL[m.durationUnit]}
             </span>
@@ -56,13 +66,7 @@ const PrescriptionDetail = ({ prescription }: { prescription: Prescription | und
   )
 }
 
-const VisitRow = ({
-  visit,
-  prescription,
-}: {
-  visit: Visit
-  prescription: Prescription | undefined
-}) => {
+const VisitRow = ({ visit }: { visit: Visit }) => {
   const [expanded, setExpanded] = useState(false)
 
   return (
@@ -73,14 +77,29 @@ const VisitRow = ({
         onClick={() => setExpanded((v) => !v)}
       >
         <span className="text-muted-foreground">
-          {expanded ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
+          {expanded ? (
+            <ChevronDown className="size-3.5" />
+          ) : (
+            <ChevronRight className="size-3.5" />
+          )}
         </span>
-        <span className="font-mono text-muted-foreground">{visit.visitNumber}</span>
-        <span className="text-muted-foreground">{format(parseISO(visit.createdAt), "dd MMM yyyy")}</span>
-        <span className="truncate text-muted-foreground">{visit.symptoms || <span className="text-border">—</span>}</span>
-        <span className="truncate text-muted-foreground">{visit.diagnosis || <span className="text-border">—</span>}</span>
+        <span className="font-mono text-muted-foreground">
+          {visit.visitNumber}
+        </span>
+        <span className="text-muted-foreground">
+          {format(parseISO(visit.createdAt), "dd MMM yyyy")}
+        </span>
+        <span className="truncate text-muted-foreground">
+          {visit.symptoms || <span className="text-border">—</span>}
+        </span>
+        <span className="truncate text-muted-foreground">
+          {visit.diagnosis || <span className="text-border">—</span>}
+        </span>
         <span>
-          <Badge variant={VISIT_STATUS_BADGE_VARIANT[visit.status] ?? "outline"} className="capitalize">
+          <Badge
+            variant={VISIT_STATUS_BADGE_VARIANT[visit.status] ?? "outline"}
+            className="capitalize"
+          >
             {VISIT_STATUS_LABEL[visit.status] ?? visit.status}
           </Badge>
         </span>
@@ -92,7 +111,7 @@ const VisitRow = ({
             <Pill className="size-3" />
             Prescription
           </div>
-          <PrescriptionDetail prescription={prescription} />
+          <PrescriptionDetail prescription={visit.prescription} />
         </div>
       )}
     </div>
@@ -101,31 +120,23 @@ const VisitRow = ({
 
 const PatientDetail = () => {
   const { id } = useParams<{ id: string }>()
-  const [visitsPage, setVisitsPage] = useState(1)
 
-  const { data: patientRes, isLoading: isPatientLoading } = useGetPatientByIdQuery(id!)
-  const { data: visitsRes, isLoading: isVisitsLoading } = useGetVisitsQuery(
-    { patientId: id, page: visitsPage, pageSize: PAGE_SIZE },
-    { skip: !id },
-  )
-  const { data: prescriptionsRes } = useGetPrescriptionsQuery(
-    { patientId: id, pageSize: 100 },
-    { skip: !id },
+  const { data: patientRes, isLoading: isPatientLoading } =
+    useGetPatientByIdQuery(id!)
+  const {
+    items: visits,
+    page: visitsPage,
+    setPage: setVisitsPage,
+    total: visitTotal,
+    totalPages: visitTotalPages,
+    isLoading: isVisitsLoading,
+  } = usePaginatedQuery<Visit, { patientId: string }>(
+    useGetVisitsQuery,
+    { patientId: id! },
+    PAGE_SIZE
   )
 
   const patient = patientRes?.result?.patient
-  const visits: Visit[] = visitsRes?.result?.data ?? []
-  const visitTotal = visitsRes?.result?.total ?? 0
-  const visitTotalPages = visitsRes?.result?.totalPages ?? 1
-
-  const prescriptionByVisit = (prescriptionsRes?.result?.data ?? []).reduce<Record<string, Prescription>>(
-    (acc, p) => {
-      const visitId = typeof p.visit === "object" ? p.visit._id : p.visit
-      if (visitId) acc[visitId] = p
-      return acc
-    },
-    {},
-  )
 
   if (isPatientLoading) {
     return (
@@ -145,59 +156,22 @@ const PatientDetail = () => {
 
   return (
     <div className="flex h-full flex-col p-6">
-      {/* Patient Info Card */}
-      <div className="rounded-lg border border-border bg-card p-4">
-        <div className="mb-3 flex items-center gap-2">
-          <div className="flex size-7 items-center justify-center rounded-md bg-primary/10">
-            <UserRound className="size-3.5 text-primary" />
-          </div>
-          <h3 className="text-sm font-semibold">Patient Info</h3>
-        </div>
-        <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-xs sm:grid-cols-3">
-          <div>
-            <p className="text-muted-foreground">Name</p>
-            <p className="font-medium">{patient.firstName} {patient.lastName}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Patient Code</p>
-            <p className="font-mono font-medium">{patient.patientCode}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Phone</p>
-            <p className="font-medium">{patient.phone}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Gender</p>
-            <p className="font-medium">{GENDER_LABEL[patient.gender] ?? patient.gender}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Age</p>
-            <p className="font-medium">{patient.dateOfBirth ? formatAge(patient.dateOfBirth) : "—"}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Blood Group</p>
-            <p className="font-medium">
-              {patient.bloodGroup ? (BLOOD_GROUP_LABEL[patient.bloodGroup] ?? patient.bloodGroup) : "—"}
-            </p>
-          </div>
-          <div className="col-span-2 sm:col-span-3">
-            <p className="text-muted-foreground">Allergies</p>
-            <p className="font-medium">{patient.allergies?.length ? patient.allergies.join(", ") : "—"}</p>
-          </div>
-          <div className="col-span-2 sm:col-span-3">
-            <p className="text-muted-foreground">Chronic Diseases</p>
-            <p className="font-medium">
-              {patient.chronicDiseases?.length ? patient.chronicDiseases.join(", ") : "—"}
-            </p>
-          </div>
-        </div>
-      </div>
+      <PatientInfoCard patient={patient} />
 
       {/* Visit History */}
-      <h3 className="mt-6 text-sm font-medium text-foreground">Visit History</h3>
-      <p className="mt-0.5 text-xs text-muted-foreground">Click a row to expand prescription details.</p>
+      <div className="mt-6 flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border border-border bg-card">
+        <div className="shrink-0 border-b border-border px-4 py-3">
+          <div className="flex items-center gap-2">
+            <div className="flex size-7 items-center justify-center rounded-md bg-primary/10">
+              <History className="size-3.5 text-primary" />
+            </div>
+            <h3 className="text-sm font-semibold">Visit History</h3>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Click a row to expand prescription details.
+          </p>
+        </div>
 
-      <div className="mt-3 flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border border-border bg-card">
         {/* Header */}
         <div className="grid shrink-0 grid-cols-[16px_80px_100px_1fr_1fr_100px] gap-3 border-b border-border bg-muted/40 px-3 py-2 text-xs font-medium text-muted-foreground">
           <span />
@@ -214,15 +188,11 @@ const PatientDetail = () => {
               <Spinner className="size-4" />
             </div>
           ) : visits.length === 0 ? (
-            <p className="py-8 text-center text-xs text-muted-foreground">No visits found for this patient.</p>
+            <p className="py-8 text-center text-xs text-muted-foreground">
+              No visits found for this patient.
+            </p>
           ) : (
-            visits.map((visit) => (
-              <VisitRow
-                key={visit._id}
-                visit={visit}
-                prescription={prescriptionByVisit[visit._id]}
-              />
-            ))
+            visits.map((visit) => <VisitRow key={visit._id} visit={visit} />)
           )}
         </div>
       </div>

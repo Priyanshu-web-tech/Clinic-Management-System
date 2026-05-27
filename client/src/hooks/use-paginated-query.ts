@@ -11,7 +11,8 @@ const usePaginatedQuery = <TItem, TFilters extends object>(
     isFetching: boolean
   },
   filters: TFilters,
-  pageSize = 10
+  pageSize = 10,
+  skip = false
 ) => {
   const [page, setPage] = useState(1)
 
@@ -22,7 +23,7 @@ const usePaginatedQuery = <TItem, TFilters extends object>(
 
   const { data, isLoading, isFetching } = queryHook(
     { ...filters, page, pageSize },
-    { refetchOnMountOrArgChange: true, refetchOnFocus: true }
+    { refetchOnMountOrArgChange: true, refetchOnFocus: true, skip }
   )
 
   return {

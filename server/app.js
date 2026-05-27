@@ -20,7 +20,11 @@ const morganFormat =
 app.use(
   helmet({
     contentSecurityPolicy: {
-      directives: { defaultSrc: ["'self'"], scriptSrc: ["'self'"] },
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "https://cdnjs.cloudflare.com"],
+        styleSrc: ["'self'", "https://cdnjs.cloudflare.com"],
+      },
     },
     referrerPolicy: { policy: "no-referrer" },
   }),
@@ -56,6 +60,11 @@ app.use(
   "/api-docs",
   swaggerUi.serve,
   swaggerUi.setup(swaggerDocs, {
+    customCssUrl: "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui.min.css",
+    customJs: [
+      "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui-bundle.min.js",
+      "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui-standalone-preset.min.js",
+    ],
     swaggerOptions: {
       withCredentials: true,
       requestInterceptor: (req) => {

@@ -62,7 +62,7 @@ const createUser = async (req) => {
     const currentUser = req.data;
 
     const existing = await userRepository.findUserByEmail(email);
-    if (existing) {
+    if (existing && existing.isActive) {
       return {
         error: true,
         data: {},
@@ -79,17 +79,34 @@ const createUser = async (req) => {
         ? currentUser.hospital?._id
         : null;
 
-    const newUser = await userRepository.createUser({
-      firstName,
-      lastName,
-      email,
-      phone: phone || "",
-      userType: userTypeConst.STAFF,
-      designation,
-      password: hashedPassword,
-      hospital,
-      isActive: true,
-    });
+    let savedUser;
+
+    if (existing && !existing.isActive) {
+      // Reactivate the soft-deleted user with the new details
+      savedUser = await userRepository.updateUserById(existing._id, {
+        firstName,
+        lastName,
+        phone: phone || "",
+        designation,
+        password: hashedPassword,
+        hospital,
+        isActive: true,
+        loginAttempts: 0,
+        lockUntil: null,
+      });
+    } else {
+      savedUser = await userRepository.createUser({
+        firstName,
+        lastName,
+        email,
+        phone: phone || "",
+        userType: userTypeConst.STAFF,
+        designation,
+        password: hashedPassword,
+        hospital,
+        isActive: true,
+      });
+    }
 
     // Send welcome email (non-blocking — don't fail user creation if email fails)
     sendEmail(
@@ -102,15 +119,15 @@ const createUser = async (req) => {
       error: false,
       data: {
         user: {
-          _id: newUser._id,
-          firstName: newUser.firstName,
-          lastName: newUser.lastName,
-          email: newUser.email,
-          phone: newUser.phone,
-          userType: newUser.userType,
-          designation: newUser.designation,
-          isActive: newUser.isActive,
-          createdAt: newUser.createdAt,
+          _id: savedUser._id,
+          firstName: savedUser.firstName,
+          lastName: savedUser.lastName,
+          email: savedUser.email,
+          phone: savedUser.phone,
+          userType: savedUser.userType,
+          designation: savedUser.designation,
+          isActive: savedUser.isActive,
+          createdAt: savedUser.createdAt,
         },
       },
       msgCode: "USER_CREATED",

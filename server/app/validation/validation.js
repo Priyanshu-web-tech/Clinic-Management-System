@@ -136,9 +136,7 @@ const createUser = Joi.object({
   firstName: Joi.string().trim().required().messages({
     "any.required": "First name is required.",
   }),
-  lastName: Joi.string().trim().required().messages({
-    "any.required": "Last name is required.",
-  }),
+  lastName: Joi.string().trim().optional().allow(""),
   email: Joi.string().email().required().messages({
     "string.email": "Please enter a valid email.",
     "any.required": "Email is required.",
@@ -164,9 +162,7 @@ const updateUser = Joi.object({
   firstName: Joi.string().trim().required().messages({
     "any.required": "First name is required.",
   }),
-  lastName: Joi.string().trim().required().messages({
-    "any.required": "Last name is required.",
-  }),
+  lastName: Joi.string().trim().optional().allow(""),
   phone: Joi.string()
     .pattern(/^\d{10}$/)
     .optional()

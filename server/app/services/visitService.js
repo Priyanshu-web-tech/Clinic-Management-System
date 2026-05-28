@@ -450,10 +450,31 @@ const updateVisit = async (req) => {
   }
 };
 
+const cancelUnattendedVisits = async () => {
+  try {
+    const count = await visitRepository.bulkCancelUnattended();
+    return {
+      error: false,
+      data: { cancelledCount: count },
+      msgCode: "VISITS_CANCELLED",
+      status: httpStatus.OK,
+    };
+  } catch (err) {
+    console.log(err);
+    return {
+      error: true,
+      data: {},
+      msgCode: "INTERNAL_SERVER_ERROR",
+      status: httpStatus.INTERNAL_SERVER_ERROR,
+    };
+  }
+};
+
 module.exports = {
   getVisits,
   createVisit,
   updateVisitStatus,
   getVisitById,
   updateVisit,
+  cancelUnattendedVisits,
 };

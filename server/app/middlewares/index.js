@@ -8,6 +8,7 @@ const {
   generateVerifyToken,
 } = require("./jwt");
 const { authorizeRoles, authorizeAccess } = require("./rbac");
+const { verifyCronSecret } = require("./cronSecret");
 
 module.exports = {
   validate,
@@ -19,4 +20,5 @@ module.exports = {
   generateVerifyToken,
   authorizeRoles,
   authorizeAccess,
+  verifyCronSecret,
 };

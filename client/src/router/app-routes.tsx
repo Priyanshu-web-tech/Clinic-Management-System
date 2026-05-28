@@ -23,6 +23,7 @@ const VerifyOtp = lazy(() => import("@/pages/verify-otp/verify-otp"))
 const ResetPassword = lazy(
   () => import("@/pages/reset-password/reset-password")
 )
+const Guide = lazy(() => import("@/pages/guide/guide"))
 
 const PrivateRoute = () => {
   const isSignedIn = useAppSelector((state) => state.userData.isSignedIn)
@@ -109,6 +110,8 @@ const AppRoutes = () => {
           </Route>
         </Route>
       </Route>
+
+      <Route path="guide" element={<Guide />} />
 
       <Route
         path="*"

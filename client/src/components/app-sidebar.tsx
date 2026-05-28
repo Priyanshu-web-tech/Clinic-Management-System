@@ -1,9 +1,9 @@
 import { useState } from "react"
-import { NavLink } from "react-router-dom"
-import { ChevronLeft, ChevronRight, Stethoscope } from "lucide-react"
+import { Link, NavLink } from "react-router-dom"
+import { ChevronLeft, ChevronRight, Stethoscope, BookOpen } from "lucide-react"
 
 import { useAppSelector } from "@/store/hook"
-import { ALL_NAV_ITEMS } from "@/constants/constants"
+import { ALL_NAV_ITEMS, NAVIGATION_ROUTES } from "@/constants/constants"
 
 interface AppSidebarProps {
   mobileOpen: boolean
@@ -62,6 +62,20 @@ const AppSidebar = ({ mobileOpen }: AppSidebarProps) => {
           </NavLink>
         ))}
       </nav>
+
+      {/* How it works */}
+      <div className="border-t border-sidebar-border px-2 py-2">
+        <Link
+          to={NAVIGATION_ROUTES.GUIDE}
+          title="How it works"
+          className={`flex items-center rounded-md px-2 py-2 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${
+            collapsed ? "md:justify-center" : "gap-3"
+          }`}
+        >
+          <BookOpen className="size-4 shrink-0" />
+          <span className={collapsed ? "md:hidden" : ""}>How it works</span>
+        </Link>
+      </div>
 
       {/* Collapse toggle — desktop only */}
       <div className="hidden border-t border-sidebar-border p-2 md:block">

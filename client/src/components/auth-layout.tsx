@@ -1,6 +1,6 @@
-import { Check, Stethoscope } from "lucide-react"
-import { Outlet } from "react-router-dom"
-import { AUTH_FEATURES } from "@/constants/constants"
+import { Check, Stethoscope, ArrowRight } from "lucide-react"
+import { Link, Outlet } from "react-router-dom"
+import { AUTH_FEATURES, NAVIGATION_ROUTES } from "@/constants/constants"
 
 const AuthLayout = () => {
   return (
@@ -40,6 +40,16 @@ const AuthLayout = () => {
               </div>
             ))}
           </div>
+
+          <div className="h-px w-10 bg-white/20" />
+
+          <Link
+            to={NAVIGATION_ROUTES.GUIDE}
+            className="group flex items-center gap-1.5 rounded-full border border-white/40 px-4 py-1.5 text-xs font-medium text-white/90 transition-colors hover:border-white/70 hover:bg-white/10 hover:text-white"
+          >
+            See how it works
+            <ArrowRight className="size-3 transition-transform duration-200 group-hover:translate-x-0.5" />
+          </Link>
         </div>
       </div>
 
@@ -53,6 +63,12 @@ const AuthLayout = () => {
           <span className="text-sm font-bold tracking-tight text-foreground">
             Doc Mate
           </span>
+          <Link
+            to={NAVIGATION_ROUTES.GUIDE}
+            className="text-xs text-muted-foreground transition-colors hover:text-primary hover:underline"
+          >
+            See how it works →
+          </Link>
         </div>
 
         <Outlet />

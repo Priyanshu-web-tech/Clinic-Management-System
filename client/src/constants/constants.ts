@@ -81,6 +81,7 @@ export const NAVIGATION_ROUTES = {
   PATIENTS: "/patients",
   VISITS: "/visits",
   PRESCRIPTIONS: "/prescriptions",
+  GUIDE: "/guide",
 }
 
 export const USER_TYPE_OPTIONS = [

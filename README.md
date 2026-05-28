@@ -107,6 +107,24 @@ npm run dev
 ```
 
 
+## How It Works Guide
+
+DocMate includes a built-in onboarding guide at [https://clinic-management-sys.vercel.app/guide](https://clinic-management-sys.vercel.app/guide) — accessible from the login and register pages via the **"See how it works"** button, and from inside the app via the **"How it works"** link at the bottom of the sidebar.
+
+The guide walks through the full clinic workflow step by step, organised by role:
+
+| Step | Role | Action |
+|---|---|---|
+| 1 | Doctor | Register your clinic |
+| 2 | Doctor | Build your team (add receptionist & chemist) |
+| 3 | Receptionist | Register patients |
+| 4 | Receptionist | Add patient to the visit queue |
+| 5 | Doctor | Start consultation |
+| 6 | Doctor | Complete visit with prescription |
+| 7 | Chemist | Dispense medicines |
+
+The guide is a public route — no login required — so it can be shared with new staff before they're onboarded.
+
 ## Tech Stack
 
 **Client:** React, Redux Toolkit, TailwindCSS

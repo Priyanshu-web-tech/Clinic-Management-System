@@ -1,23 +1,14 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 const fs = require("fs");
 const path = require("path");
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const emailTypeSubject = {
   FORGET_PASSWORD: "Reset Your DocMate Password",
   WELCOME_USER: "Welcome to DocMate - Your Account Credentials",
   VISIT_SUMMARY: "Your DocMate Prescription Summary",
 };
-
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // STARTTLS — port 465 is blocked on Render
-  family: 4, // force IPv4 — Render doesn't support outbound IPv6
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
 
 const templateMap = {
   [emailTypeSubject.FORGET_PASSWORD]: path.join(
@@ -44,14 +35,12 @@ const sendEmail = async (to, data, type) => {
     html = html.replace(new RegExp(`\\{\\{${key}\\}\\}`, "g"), value);
   });
 
-  const mailOptions = {
-    from: `"DocMate" <${process.env.EMAIL_USER}>`,
+  return await resend.emails.send({
+    from: "DocMate <onboarding@resend.dev>",
     to,
     subject: type,
     html,
-  };
-
-  return await transporter.sendMail(mailOptions);
+  });
 };
 
 module.exports = { sendEmail, emailTypeSubject };

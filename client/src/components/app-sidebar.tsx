@@ -22,7 +22,8 @@ const AppSidebar = ({ mobileOpen }: AppSidebarProps) => {
       className={`fixed inset-y-0 left-0 z-40 flex w-56 flex-col border-r border-sidebar-border bg-sidebar transition-transform duration-300 ease-in-out md:relative md:z-auto md:translate-x-0 md:transition-[width,transform] ${mobileOpen ? "translate-x-0" : "-translate-x-full"} ${collapsed ? "md:w-14" : "md:w-56"}`}
     >
       {/* Brand */}
-      <div
+      <NavLink
+        to="/dashboard"
         className={`flex h-14 shrink-0 items-center border-b border-sidebar-border px-3 ${
           collapsed ? "md:justify-center" : "gap-2.5"
         }`}
@@ -37,7 +38,7 @@ const AppSidebar = ({ mobileOpen }: AppSidebarProps) => {
         >
           Doc Mate
         </span>
-      </div>
+      </NavLink>
 
       {/* Nav links */}
       <nav className="flex-1 overflow-y-auto px-2 py-3">

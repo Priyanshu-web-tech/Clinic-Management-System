@@ -10,8 +10,8 @@ const emailTypeSubject = {
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
+  port: 587,
+  secure: false, // STARTTLS — port 465 is blocked on Render
   family: 4, // force IPv4 — Render doesn't support outbound IPv6
   auth: {
     user: process.env.EMAIL_USER,

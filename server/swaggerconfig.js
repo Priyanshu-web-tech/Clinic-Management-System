@@ -12,6 +12,7 @@ const swaggerOptions = {
     tags: [
       { name: "Authentication" },
       { name: "Dashboard" },
+      { name: "Events" },
       { name: "Hospital" },
       { name: "Patients" },
       { name: "Prescriptions" },

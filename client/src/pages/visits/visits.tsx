@@ -20,6 +20,7 @@ import type { Visit, VisitStatus } from "@/types/api.types"
 import { VisitStatus as VS } from "@/types/api.types"
 
 import usePaginatedQuery from "@/hooks/use-paginated-query"
+import { useVisitEvents } from "@/hooks/use-visit-events"
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -39,6 +40,8 @@ import DeleteConfirmDialog from "@/components/delete-confirm-dialog"
 const todayString = () => new Date().toISOString().substring(0, 10)
 
 const Visits = () => {
+  useVisitEvents()
+
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState<VisitStatus | "active" | "">("active")

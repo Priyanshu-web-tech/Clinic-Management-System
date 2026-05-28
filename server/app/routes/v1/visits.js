@@ -5,6 +5,7 @@ const {
   validate,
   verifyAuthToken,
   authorizeAccess,
+  verifyCronSecret,
 } = require("../../middlewares/index");
 const { designation: designationConst } = require("../../constant/constant");
 const authorizeResourceAccess = authorizeAccess(designationConst.RECEPTIONIST);
@@ -175,5 +176,25 @@ router.patch(
   validate(schema.updateVisitStatus),
   controller.updateVisitStatus,
 );
+
+/**
+ * @swagger
+ * /v1/visits/cancel-unattended:
+ *   patch:
+ *     summary: Cancel all unattended visits (cron use only)
+ *     tags: [Visits]
+ *     description: Bulk-cancels every visit still in `waiting` or `in_consultation` status. Requires the `x-cron-secret` header — not for regular client use.
+ *     parameters:
+ *       - in: header
+ *         name: x-cron-secret
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Visits cancelled successfully.
+ *       401:
+ *         description: Unauthorized — missing or invalid cron secret.
+ */
+router.patch("/cancel-unattended", verifyCronSecret, controller.cancelUnattendedVisits);
 
 module.exports = router;

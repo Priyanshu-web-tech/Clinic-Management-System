@@ -1,0 +1,52 @@
+name: Cancel Unattended Visits
+
+on:
+  schedule:
+    - cron: '30 18 * * *'  # midnight IST (UTC+5:30)
+  workflow_dispatch:        # allow manual trigger from GitHub UI
+
+jobs:
+  cancel-unattended-visits:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Wake up Render service
+        run: |
+          echo "Pinging Render health endpoint (free tier cold start ~60s)..."
+          for i in 1 2 3 4 5; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 "${{ secrets.BACKEND_URL }}/health" || echo "000")
+            echo "Attempt $i: HTTP $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "Service is up."
+              break
+            fi
+            if [ $i -lt 5 ]; then
+              echo "Not ready yet, retrying in 30s..."
+              sleep 30
+            else
+              echo "Service did not come up after 5 attempts."
+              exit 1
+            fi
+          done
+
+      - name: Cancel unattended visits
+        run: |
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X PATCH \
+            --max-time 30 \
+            "${{ secrets.BACKEND_URL }}/api/v1/visits/cancel-unattended" \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "Response: $BODY"
+          echo "HTTP status: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "Request failed with HTTP $HTTP_CODE"
+            exit 1
+          fi
+
+          echo "Done."

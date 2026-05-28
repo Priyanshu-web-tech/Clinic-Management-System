@@ -190,6 +190,14 @@ const updateVisitById = async (id, data, session = null) => {
     .populate("doctor", "firstName lastName");
 };
 
+const bulkCancelUnattended = async () => {
+  const result = await Visit.updateMany(
+    { status: { $in: ["waiting", "in_consultation"] } },
+    { $set: { status: "cancelled", closedAt: new Date() } },
+  );
+  return result.modifiedCount;
+};
+
 module.exports = {
   findVisits,
   findVisitById,
@@ -199,4 +207,5 @@ module.exports = {
   getNextTokenNumber,
   createVisit,
   updateVisitById,
+  bulkCancelUnattended,
 };

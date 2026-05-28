@@ -19,7 +19,7 @@ const generateUserToken = (data, res) => {
   res.cookie("SESSION-TOKEN", token, {
     httpOnly: true,
     secure: true, // HTTPS only in production
-    sameSite: "None",
+    sameSite: "none",
     maxAge: 86400000, // 24 hour
   });
 
@@ -39,7 +39,7 @@ const generateUserRefreshToken = (data, res) => {
   res.cookie("REFRESH-TOKEN", refreshToken, {
     httpOnly: true,
     secure: true,
-    sameSite: "None",
+    sameSite: "none",
     maxAge: 604800000, // 7 days
   });
 
@@ -54,7 +54,7 @@ const generateOtpToken = (data, res) => {
   res.cookie("OTP-TOKEN", otpToken, {
     httpOnly: true,
     secure: true,
-    sameSite: "None",
+    sameSite: "none",
     maxAge: 15 * 60 * 1000, // Convert to milliseconds
   });
 
@@ -69,7 +69,7 @@ const generateVerifyToken = (data, res) => {
   res.cookie("VERIFY-TOKEN", verifyToken, {
     httpOnly: true,
     secure: true,
-    sameSite: "None",
+    sameSite: "none",
     maxAge: 15 * 60 * 1000, // Convert to milliseconds
   });
 

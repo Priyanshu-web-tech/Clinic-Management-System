@@ -1,5 +1,6 @@
 const { success, error } = require("../response/index");
 const visitService = require("../services/visitService");
+const { broadcastVisitUpdate } = require("../utils/sseManager");
 
 const getVisits = async (req, res) => {
   try {
@@ -25,12 +26,13 @@ const createVisit = async (req, res) => {
   try {
     const result = await visitService.createVisit(req);
     if (result.error) throw result;
-    return success(
+    await success(
       req,
       res,
       { msgCode: result.msgCode, data: result.data },
       result.status,
     );
+    broadcastVisitUpdate(req.data?.hospital?._id);
   } catch (err) {
     return error(
       req,
@@ -45,12 +47,13 @@ const updateVisitStatus = async (req, res) => {
   try {
     const result = await visitService.updateVisitStatus(req);
     if (result.error) throw result;
-    return success(
+    await success(
       req,
       res,
       { msgCode: result.msgCode, data: result.data },
       result.status,
     );
+    broadcastVisitUpdate(req.data?.hospital?._id);
   } catch (err) {
     return error(
       req,
@@ -85,13 +88,15 @@ const updateVisit = async (req, res) => {
   try {
     const result = await visitService.updateVisit(req);
     if (result.error) throw result;
-    return success(
+    // success() commits the transaction before returning
+    await success(
       req,
       res,
       { msgCode: result.msgCode, data: result.data },
       result.status,
       result.transaction,
     );
+    broadcastVisitUpdate(req.data?.hospital?._id);
   } catch (err) {
     return error(
       req,

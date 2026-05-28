@@ -18,6 +18,7 @@ import type { Patient, Gender, BloodGroup } from "@/types/api.types"
 import { VisitStatus } from "@/types/api.types"
 import { VISIT_STATUS_LABEL, VISIT_STATUS_BADGE_VARIANT } from "@/constants/constants"
 import usePaginatedQuery from "@/hooks/use-paginated-query"
+import { useVisitEvents } from "@/hooks/use-visit-events"
 import { useAppSelector } from "@/store/hook"
 import { UserType, Designation } from "@/types/api.types"
 
@@ -40,6 +41,8 @@ import PatientModal from "./patient-modal"
 import VisitModal from "@/pages/visits/visit-modal"
 
 const Patients = () => {
+  useVisitEvents()
+
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [genderFilter, setGenderFilter] = useState<Gender | "">("")

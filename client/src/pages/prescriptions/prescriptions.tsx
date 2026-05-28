@@ -3,6 +3,7 @@ import { format, parseISO } from "date-fns"
 import { ChevronDown, ChevronRight, ClipboardList, Search } from "lucide-react"
 
 import { useGetPrescriptionsQuery } from "@/store/api/prescription-api-slice"
+import { useVisitEvents } from "@/hooks/use-visit-events"
 import { MEDICINE_TIMING_LABEL, DURATION_UNIT_LABEL, PAGE_SIZE } from "@/constants/constants"
 import type { Prescription } from "@/types/api.types"
 import usePaginatedQuery from "@/hooks/use-paginated-query"
@@ -98,6 +99,8 @@ const PrescriptionCard = ({ prescription }: { prescription: Prescription }) => {
 }
 
 const Prescriptions = () => {
+  useVisitEvents()
+
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [date, setDate] = useState(todayString())

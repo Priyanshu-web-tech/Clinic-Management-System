@@ -87,8 +87,13 @@ const AppRoutes = () => {
             }
           >
             <Route path="patients" element={<Patients />} />
-            <Route path="patients/:id" element={<PatientDetail />} />
             <Route path="visits" element={<Visits />} />
+          </Route>
+
+          <Route
+            element={<RoleRoute roles={[UserType.Admin, UserType.Doctor]} />}
+          >
+            <Route path="patients/:id" element={<PatientDetail />} />
             <Route path="visits/:id" element={<VisitDetail />} />
           </Route>
 

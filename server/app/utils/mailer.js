@@ -1,8 +1,12 @@
-const { Resend } = require("resend");
+const Brevo = require("@getbrevo/brevo");
 const fs = require("fs");
 const path = require("path");
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const apiInstance = new Brevo.TransactionalEmailsApi();
+apiInstance.setApiKey(
+  Brevo.TransactionalEmailsApiApiKeys.apiKey,
+  process.env.BREVO_API_KEY
+);
 
 const emailTypeSubject = {
   FORGET_PASSWORD: "Reset Your DocMate Password",
@@ -35,15 +39,13 @@ const sendEmail = async (to, data, type) => {
     html = html.replace(new RegExp(`\\{\\{${key}\\}\\}`, "g"), value);
   });
 
-  const { data: result, error } = await resend.emails.send({
-    from: "DocMate <onboarding@resend.dev>",
-    to,
-    subject: type,
-    html,
-  });
+  const sendSmtpEmail = new Brevo.SendSmtpEmail();
+  sendSmtpEmail.sender = { name: "DocMate", email: process.env.BREVO_SENDER_EMAIL };
+  sendSmtpEmail.to = [{ email: to }];
+  sendSmtpEmail.subject = type;
+  sendSmtpEmail.htmlContent = html;
 
-  if (error) throw new Error(`Resend error: ${JSON.stringify(error)}`);
-  return result;
+  return await apiInstance.sendTransacEmail(sendSmtpEmail);
 };
 
 module.exports = { sendEmail, emailTypeSubject };

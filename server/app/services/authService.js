@@ -514,7 +514,7 @@ const verifyOtp = async (req, res) => {
       };
     }
 
-    res.clearCookie("OTP-TOKEN", { httpOnly: true, secure: true, sameSite: "None" });
+    res.clearCookie("OTP-TOKEN", { httpOnly: true, secure: true, sameSite: "none" });
     generateVerifyToken({ id: checkUser._id, email: checkUser.email }, res);
 
     return {
@@ -561,8 +561,8 @@ const resetPassword = async (req, res) => {
       transaction
     );
 
-    res.clearCookie("VERIFY-TOKEN", { httpOnly: true, secure: true, sameSite: "None" });
-    res.clearCookie("OTP-TOKEN", { httpOnly: true, secure: true, sameSite: "None" });
+    res.clearCookie("VERIFY-TOKEN", { httpOnly: true, secure: true, sameSite: "none" });
+    res.clearCookie("OTP-TOKEN", { httpOnly: true, secure: true, sameSite: "none" });
 
     return {
       error: false,
@@ -699,8 +699,8 @@ const logout = async (req, res) => {
 
     await sessionRepository.deleteSession({ userId, accessToken: token });
 
-    res.clearCookie("SESSION-TOKEN", { httpOnly: true, secure: true, sameSite: "None" });
-    res.clearCookie("REFRESH-TOKEN", { httpOnly: true, secure: true, sameSite: "None" });
+    res.clearCookie("SESSION-TOKEN", { httpOnly: true, secure: true, sameSite: "none" });
+    res.clearCookie("REFRESH-TOKEN", { httpOnly: true, secure: true, sameSite: "none" });
 
     return {
       error: false,

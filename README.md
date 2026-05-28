@@ -65,8 +65,9 @@ cp .sampleEnv .env
 | `JWT_ALGO` | JWT algorithm — must be `RS256` |
 | `JWT_ISSUER` | JWT issuer claim (e.g. `DOCMATE`) |
 | `ROUND` | bcrypt salt rounds (e.g. `10`) |
-| `EMAIL_USER` | Email address used to send OTPs |
-| `EMAIL_PASS` | App password for the email account |
+| `BREVO_API_KEY` | Brevo (Sendinblue) API key for sending emails |
+| `BREVO_SENDER_EMAIL` | Verified sender email address in Brevo |
+| `CRON_SECRET` | Secret token to authenticate scheduled cron job requests |
 | `OTP_EXPIRES_IN` | OTP validity window (e.g. `15m`) |
 | `OTP_DIGIT` | Number of OTP digits (e.g. `6`) |
 | `OTP_BYPASS` | Set `true` in dev to skip real OTP sending |
@@ -114,7 +115,7 @@ npm run dev
 
 **Database:** MongoDB with Mongoose
 
-**Auth:** JWT (RS256), HTTP-only cookies, OTP via email
+**Auth:** JWT (RS256), HTTP-only cookies, OTP via Brevo email API
 
 
 ## Screenshots

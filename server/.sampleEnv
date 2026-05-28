@@ -14,9 +14,12 @@ JWT_ALGO=RS256
 JWT_ISSUER=DOCMATE
 ROUND=10
 
-# Email (for OTP delivery)
-EMAIL_USER=your_email@example.com
-EMAIL_PASS=your_email_app_password
+# Email (for OTP delivery via Brevo)
+BREVO_API_KEY=your_brevo_api_key
+BREVO_SENDER_EMAIL=your_sender_email@example.com
+
+# Cron job secret (used to authenticate scheduled cron requests)
+CRON_SECRET=your_cron_secret
 
 # OTP
 OTP_EXPIRES_IN=15m

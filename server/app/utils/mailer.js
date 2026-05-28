@@ -35,7 +35,7 @@ const sendEmail = async (to, data, type) => {
     html = html.replace(new RegExp(`\\{\\{${key}\\}\\}`, "g"), value);
   });
 
-  const { data, error } = await resend.emails.send({
+  const { data: result, error } = await resend.emails.send({
     from: "DocMate <onboarding@resend.dev>",
     to,
     subject: type,
@@ -43,7 +43,7 @@ const sendEmail = async (to, data, type) => {
   });
 
   if (error) throw new Error(`Resend error: ${JSON.stringify(error)}`);
-  return data;
+  return result;
 };
 
 module.exports = { sendEmail, emailTypeSubject };

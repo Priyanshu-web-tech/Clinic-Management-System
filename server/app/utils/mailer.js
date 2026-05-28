@@ -1,12 +1,5 @@
-const Brevo = require("@getbrevo/brevo");
 const fs = require("fs");
 const path = require("path");
-
-const apiInstance = new Brevo.TransactionalEmailsApi();
-apiInstance.setApiKey(
-  Brevo.TransactionalEmailsApiApiKeys.apiKey,
-  process.env.BREVO_API_KEY
-);
 
 const emailTypeSubject = {
   FORGET_PASSWORD: "Reset Your DocMate Password",
@@ -39,13 +32,26 @@ const sendEmail = async (to, data, type) => {
     html = html.replace(new RegExp(`\\{\\{${key}\\}\\}`, "g"), value);
   });
 
-  const sendSmtpEmail = new Brevo.SendSmtpEmail();
-  sendSmtpEmail.sender = { name: "DocMate", email: process.env.BREVO_SENDER_EMAIL };
-  sendSmtpEmail.to = [{ email: to }];
-  sendSmtpEmail.subject = type;
-  sendSmtpEmail.htmlContent = html;
+  const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      "api-key": process.env.BREVO_API_KEY,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      sender: { name: "DocMate", email: process.env.BREVO_SENDER_EMAIL },
+      to: [{ email: to }],
+      subject: type,
+      htmlContent: html,
+    }),
+  });
 
-  return await apiInstance.sendTransacEmail(sendSmtpEmail);
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(`Brevo error: ${JSON.stringify(error)}`);
+  }
+
+  return response.json();
 };
 
 module.exports = { sendEmail, emailTypeSubject };

@@ -40,6 +40,7 @@
   "USER_DELETED": "Member removed successfully.",
   "USER_NOT_FOUND": "User not found.",
   "USER_ALREADY_EXISTS": "A user with this email already exists.",
+  "EMAIL_IN_USE_AT_ANOTHER_HOSPITAL": "This email is already associated with a user at another hospital.",
   "CANNOT_DELETE_SELF": "You cannot deactivate your own account.",
   "FORBIDDEN_USER_TYPE": "You are not allowed to create a user of this role.",
   "ACCESS_DENIED": "You do not have permission to perform this action.",

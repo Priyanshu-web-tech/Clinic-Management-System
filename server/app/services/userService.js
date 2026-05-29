@@ -62,14 +62,6 @@ const createUser = async (req) => {
     const currentUser = req.data;
 
     const existing = await userRepository.findUserByEmail(email);
-    if (existing && existing.isActive) {
-      return {
-        error: true,
-        data: {},
-        msgCode: "USER_ALREADY_EXISTS",
-        status: httpStatus.CONFLICT,
-      };
-    }
 
     const plainPassword = generatePassword();
     const hashedPassword = await generateHash(plainPassword);
@@ -78,6 +70,16 @@ const createUser = async (req) => {
       currentUser.userType === userTypeConst.DOCTOR
         ? currentUser.hospital?._id
         : null;
+
+    if (existing && existing.isActive) {
+      const isSameHospital = String(existing.hospital) === String(hospital);
+      return {
+        error: true,
+        data: {},
+        msgCode: isSameHospital ? "USER_ALREADY_EXISTS" : "EMAIL_IN_USE_AT_ANOTHER_HOSPITAL",
+        status: httpStatus.CONFLICT,
+      };
+    }
 
     let savedUser;
 

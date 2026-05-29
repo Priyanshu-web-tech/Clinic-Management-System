@@ -221,6 +221,15 @@ const deleteUser = async (req) => {
       };
     }
 
+    if (target.userType === userTypeConst.DOCTOR) {
+      return {
+        error: true,
+        data: {},
+        msgCode: "FORBIDDEN",
+        status: httpStatus.FORBIDDEN,
+      };
+    }
+
     // Hospital-scoped: doctor can only delete users in their hospital
     if (
       currentUser.userType === userTypeConst.DOCTOR &&

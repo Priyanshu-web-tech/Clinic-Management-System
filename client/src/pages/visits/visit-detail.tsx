@@ -7,10 +7,11 @@ import {
   nullableStringValidation,
 } from "@/utils/validations"
 import { toast } from "sonner"
-import { Plus, Trash2, Pill, ClipboardList } from "lucide-react"
+import { Plus, Trash2, Pill, ClipboardList, History } from "lucide-react"
 
 import {
   useGetVisitByIdQuery,
+  useLazyGetVisitsQuery,
   useUpdateVisitMutation,
   useUpdateVisitStatusMutation,
 } from "@/store/api/visit-api-slice"
@@ -19,7 +20,7 @@ import {
   DurationUnit,
   MedicineTiming,
 } from "@/types/api.types"
-import type { PrescriptionMedicineInput } from "@/types/api.types"
+import type { PrescriptionMedicineInput, PrescriptionMedicine } from "@/types/api.types"
 import {
   VISIT_STATUS_LABEL,
   VISIT_STATUS_BADGE_VARIANT,
@@ -286,6 +287,8 @@ const VisitDetail = () => {
   const [cancelOpen, setCancelOpen] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
   const [completeWarningOpen, setCompleteWarningOpen] = useState(false)
+  const [fillConfirmOpen, setFillConfirmOpen] = useState(false)
+  const [pendingFillMedicines, setPendingFillMedicines] = useState<PrescriptionMedicineInput[]>([])
 
   const { data, isLoading } = useGetVisitByIdQuery(id!, {
     refetchOnMountOrArgChange: true,
@@ -297,6 +300,7 @@ const VisitDetail = () => {
   const [updateVisit, { isLoading: isSaving }] = useUpdateVisitMutation()
   const [updateStatus, { isLoading: isCancelling }] =
     useUpdateVisitStatusMutation()
+  const [fetchPreviousVisits, { isFetching: isFillLoading }] = useLazyGetVisitsQuery()
   const [medicines, setMedicines] = useState<PrescriptionMedicineInput[]>([])
   const [medicinesInitialized, setMedicinesInitialized] = useState(false)
 
@@ -328,6 +332,50 @@ const VisitDetail = () => {
 
   const removeMedicine = (index: number) =>
     setMedicines((prev) => prev.filter((_, i) => i !== index))
+
+  const handleFillFromLastVisit = async () => {
+    if (!visit) return
+    try {
+      const res = await fetchPreviousVisits({
+        patientId: visit.patient._id,
+        excludeVisitId: id,
+        pageSize: 1,
+      }).unwrap()
+      const previous = res.result?.data?.[0]
+      if (!previous) {
+        toast.info("No previous visits found for this patient.")
+        return
+      }
+      const prevMedicines: PrescriptionMedicine[] = previous.prescription?.medicines ?? []
+      if (prevMedicines.length === 0) {
+        toast.info("Previous visit has no prescription to fill.")
+        return
+      }
+      const mapped = prevMedicines.map((m) => ({
+        medicineName: m.medicineName,
+        durationValue: m.durationValue,
+        durationUnit: m.durationUnit,
+        frequency: m.frequency,
+        timing: m.timing,
+      }))
+      if (medicines.length > 0) {
+        setPendingFillMedicines(mapped)
+        setFillConfirmOpen(true)
+      } else {
+        setMedicines(mapped)
+        toast.success("Prescription filled from last visit. Review and edit as needed.")
+      }
+    } catch {
+      toast.error("Failed to fetch previous visit.")
+    }
+  }
+
+  const handleFillConfirm = () => {
+    setMedicines(pendingFillMedicines)
+    setPendingFillMedicines([])
+    setFillConfirmOpen(false)
+    toast.success("Prescription filled from last visit. Review and edit as needed.")
+  }
 
   const doComplete = async (values: { symptoms: string; diagnosis: string; followUpDate: string | null }) => {
     if (!id) return
@@ -530,16 +578,33 @@ const VisitDetail = () => {
                 )}
               </div>
               {isConsultation && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-7 gap-1 text-xs"
-                  onClick={addMedicine}
-                >
-                  <Plus className="size-3" />
-                  Add Medicine
-                </Button>
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 gap-1 text-xs"
+                    disabled={isFillLoading}
+                    onClick={handleFillFromLastVisit}
+                  >
+                    {isFillLoading ? (
+                      <Spinner className="size-3" />
+                    ) : (
+                      <History className="size-3" />
+                    )}
+                    Fill from last visit
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 gap-1 text-xs"
+                    onClick={addMedicine}
+                  >
+                    <Plus className="size-3" />
+                    Add Medicine
+                  </Button>
+                </div>
               )}
             </div>
 
@@ -617,6 +682,17 @@ const VisitDetail = () => {
         patientName={`${visit.patient.firstName} ${visit.patient.lastName}`}
         patientId={visit.patient._id}
         currentVisitId={id!}
+      />
+
+      {/* Fill from last visit — overwrite confirm */}
+      <DeleteConfirmDialog
+        open={fillConfirmOpen}
+        onOpenChange={setFillConfirmOpen}
+        onConfirm={handleFillConfirm}
+        isLoading={false}
+        title="Replace Current Prescription?"
+        confirmLabel="Replace"
+        description={`You already have ${medicines.length} medicine${medicines.length === 1 ? "" : "s"} added. Filling from the last visit will replace them. Continue?`}
       />
 
       {/* Complete Without Details Warning */}

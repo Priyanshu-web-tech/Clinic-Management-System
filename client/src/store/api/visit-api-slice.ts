@@ -64,6 +64,7 @@ export const visitApi = apiSlice.injectEndpoints({
 
 export const {
   useGetVisitsQuery,
+  useLazyGetVisitsQuery,
   useCreateVisitMutation,
   useUpdateVisitStatusMutation,
   useGetVisitByIdQuery,

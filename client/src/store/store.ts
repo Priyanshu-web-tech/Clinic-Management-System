@@ -14,7 +14,7 @@ const persistConfig = {
   whitelist: ["userData"],
 };
 
-const persistedReducer = persistReducer(persistConfig, appReducer);
+const persistedReducer = persistReducer(persistConfig, appReducer) as unknown as typeof appReducer;
 
 export const store = configureStore({
   reducer: persistedReducer,

@@ -4,8 +4,7 @@ import { toast } from "sonner"
 
 import {
   emailValidation,
-  requiredFieldValidation,
-  optionalStringValidation,
+  textFieldValidation,
   phoneValidation,
   designationValidation,
 } from "@/utils/validations"
@@ -35,16 +34,16 @@ import {
 // ── Schemas ───────────────────────────────────────────────
 
 const addUserSchema = Yup.object({
-  firstName: requiredFieldValidation("First name"),
-  lastName: optionalStringValidation,
+  firstName: textFieldValidation("First name", true),
+  lastName: textFieldValidation("Last name"),
   email: emailValidation,
   phone: phoneValidation,
   designation: designationValidation,
 })
 
 const editUserSchema = Yup.object({
-  firstName: requiredFieldValidation("First name"),
-  lastName: optionalStringValidation,
+  firstName: textFieldValidation("First name", true),
+  lastName: textFieldValidation("Last name"),
   phone: phoneValidation,
   designation: designationValidation,
 })
@@ -130,7 +129,10 @@ const UserModal = ({ open, onClose, editTarget }: UserModalProps) => {
                 placeholder="John"
                 className="h-8 text-xs"
                 value={formik.values.firstName}
-                onChange={formik.handleChange}
+                onChange={(e) => {
+                  if (e.target.value.startsWith(" ")) return
+                  formik.handleChange(e)
+                }}
                 onBlur={formik.handleBlur}
                 aria-invalid={!!(formik.touched.firstName && formik.errors.firstName)}
               />
@@ -148,7 +150,10 @@ const UserModal = ({ open, onClose, editTarget }: UserModalProps) => {
                 placeholder="Doe"
                 className="h-8 text-xs"
                 value={formik.values.lastName}
-                onChange={formik.handleChange}
+                onChange={(e) => {
+                  if (e.target.value.startsWith(" ")) return
+                  formik.handleChange(e)
+                }}
                 onBlur={formik.handleBlur}
                 aria-invalid={!!(formik.touched.lastName && formik.errors.lastName)}
               />

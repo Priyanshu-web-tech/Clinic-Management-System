@@ -3,11 +3,10 @@ import { useFormik } from "formik"
 import { toast } from "sonner"
 
 import {
-  requiredFieldValidation,
+  textFieldValidation,
   requiredPhoneValidation,
   genderValidation,
   dateOfBirthValidation,
-  optionalStringValidation,
   bloodGroupValidation,
   stringArrayValidation,
   optionalEmailValidation,
@@ -76,8 +75,8 @@ const PatientModal = ({ open, onClose, editTarget }: PatientModalProps) => {
       chronicDiseases: editTarget?.chronicDiseases ?? [] as string[],
     },
     validationSchema: Yup.object({
-      firstName: requiredFieldValidation("First name"),
-      lastName: optionalStringValidation,
+      firstName: textFieldValidation("First name", true),
+      lastName: textFieldValidation("Last name"),
       phone: requiredPhoneValidation,
       email: optionalEmailValidation,
       gender: genderValidation,
@@ -143,7 +142,10 @@ const PatientModal = ({ open, onClose, editTarget }: PatientModalProps) => {
                 placeholder="John"
                 className="h-8 text-xs"
                 value={formik.values.firstName}
-                onChange={formik.handleChange}
+                onChange={(e) => {
+                  if (e.target.value.startsWith(" ")) return
+                  formik.handleChange(e)
+                }}
                 onBlur={formik.handleBlur}
                 aria-invalid={!!(formik.touched.firstName && formik.errors.firstName)}
               />
@@ -163,9 +165,16 @@ const PatientModal = ({ open, onClose, editTarget }: PatientModalProps) => {
                 placeholder="Doe"
                 className="h-8 text-xs"
                 value={formik.values.lastName}
-                onChange={formik.handleChange}
+                onChange={(e) => {
+                  if (e.target.value.startsWith(" ")) return
+                  formik.handleChange(e)
+                }}
                 onBlur={formik.handleBlur}
+                aria-invalid={!!(formik.touched.lastName && formik.errors.lastName)}
               />
+              {formik.touched.lastName && formik.errors.lastName && (
+                <p className="text-[11px] text-destructive">{formik.errors.lastName}</p>
+              )}
             </div>
           </div>
 

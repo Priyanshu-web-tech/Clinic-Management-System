@@ -66,6 +66,17 @@ export const dateOfBirthValidation = Yup.string()
 
 export const optionalStringValidation = Yup.string().optional()
 
+export const textFieldValidation = (fieldName: string, required = false, minLength = 3) => {
+  if (required) {
+    return Yup.string()
+      .required(`${fieldName} is required`)
+      .min(minLength, `${fieldName} must be at least ${minLength} characters`)
+  }
+  return Yup.string()
+    .optional()
+    .test("min-if-filled", `${fieldName} must be at least ${minLength} characters`, (val) => !val || val.length >= minLength)
+}
+
 export const requiredPhoneValidation = phoneValidation.required("Phone is required")
 
 export const bloodGroupValidation = Yup.string().optional().nullable()

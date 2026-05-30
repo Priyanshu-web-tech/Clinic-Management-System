@@ -14,11 +14,10 @@ import { Spinner } from "@/components/ui/spinner"
 import { NAVIGATION_ROUTES } from "@/constants/constants"
 import {
   emailValidation,
-  requiredFieldValidation,
   registerPasswordValidation,
   confirmPasswordValidation,
   phoneValidation,
-  optionalStringValidation,
+  textFieldValidation,
 } from "@/utils/validations"
 import type { RegisterFormValues } from "./register.types"
 
@@ -41,12 +40,12 @@ const Register = () => {
       confirmPassword: "",
     },
     validationSchema: Yup.object({
-      hospitalName: requiredFieldValidation("Hospital name"),
-      firstName: requiredFieldValidation("First name"),
-      lastName: optionalStringValidation,
+      hospitalName: textFieldValidation("Hospital name", true),
+      firstName: textFieldValidation("First name", true),
+      lastName: textFieldValidation("Last name"),
       email: emailValidation,
       phone: phoneValidation,
-      address: optionalStringValidation,
+      address: textFieldValidation("Address"),
       password: registerPasswordValidation,
       confirmPassword: confirmPasswordValidation("password"),
     }),
@@ -113,7 +112,10 @@ const Register = () => {
               type="text"
               placeholder="City General Hospital"
               value={formik.values.hospitalName}
-              onChange={formik.handleChange}
+              onChange={(e) => {
+                if (e.target.value.startsWith(" ")) return
+                formik.handleChange(e)
+              }}
               onBlur={formik.handleBlur}
               aria-invalid={!!(formik.touched.hospitalName && formik.errors.hospitalName)}
             />
@@ -133,7 +135,10 @@ const Register = () => {
                 type="text"
                 placeholder="John"
                 value={formik.values.firstName}
-                onChange={formik.handleChange}
+                onChange={(e) => {
+                  if (e.target.value.startsWith(" ")) return
+                  formik.handleChange(e)
+                }}
                 onBlur={formik.handleBlur}
                 aria-invalid={!!(formik.touched.firstName && formik.errors.firstName)}
               />
@@ -151,7 +156,10 @@ const Register = () => {
                 type="text"
                 placeholder="Doe"
                 value={formik.values.lastName}
-                onChange={formik.handleChange}
+                onChange={(e) => {
+                  if (e.target.value.startsWith(" ")) return
+                  formik.handleChange(e)
+                }}
                 onBlur={formik.handleBlur}
                 aria-invalid={!!(formik.touched.lastName && formik.errors.lastName)}
               />
@@ -213,7 +221,10 @@ const Register = () => {
               type="text"
               placeholder="123 Main St, City"
               value={formik.values.address}
-              onChange={formik.handleChange}
+              onChange={(e) => {
+                if (e.target.value.startsWith(" ")) return
+                formik.handleChange(e)
+              }}
               onBlur={formik.handleBlur}
               aria-invalid={!!(formik.touched.address && formik.errors.address)}
             />

@@ -2,7 +2,7 @@ import * as Yup from "yup"
 import { useFormik } from "formik"
 import { toast } from "sonner"
 
-import { requiredFieldValidation, optionalStringValidation } from "@/utils/validations"
+import { textFieldValidation } from "@/utils/validations"
 import {
   useGetMeQuery,
   useUpdateHospitalMutation,
@@ -27,8 +27,8 @@ const HospitalTab = () => {
       address: hospital?.address ?? "",
     },
     validationSchema: Yup.object({
-      name: requiredFieldValidation("Hospital name"),
-      address: optionalStringValidation,
+      name: textFieldValidation("Hospital name", true),
+      address: textFieldValidation("Address"),
     }),
     onSubmit: async (values) => {
       try {
@@ -58,13 +58,16 @@ const HospitalTab = () => {
 
       <form onSubmit={formik.handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="hospitalName">Hospital name</Label>
+          <Label htmlFor="hospitalName">Hospital name <span className="text-destructive">*</span></Label>
           <Input
             id="hospitalName"
             name="name"
             placeholder="City General Hospital"
             value={formik.values.name}
-            onChange={formik.handleChange}
+            onChange={(e) => {
+              if (e.target.value.startsWith(" ")) return
+              formik.handleChange(e)
+            }}
             onBlur={formik.handleBlur}
             aria-invalid={!!(formik.touched.name && formik.errors.name)}
           />
@@ -80,9 +83,16 @@ const HospitalTab = () => {
             name="address"
             placeholder="123 Main St, City"
             value={formik.values.address}
-            onChange={formik.handleChange}
+            onChange={(e) => {
+              if (e.target.value.startsWith(" ")) return
+              formik.handleChange(e)
+            }}
             onBlur={formik.handleBlur}
+            aria-invalid={!!(formik.touched.address && formik.errors.address)}
           />
+          {formik.touched.address && formik.errors.address && (
+            <p className="text-xs text-destructive">{formik.errors.address}</p>
+          )}
         </div>
 
         <Button type="submit" size="sm" disabled={isLoading}>

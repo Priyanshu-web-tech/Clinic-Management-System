@@ -2,7 +2,7 @@ import * as Yup from "yup"
 import { useFormik } from "formik"
 import { toast } from "sonner"
 
-import { requiredFieldValidation, phoneValidation } from "@/utils/validations"
+import { textFieldValidation, phoneValidation } from "@/utils/validations"
 import {
   useGetMeQuery,
   useUpdateProfileMutation,
@@ -31,8 +31,8 @@ const EditProfileTab = () => {
       phone: meData?.result?.phone ?? "",
     },
     validationSchema: Yup.object({
-      firstName: requiredFieldValidation("First name"),
-      lastName: requiredFieldValidation("Last name"),
+      firstName: textFieldValidation("First name", true),
+      lastName: textFieldValidation("Last name", true),
       phone: phoneValidation,
     }),
     onSubmit: async (values) => {
@@ -78,13 +78,16 @@ const EditProfileTab = () => {
 
       <form onSubmit={formik.handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="firstName">First name</Label>
+          <Label htmlFor="firstName">First name <span className="text-destructive">*</span></Label>
           <Input
             id="firstName"
             name="firstName"
             placeholder="John"
             value={formik.values.firstName}
-            onChange={formik.handleChange}
+            onChange={(e) => {
+              if (e.target.value.startsWith(" ")) return
+              formik.handleChange(e)
+            }}
             onBlur={formik.handleBlur}
             aria-invalid={
               !!(formik.touched.firstName && formik.errors.firstName)
@@ -98,13 +101,16 @@ const EditProfileTab = () => {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="lastName">Last name</Label>
+          <Label htmlFor="lastName">Last name <span className="text-destructive">*</span></Label>
           <Input
             id="lastName"
             name="lastName"
             placeholder="Doe"
             value={formik.values.lastName}
-            onChange={formik.handleChange}
+            onChange={(e) => {
+              if (e.target.value.startsWith(" ")) return
+              formik.handleChange(e)
+            }}
             onBlur={formik.handleBlur}
             aria-invalid={!!(formik.touched.lastName && formik.errors.lastName)}
           />

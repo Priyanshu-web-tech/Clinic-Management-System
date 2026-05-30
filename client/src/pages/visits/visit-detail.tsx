@@ -565,7 +565,7 @@ const VisitDetail = () => {
 
           {/* Prescription */}
           <div className="border-t border-border pt-4">
-            <div className="mb-2 flex items-center justify-between gap-2">
+            <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2">
                 <div className="flex size-6 items-center justify-center rounded-md bg-primary/10">
                   <Pill className="size-3 text-primary" />

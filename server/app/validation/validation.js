@@ -260,7 +260,11 @@ const prescriptionMedicineItem = Joi.object({
     "any.required": "Medicine name is required.",
     "string.empty": "Medicine name is required.",
   }),
-  durationValue: Joi.number().min(1).default(1),
+  durationValue: Joi.number().min(1).default(1).messages({
+    "number.base": "Duration must be a valid number.",
+    "number.unsafe": "Duration value is too large to be valid.",
+    "number.min": "Duration must be at least 1.",
+  }),
   durationUnit: Joi.string().valid(...durationUnitValues).default(durationUnitConst.DAYS),
   frequency: Joi.object({
     morning: Joi.number().min(0).default(0),

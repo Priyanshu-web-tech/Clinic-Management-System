@@ -304,6 +304,7 @@ export interface GetVisitsRequest {
   date?: string
   doctorId?: string
   patientId?: string
+  excludeVisitId?: string
 }
 
 export type GetVisitsResponse = PaginatedResponse<Visit>

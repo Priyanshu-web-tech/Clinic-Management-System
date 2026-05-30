@@ -12,7 +12,7 @@ const {
 
 const getVisits = async (req) => {
   try {
-    const { page, pageSize, status, date, doctorId, patientId, search } =
+    const { page, pageSize, status, date, doctorId, patientId, search, excludeVisitId } =
       req.query;
     const currentUser = req.data;
 
@@ -34,6 +34,10 @@ const getVisits = async (req) => {
       filter.doctor = currentUser._id;
     } else if (doctorId) {
       filter.doctor = doctorId;
+    }
+
+    if (excludeVisitId) {
+      filter._id = { $ne: new mongoose.Types.ObjectId(excludeVisitId) };
     }
 
     if (status === "active") {

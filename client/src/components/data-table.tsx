@@ -52,33 +52,27 @@ const DataTable = ({
             ))}
           </TableRow>
         </TableHeader>
-        <TableBody>
-          {isLoading ? (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-40 text-center">
-                <Spinner className="mx-auto size-5" />
-              </TableCell>
-            </TableRow>
-          ) : rows.length === 0 ? (
-            <TableRow>
-              <TableCell
-                colSpan={columns.length}
-                className="h-40 text-center text-sm text-muted-foreground"
-              >
-                {fallbackMessage}
-              </TableCell>
-            </TableRow>
-          ) : (
-            rows.map((row) => (
+        {!isLoading && rows.length > 0 && (
+          <TableBody>
+            {rows.map((row) => (
               <TableRow key={row.id}>
                 {row.data.map((cell, idx) => (
                   <TableCell key={idx}>{cell}</TableCell>
                 ))}
               </TableRow>
-            ))
-          )}
-        </TableBody>
+            ))}
+          </TableBody>
+        )}
       </Table>
+      {(isLoading || rows.length === 0) && (
+        <div className="flex flex-1 items-center justify-center">
+          {isLoading ? (
+            <Spinner className="size-5" />
+          ) : (
+            <p className="text-sm text-muted-foreground">{fallbackMessage}</p>
+          )}
+        </div>
+      )}
     </div>
   )
 }

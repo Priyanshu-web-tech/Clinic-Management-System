@@ -137,18 +137,14 @@ const VisitHistoryModal = ({
   patientId,
   currentVisitId,
 }: VisitHistoryModalProps) => {
-  const { items, page, setPage, total, isLoading } = usePaginatedQuery<
+  const { items, page, setPage, total, totalPages, isLoading } = usePaginatedQuery<
     Visit,
-    { patientId: string }
-  >(useGetVisitsQuery, { patientId }, PAGE_SIZE, !open || !patientId)
+    { patientId: string; excludeVisitId: string }
+  >(useGetVisitsQuery, { patientId, excludeVisitId: currentVisitId }, PAGE_SIZE, !open || !patientId)
 
   useEffect(() => {
     if (!open) setPage(1)
   }, [open, setPage])
-
-  const previousVisits = items.filter((v) => v._id !== currentVisitId)
-  const adjustedTotal = Math.max(0, total - 1)
-  const totalPages = Math.ceil(adjustedTotal / PAGE_SIZE) || 1
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -161,7 +157,7 @@ const VisitHistoryModal = ({
           <div className="flex items-center justify-center py-10">
             <Spinner className="size-5" />
           </div>
-        ) : previousVisits.length === 0 ? (
+        ) : items.length === 0 ? (
           <p className="py-6 text-center text-sm text-muted-foreground">
             No previous visits found.
           </p>
@@ -176,14 +172,14 @@ const VisitHistoryModal = ({
                 <span>Diagnosis</span>
                 <span>Status</span>
               </div>
-              {previousVisits.map((v) => (
+              {items.map((v) => (
                 <HistoryVisitRow key={v._id} visit={v} />
               ))}
             </div>
             <Pagination
               page={page}
               totalPages={totalPages}
-              total={adjustedTotal}
+              total={total}
               pageSize={PAGE_SIZE}
               onPageChange={setPage}
             />

@@ -285,6 +285,7 @@ const VisitDetail = () => {
 
   const [cancelOpen, setCancelOpen] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
+  const [completeWarningOpen, setCompleteWarningOpen] = useState(false)
 
   const { data, isLoading } = useGetVisitByIdQuery(id!, {
     refetchOnMountOrArgChange: true,
@@ -328,6 +329,30 @@ const VisitDetail = () => {
   const removeMedicine = (index: number) =>
     setMedicines((prev) => prev.filter((_, i) => i !== index))
 
+  const doComplete = async (values: { symptoms: string; diagnosis: string; followUpDate: string | null }) => {
+    if (!id) return
+    const validMedicines = medicines.filter((m) => m.medicineName.trim())
+    try {
+      const res = await updateVisit({
+        id,
+        symptoms: values.symptoms,
+        diagnosis: values.diagnosis,
+        followUpDate: values.followUpDate || null,
+        status: VS.Completed,
+        medicines: validMedicines,
+      }).unwrap()
+      toast.success(res.message ?? "Visit completed successfully.")
+      navigate("/visits")
+    } catch (err: unknown) {
+      const message =
+        (err as { data?: { message?: string } })?.data?.message ??
+        "Failed to complete visit."
+      toast.error(message)
+    } finally {
+      setCompleteWarningOpen(false)
+    }
+  }
+
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
@@ -357,24 +382,15 @@ const VisitDetail = () => {
         return
       }
 
-      const validMedicines = medicines.filter((m) => m.medicineName.trim())
-      try {
-        const res = await updateVisit({
-          id,
-          symptoms: values.symptoms,
-          diagnosis: values.diagnosis,
-          followUpDate: values.followUpDate || null,
-          status: VS.Completed,
-          medicines: validMedicines,
-        }).unwrap()
-        toast.success(res.message ?? "Visit completed successfully.")
-        navigate("/visits")
-      } catch (err: unknown) {
-        const message =
-          (err as { data?: { message?: string } })?.data?.message ??
-          "Failed to complete visit."
-        toast.error(message)
+      const hasNotes = values.symptoms.trim() || values.diagnosis.trim()
+      const hasMedicines = medicines.some((m) => m.medicineName.trim())
+
+      if (!hasNotes && !hasMedicines) {
+        setCompleteWarningOpen(true)
+        return
       }
+
+      await doComplete(values)
     },
   })
 
@@ -601,6 +617,17 @@ const VisitDetail = () => {
         patientName={`${visit.patient.firstName} ${visit.patient.lastName}`}
         patientId={visit.patient._id}
         currentVisitId={id!}
+      />
+
+      {/* Complete Without Details Warning */}
+      <DeleteConfirmDialog
+        open={completeWarningOpen}
+        onOpenChange={setCompleteWarningOpen}
+        onConfirm={() => doComplete(formik.values)}
+        isLoading={isSaving}
+        title="Complete Without Details?"
+        confirmLabel="Complete Anyway"
+        description="No symptoms, diagnosis, or prescription have been added for this visit. Are you sure you want to complete it without any details?"
       />
 
       {/* Cancel Confirm */}

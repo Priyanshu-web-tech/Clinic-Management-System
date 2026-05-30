@@ -18,7 +18,7 @@ const Pagination = ({ page, totalPages, total, pageSize, onPageChange }: Paginat
     }, [])
 
   return (
-    <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
+    <div className="mt-4 flex flex-wrap items-center justify-between gap-y-2 text-xs text-muted-foreground">
       <span>
         Showing {total === 0 ? 0 : (page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} of {total}
       </span>

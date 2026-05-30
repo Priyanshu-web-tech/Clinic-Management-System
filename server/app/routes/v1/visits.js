@@ -51,6 +51,10 @@ const authorizeResourceAccess = authorizeAccess(designationConst.RECEPTIONIST);
  *         name: patientId
  *         schema: { type: string }
  *         description: Filter by patient (used for patient visit history)
+ *       - in: query
+ *         name: excludeVisitId
+ *         schema: { type: string }
+ *         description: Exclude a specific visit by ID from results and count (used with patientId to hide the current visit in history modal)
  *     responses:
  *       200:
  *         description: Visits fetched successfully.

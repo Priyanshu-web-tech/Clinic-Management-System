@@ -155,7 +155,6 @@ const Prescriptions = () => {
           <DatePicker
             value={date}
             onChange={(val) => setDate(val ?? todayString())}
-            maxDate={new Date(9999, 11, 31)}
             clearable={false}
           />
         </div>

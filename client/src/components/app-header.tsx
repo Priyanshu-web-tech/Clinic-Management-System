@@ -4,7 +4,8 @@ import { useLocation, useNavigate } from "react-router-dom"
 
 import { useAppSelector } from "@/store/hook"
 import { getInitials } from "@/utils/helpers"
-import { NAVIGATION_ROUTES, USER_TYPE_LABEL } from "@/constants/constants"
+import { NAVIGATION_ROUTES, USER_TYPE_LABEL, DESIGNATION_LABEL } from "@/constants/constants"
+import { UserType } from "@/types/api.types"
 import { buildCrumbs } from "@/utils/breadcrumbs"
 import {
   Breadcrumb,
@@ -60,7 +61,9 @@ const AppHeader = ({ onMenuOpen, onLogout }: AppHeaderProps) => {
 
       <div className="flex items-center gap-2.5">
         <span className="hidden text-xs font-medium text-muted-foreground sm:block">
-          {USER_TYPE_LABEL[user.userType] ?? user.userType}
+          {user.userType === UserType.Staff && user.designation
+            ? (DESIGNATION_LABEL[user.designation] ?? user.designation)
+            : (USER_TYPE_LABEL[user.userType] ?? user.userType)}
         </span>
 
         <DropdownMenu.Root>

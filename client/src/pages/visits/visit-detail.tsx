@@ -558,6 +558,7 @@ const VisitDetail = () => {
                 onChange={(val) => formik.setFieldValue("followUpDate", val)}
                 placeholder="Select date"
                 disabled={!isConsultation}
+                minDate={new Date()}
                 maxDate={new Date(9999, 11, 31)}
               />
             </div>

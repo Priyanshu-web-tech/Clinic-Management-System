@@ -8,9 +8,9 @@ import {
   startOfWeek,
   endOfWeek,
   eachDayOfInterval,
-  isSameMonth,
   isSameDay,
   isAfter,
+  isBefore,
   setMonth,
   setYear,
   getMonth,
@@ -22,9 +22,7 @@ import { cn } from "@/lib/utils"
 const WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
-const MAX_YEAR = new Date().getFullYear()
-const MIN_YEAR = 1900
-const YEARS = Array.from({ length: MAX_YEAR - MIN_YEAR + 1 }, (_, i) => MAX_YEAR - i)
+const DEFAULT_MIN_YEAR = 1900
 
 type HeaderMode = "calendar" | "month" | "year"
 
@@ -35,6 +33,7 @@ interface DatePickerProps {
   className?: string
   onBlur?: () => void
   disabled?: boolean
+  minDate?: Date
   maxDate?: Date
   clearable?: boolean
 }
@@ -46,6 +45,7 @@ function DatePicker({
   className,
   onBlur,
   disabled,
+  minDate,
   maxDate = new Date(),
   clearable = true,
 }: DatePickerProps) {
@@ -53,6 +53,13 @@ function DatePicker({
   const [headerMode, setHeaderMode] = React.useState<HeaderMode>("calendar")
   const selected = value ? parseISO(value) : undefined
   const [viewMonth, setViewMonth] = React.useState<Date>(selected ?? new Date())
+
+  const minYear = minDate ? minDate.getFullYear() : DEFAULT_MIN_YEAR
+  const maxYear = maxDate.getFullYear()
+  const years = React.useMemo(
+    () => Array.from({ length: maxYear - minYear + 1 }, (_, i) => maxYear - i),
+    [minYear, maxYear]
+  )
 
   const yearListRef = React.useRef<HTMLDivElement>(null)
 
@@ -75,6 +82,7 @@ function DatePicker({
 
   const handleSelect = (day: Date) => {
     if (isAfter(day, maxDate)) return
+    if (minDate && isBefore(day, minDate)) return
     onChange(format(day, "yyyy-MM-dd"))
     setOpen(false)
   }
@@ -222,7 +230,7 @@ function DatePicker({
               className="grid grid-cols-3 gap-1 max-h-48 overflow-y-auto"
               onWheel={(e) => e.stopPropagation()}
             >
-              {YEARS.map((yr) => (
+              {years.map((yr) => (
                 <button
                   key={yr}
                   type="button"
@@ -256,8 +264,7 @@ function DatePicker({
               <div className="grid grid-cols-7">
                 {days.map((day) => {
                   const isSelected = selected ? isSameDay(day, selected) : false
-                  const isDisabled = isAfter(day, maxDate)
-                  const isOutside = !isSameMonth(day, viewMonth)
+                  const isDisabled = isAfter(day, maxDate) || (!!minDate && isBefore(day, minDate))
 
                   return (
                     <button
@@ -267,8 +274,7 @@ function DatePicker({
                       onClick={() => handleSelect(day)}
                       className={cn(
                         "flex size-8 items-center justify-center rounded-md text-sm transition-colors",
-                        isOutside && "text-muted-foreground opacity-50",
-                        isDisabled && "pointer-events-none opacity-50",
+                        isDisabled && "cursor-not-allowed opacity-35",
                         isSelected
                           ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
                           : "hover:bg-accent hover:text-accent-foreground"

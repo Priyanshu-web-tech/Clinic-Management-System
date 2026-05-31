@@ -33,6 +33,7 @@ export type BloodGroup = (typeof BloodGroup)[keyof typeof BloodGroup]
 export interface LoginRequest {
   email: string
   password: string
+  deviceId: string
 }
 
 export interface RegisterRequest {
@@ -43,6 +44,7 @@ export interface RegisterRequest {
   phone: string
   hospitalName: string
   address: string
+  deviceId: string
 }
 
 export interface AuthUser {

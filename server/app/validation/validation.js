@@ -39,6 +39,10 @@ const login = Joi.object({
     "any.required": "Password is required.",
     "string.empty": "Password is required.",
   }),
+  deviceId: Joi.string().required().messages({
+    "any.required": "Device ID is required.",
+    "string.empty": "Device ID is required.",
+  }),
 });
 
 const register = Joi.object({
@@ -65,6 +69,10 @@ const register = Joi.object({
     "any.required": "Hospital name is required.",
   }),
   address: Joi.string().trim().optional().allow(""),
+  deviceId: Joi.string().required().messages({
+    "any.required": "Device ID is required.",
+    "string.empty": "Device ID is required.",
+  }),
 });
 
 const forgotPassword = Joi.object({

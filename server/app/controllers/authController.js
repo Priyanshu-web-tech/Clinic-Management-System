@@ -3,9 +3,8 @@ const authService = require("../services/authService");
 
 const login = async (req, res) => {
   try {
-    const deviceId = req.ip || "web";
     const result = await authService.loginByEmail(
-      { ...req.body, deviceId },
+      req.body,
       res,
     );
 
@@ -33,9 +32,8 @@ const login = async (req, res) => {
 
 const register = async (req, res) => {
   try {
-    const deviceId = req.ip || "web";
     const result = await authService.registerUser(
-      { ...req.body, deviceId },
+      req.body,
       res,
     );
 

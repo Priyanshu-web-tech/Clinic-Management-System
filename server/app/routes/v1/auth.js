@@ -20,6 +20,7 @@ const { validate, verifyAuthToken, verifyOtpToken } = require("../../middlewares
  *             required:
  *               - email
  *               - password
+ *               - deviceId
  *             properties:
  *               email:
  *                 type: string
@@ -28,6 +29,10 @@ const { validate, verifyAuthToken, verifyOtpToken } = require("../../middlewares
  *               password:
  *                 type: string
  *                 example: Password@123
+ *               deviceId:
+ *                 type: string
+ *                 description: A unique identifier for the browser/device (UUID stored in localStorage). Ensures each browser maintains an independent session for the same user.
+ *                 example: "550e8400-e29b-41d4-a716-446655440000"
  *     responses:
  *       200:
  *         description: Login successful.
@@ -89,6 +94,7 @@ router.post("/login", validate(schema.login), controller.login);
  *               - firstName
  *               - lastName
  *               - hospitalName
+ *               - deviceId
  *             properties:
  *               hospitalName:
  *                 type: string
@@ -115,6 +121,10 @@ router.post("/login", validate(schema.login), controller.login);
  *                 type: string
  *                 example: Password@123
  *                 description: Min 8 chars, must include uppercase, lowercase, number, and special character.
+ *               deviceId:
+ *                 type: string
+ *                 description: A unique identifier for the browser/device (UUID stored in localStorage). Ensures each browser maintains an independent session for the same user.
+ *                 example: "550e8400-e29b-41d4-a716-446655440000"
  *     responses:
  *       201:
  *         description: Doctor and hospital registered successfully.

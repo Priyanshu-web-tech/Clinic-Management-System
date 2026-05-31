@@ -51,6 +51,11 @@ const Register = () => {
     }),
     onSubmit: async (values) => {
       try {
+        let deviceId = localStorage.getItem("deviceId")
+        if (!deviceId) {
+          deviceId = crypto.randomUUID()
+          localStorage.setItem("deviceId", deviceId)
+        }
         const response = await register({
           hospitalName: values.hospitalName,
           firstName: values.firstName,
@@ -59,6 +64,7 @@ const Register = () => {
           phone: values.phone,
           address: values.address,
           password: values.password,
+          deviceId,
         }).unwrap()
 
         if (response?.success) {

@@ -29,7 +29,12 @@ const Login = () => {
     }),
     onSubmit: async (values) => {
       try {
-        const response = await login(values).unwrap()
+        let deviceId = localStorage.getItem("deviceId")
+        if (!deviceId) {
+          deviceId = crypto.randomUUID()
+          localStorage.setItem("deviceId", deviceId)
+        }
+        const response = await login({ ...values, deviceId }).unwrap()
         if (response?.success) {
           const { user } = response.result
           dispatch(

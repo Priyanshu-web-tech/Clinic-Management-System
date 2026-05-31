@@ -19,11 +19,12 @@ const { verifyAuthToken } = require("../../middlewares/index");
  *       - bearerAuth: []
  *     description: |
  *       Returns clinic statistics scoped to the authenticated user's role:
- *       - **Doctor** – today's own visit counts (waiting, in_consultation, completed, cancelled), total patients, and total staff.
- *       - **Receptionist / Admin** – today's all-hospital visit counts and total patients.
+ *       - **Doctor** – today's own visit counts (waiting, in_consultation, completed, cancelled), total patients, total staff, and 7-day visit trend.
+ *       - **Receptionist / Admin** – today's all-hospital visit counts, total patients, and 7-day visit trend.
  *       - **Chemist** – today's prescriptions, all-time prescription count, and total patients.
  *
  *       Visit counts for chemists are always 0. `totalStaff` and `totalPrescriptions` are 0 for non-doctor/non-chemist roles respectively.
+ *       `visitTrend` is always an empty array for chemists.
  *     responses:
  *       200:
  *         description: Dashboard stats fetched successfully.
@@ -76,6 +77,25 @@ const { verifyAuthToken } = require("../../middlewares/index");
  *                       type: integer
  *                       description: Active staff members. Non-zero for doctor only.
  *                       example: 3
+ *                     visitTrend:
+ *                       type: array
+ *                       description: Daily completed and cancelled visit counts for the last 7 days. Empty array for chemists.
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           date:
+ *                             type: string
+ *                             format: date
+ *                             description: Calendar date in YYYY-MM-DD format (UTC).
+ *                             example: "2026-05-24"
+ *                           completed:
+ *                             type: integer
+ *                             description: Number of completed visits on this date.
+ *                             example: 7
+ *                           cancelled:
+ *                             type: integer
+ *                             description: Number of cancelled visits on this date.
+ *                             example: 2
  *       400:
  *         description: Hospital not found for the authenticated user.
  *       401:

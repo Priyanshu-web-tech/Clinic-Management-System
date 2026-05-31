@@ -1,5 +1,6 @@
 const httpStatus = require("http-status").status;
 const dashboardRepository = require("../repositories/dashboardRepository");
+const { buildTrendRange } = require("../utils/helper");
 const {
   userType: userTypeConst,
   designation: designationConst,
@@ -31,7 +32,9 @@ const getStats = async (req) => {
       currentUser.designation === designationConst.CHEMIST;
     const isDoctor = currentUser.userType === userTypeConst.DOCTOR;
 
-    const [visitCounts, totalPatients, todayPrescriptions, totalPrescriptions, totalStaff] =
+    const trendRange = buildTrendRange(7);
+
+    const [visitCounts, totalPatients, todayPrescriptions, totalPrescriptions, totalStaff, rawTrend] =
       await Promise.all([
         isChemist
           ? Promise.resolve({})
@@ -54,7 +57,17 @@ const getStats = async (req) => {
         isDoctor
           ? dashboardRepository.getTotalStaff(hospitalId, userTypeConst.STAFF)
           : Promise.resolve(0),
+        isChemist
+          ? Promise.resolve([])
+          : dashboardRepository.getVisitTrend({
+              hospitalId,
+              doctorId: isDoctor ? currentUser._id : null,
+              start: trendRange.start,
+              end: trendRange.end,
+            }),
       ]);
+
+    const visitTrend = isChemist ? [] : rawTrend;
 
     return {
       error: false,
@@ -67,6 +80,7 @@ const getStats = async (req) => {
         todayPrescriptions,
         totalPrescriptions,
         totalStaff,
+        visitTrend,
       },
       msgCode: "STATS_FETCHED",
       status: httpStatus.OK,

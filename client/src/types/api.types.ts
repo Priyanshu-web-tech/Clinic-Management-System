@@ -385,6 +385,12 @@ export type GetPrescriptionsResponse = PaginatedResponse<Prescription>
 
 // ── Dashboard ──────────────────────────────────────
 
+export interface VisitTrendDay {
+  date: string
+  completed: number
+  cancelled: number
+}
+
 export interface DashboardStats {
   todayVisits: number
   waitingVisits: number
@@ -395,5 +401,6 @@ export interface DashboardStats {
   todayPrescriptions: number
   totalPrescriptions: number
   totalStaff: number
+  visitTrend: VisitTrendDay[]
 }
 

@@ -17,6 +17,8 @@ import { UserType, Designation } from "@/types/api.types"
 import { cn } from "@/lib/utils"
 import { getGreeting, formatTodayDate } from "@/utils/helpers"
 import type { StatCardProps } from "./dashboard.types"
+import VisitTrendChart from "./visit-trend-chart"
+import TodayBreakdownChart from "./today-breakdown-chart"
 
 const StatCard = ({
   label,
@@ -162,9 +164,6 @@ const Dashboard = () => {
           <h3 className="text-sm font-semibold tracking-wide text-foreground uppercase">
             Overview
           </h3>
-          <span className="text-sm text-muted-foreground">
-            {isChemist ? "— Pharmacy summary" : "— Today's clinic activity"}
-          </span>
         </div>
 
         {isChemist ? (
@@ -205,6 +204,28 @@ const Dashboard = () => {
           </div>
         )}
       </div>
+
+      {/* Charts — only for non-chemist roles */}
+      {!isChemist && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <h3 className="text-sm font-semibold tracking-wide text-foreground uppercase">
+              Analytics
+            </h3>
+          </div>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <VisitTrendChart data={stats?.visitTrend ?? []} loading={isLoading} />
+            <TodayBreakdownChart
+              waiting={stats?.waitingVisits ?? 0}
+              inConsultation={stats?.inConsultationVisits ?? 0}
+              completed={stats?.completedVisits ?? 0}
+              cancelled={stats?.cancelledVisits ?? 0}
+              loading={isLoading}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
